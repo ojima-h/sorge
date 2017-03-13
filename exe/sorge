@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require 'sorge/cli'
+
+Sorge::CLI.start(ARGV)
