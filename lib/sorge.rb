@@ -1,4 +1,5 @@
 require 'sorge/application'
+require 'sorge/dsl'
 require 'sorge/model'
 require 'sorge/util'
 require 'sorge/version'
