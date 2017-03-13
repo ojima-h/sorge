@@ -41,7 +41,7 @@ module Sorge
       end
 
       def join(name)
-        [path, name].join(':')
+        [*map(&:name), name].join(':')
       end
     end
   end

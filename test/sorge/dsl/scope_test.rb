@@ -16,6 +16,7 @@ module Sorge
 
         assert_equal '', Scope.current.path
         assert_empty Scope.current.to_a
+        assert_equal 'foo', Scope.current.join(:foo)
       end
     end
   end
