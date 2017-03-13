@@ -4,12 +4,10 @@ module Sorge
   class Application
     def initialize(config_file: nil)
       @config = load_config(config_file)
+      @model = Model.new(self)
+      @dsl = DSL.new(self)
     end
-    attr_reader :config
-
-    def model
-      @model ||= Model.new(self)
-    end
+    attr_reader :config, :model, :dsl
 
     private
 
