@@ -13,6 +13,7 @@ module Sorge
       attr_reader :edges
 
       def define(name, klass, &block)
+        name = name.to_s
         @tasks[name] ||= klass.create(name, @dsl)
         @tasks[name].enhance(&block)
         build_edge_index(@tasks[name])
@@ -26,8 +27,11 @@ module Sorge
         end
       end
 
-      def [](name, scope = Scope.root)
-        raise NameError, "uninitialized task #{name}" if scope.nil?
+      def [](name, scope = Scope.null)
+        name = name.to_s
+        if scope.root? && !@tasks.include?(name)
+          raise NameError, "uninitialized task #{name}"
+        end
         @tasks[scope.join(name)] || self[name, scope.parent]
       end
 

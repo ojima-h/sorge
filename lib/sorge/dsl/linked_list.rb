@@ -27,6 +27,10 @@ module Sorge
         yield head
         tail.each(&block)
       end
+
+      def inspect
+        to_a.inspect
+      end
     end
   end
 end

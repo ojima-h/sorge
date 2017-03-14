@@ -1,47 +1,29 @@
 module Sorge
   class DSL
     # Scope represents the namespace where a task is defined.
-    class Scope
-      include Enumerable
-
-      def self.root
-        @root ||= new('')
-      end
-
+    class Scope < LinkedList
       def self.current
-        @current ||= root
+        @current ||= null
       end
 
       # Evaluate block in given namespace
-      def self.with(path)
-        @current = Scope.new(path, current)
+      def self.with(name)
+        @current = @current.conj(name)
         yield
       ensure
-        @current = @current.parent
+        @current = @current.tail
       end
 
-      def initialize(name, parent = nil)
-        @name = name
-        @parent = parent
-      end
-      attr_reader :name, :parent
+      alias name head
+      alias parent tail
+      alias root? empty?
 
-      def root?
-        parent.nil?
-      end
-
-      def each(&block)
-        return if root? # root scope
-        parent.each(&block)
-        yield self
-      end
-
-      def path
-        map(&:name).join(':')
+      def full_name
+        to_a.reverse.join(':')
       end
 
       def join(name)
-        [*map(&:name), name].join(':')
+        [*to_a.reverse, name].join(':')
       end
     end
   end

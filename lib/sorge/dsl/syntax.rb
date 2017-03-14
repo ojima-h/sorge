@@ -1,18 +1,18 @@
 module Sorge
   class DSL
     module Syntax
-      def namespace(path, &block)
-        Scope.with(path, &block)
+      def namespace(name, &block)
+        Scope.with(name, &block)
       end
 
       def task(name, &block)
-        path = Scope.current.join(name)
-        Sorge::DSL.current.task_manager.define(path, Task, &block)
+        full_name = Scope.current.join(name)
+        Sorge::DSL.current.task_manager.define(full_name, Task, &block)
       end
 
       def mixin(name, &block)
-        path = Scope.current.join(name)
-        Sorge::DSL.current.task_manager.define(path, Mixin, &block)
+        full_name = Scope.current.join(name)
+        Sorge::DSL.current.task_manager.define(full_name, Mixin, &block)
       end
 
       def global_mixin(&block)
