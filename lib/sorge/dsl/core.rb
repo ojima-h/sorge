@@ -17,6 +17,10 @@ module Sorge
         @upstreams ||= {}
       end
 
+      def successors
+        @dsl.task_graph.direct_successors(self)
+      end
+
       # Declare upstreams.
       #
       #   task :foo do

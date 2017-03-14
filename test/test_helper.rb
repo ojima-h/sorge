@@ -10,6 +10,10 @@ class SorgeTest < Minitest::Test
     @spy ||= []
   end
 
+  def tasks
+    app.dsl.task_manager
+  end
+
   def run(*args, &block)
     @app = Sorge::Application.new
     load File.expand_path('../Sorgefile.rb', __FILE__)
