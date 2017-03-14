@@ -46,4 +46,9 @@ namespace :ns1 do
     upstream 'ns2:t2'
     action { spy }
   end
+
+  task :t4 do
+    upstream 'ns1:ns2:t1'
+    upstream 'ns1:t3'
+  end
 end

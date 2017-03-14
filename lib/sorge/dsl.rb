@@ -16,6 +16,7 @@ module Sorge
 end
 
 require 'sorge/dsl/core'
+require 'sorge/dsl/linked_list'
 require 'sorge/dsl/mixin'
 require 'sorge/dsl/syntax'
 require 'sorge/dsl/scope'
