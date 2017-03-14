@@ -23,6 +23,12 @@ module Sorge
       def test_helper
         assert_equal :h1, app.dsl.task_manager['ns1:ns2:t1'].h1
       end
+
+      def test_call_action
+        app.dsl.task_manager[:t1].new.call_action(:action)
+
+        assert_equal [['t1']], SorgeTest.spy
+      end
     end
   end
 end

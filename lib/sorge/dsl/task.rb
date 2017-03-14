@@ -2,6 +2,7 @@ module Sorge
   class DSL
     class Task
       extend Core
+      extend Forwardable
 
       def self.create(name, dsl)
         Class.new(self) do
@@ -21,6 +22,13 @@ module Sorge
         mixins.reverse.each { |mixin| ret.update(mixin.upstreams) }
         ret
       end
+
+      def initialize(params = {})
+        @params = params.dup
+      end
+      attr_reader :params
+
+      def_delegators 'self.class', :name
 
       # Call each actions
       # @param tag [Symbol] action name
