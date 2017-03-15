@@ -6,6 +6,9 @@ module Sorge
         @tasks = {}
       end
 
+      # @param name [String, Symbol] task name
+      # @param klass [Class] task class (Task or Mixin)
+      # @param block [Proc] task definition
       def define(name, klass, &block)
         name = name.to_s
         task = (@tasks[name] ||= klass.create(name, @dsl))

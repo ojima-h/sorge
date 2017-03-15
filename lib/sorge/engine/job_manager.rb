@@ -11,6 +11,10 @@ module Sorge
         @jobs[task_name]
       end
 
+      def all
+        @jobs
+      end
+
       def prepare(root_task)
         @jobs = {}
         @engine.task_graph.reachable_edges(root_task)

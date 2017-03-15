@@ -3,6 +3,10 @@ $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'sorge'
 require 'minitest/autorun'
 
+# # Disable Sorge logger
+# Sorge.logger = Logger.new(nil)
+
+# Enable Concurrent gem logger
 Concurrent.use_stdlib_logger(Logger::DEBUG)
 
 class SorgeTest < Minitest::Test
@@ -27,6 +31,10 @@ class SorgeTest < Minitest::Test
   #
   def tasks
     app.dsl.task_manager
+  end
+
+  def jobs
+    app.engine.job_manager
   end
 
   def invoke(task, params = {})

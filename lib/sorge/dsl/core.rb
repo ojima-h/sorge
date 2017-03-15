@@ -11,7 +11,7 @@ module Sorge
       end
 
       def enhance(&block)
-        class_eval(&block)
+        class_eval(&block) if block_given?
       end
 
       def upstreams

@@ -35,7 +35,7 @@ module Sorge
       def on_status_updated(_time, old_status, new_status)
         return if old_status == new_status
 
-        on_pending(new_status) if new_status.is_a? JobStatus::Pending
+        on_pending(new_status) if new_status.pending?
         on_complete(new_status) if new_status.complete?
       end
 

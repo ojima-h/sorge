@@ -4,13 +4,13 @@ module Sorge
   class DSL
     class TaskGraphTest < SorgeTest
       def test_reachable_edges
-        es = app.dsl.task_graph.reachable_edges(tasks['ns1:ns2:t1'])
+        es = app.dsl.task_graph.reachable_edges(tasks['test_namespace:ns:t1'])
                 .map { |e| [e.head.name, e.tail.name] }
-        assert_equal [['ns1:ns2:t1', 'ns1:ns2:t2'],
-                      ['ns1:ns2:t2', 'ns1:t3'],
-                      ['ns1:t3', 'ns1:t4'],
-                      ['ns1:ns2:t1', 'ns1:t3'],
-                      ['ns1:ns2:t1', 'ns1:t4']], es
+        assert_equal [['test_namespace:ns:t1', 'test_namespace:ns:t2'],
+                      ['test_namespace:ns:t2', 'test_namespace:t3'],
+                      ['test_namespace:t3', 'test_namespace:t4'],
+                      ['test_namespace:ns:t1', 'test_namespace:t3'],
+                      ['test_namespace:ns:t1', 'test_namespace:t4']], es
       end
     end
   end

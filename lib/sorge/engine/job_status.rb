@@ -24,8 +24,17 @@ module Sorge
           next_status.new(@opts.merge(opts))
         end
 
+        def name
+          self.class.name.split('::').last.downcase
+        end
+
+        %w(unscheduled pending
+           running successed failed cancelled).each do |n|
+          define_method(n + '?') { name == n }
+        end
+
         def complete?
-          false
+          successed? || failed? || cancelled?
         end
 
         def predecessor_finished(_status)
@@ -102,10 +111,6 @@ module Sorge
 
       # Common features of complete statuses
       module Complete
-        def complete?
-          true
-        end
-
         def killed
           self
         end

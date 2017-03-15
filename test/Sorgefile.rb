@@ -7,6 +7,8 @@ global_mixin do
     end
   end
 
+  action { spy }
+
   helpers do
     def h1
       :h1
@@ -14,25 +16,18 @@ global_mixin do
   end
 end
 
-task :t1 do
-  action { spy }
-end
+task :t1
 
 task :t2 do
   upstream :t1
-
-  action { spy }
 end
 
-namespace :ns1 do
-  namespace :ns2 do
-    task :t1 do
-      action { spy }
-    end
+namespace :test_namespace do
+  namespace :ns do
+    task :t1
 
     task :t2 do
       upstream :t1
-      action { spy }
     end
 
     mixin :m1 do
@@ -41,14 +36,31 @@ namespace :ns1 do
   end
 
   task :t3 do
-    include 'ns2:m1'
+    include 'ns:m1'
 
-    upstream 'ns2:t2'
-    action { spy }
+    upstream 'ns:t2'
   end
 
   task :t4 do
-    upstream 'ns1:ns2:t1'
-    upstream 'ns1:t3'
+    upstream 'test_namespace:ns:t1'
+    upstream 'test_namespace:t3'
+  end
+end
+
+namespace :test_failure do
+  task :t1
+
+  task :t2 do
+    upstream :t1
+    action { raise 'test' }
+  end
+  task(:t3) { upstream :t1 }
+
+  task(:t4) { upstream :t2 }
+  task(:t5) { upstream :t3 }
+
+  task :t6 do
+    upstream :t4
+    upstream :t5
   end
 end
