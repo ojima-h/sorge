@@ -9,24 +9,24 @@ module Sorge
       end
 
       def add(task)
-        task.all_upstreams.each do |u, opts|
+        task.predecessors.each do |u, opts|
           @matrix[u.name][task.name] = Edge[u, task, opts]
         end
       end
 
-      def direct_successor_edges(task)
+      def successor_edges(task)
         @matrix[task.name].map { |_, edge| edge }
       end
 
-      def direct_successors(task)
-        direct_successor_edges(task).map(&:tail)
+      def successors(task)
+        successor_edges(task).map(&:tail)
       end
 
       # @return [Array<Edge>]
-      def reachable_edges(*tasks)
+      def reachable_edges(task)
         found = {}
         path = LinkedList.null
-        tasks.each { |task| collect_reachable_edges(task, found, path) }
+        collect_reachable_edges(task, found, path)
         found.values
       end
 
@@ -35,7 +35,7 @@ module Sorge
       def collect_reachable_edges(task, found, path)
         next_path = build_next_path(task.name, path)
 
-        direct_successor_edges(task).each do |edge|
+        successor_edges(task).each do |edge|
           found[edge.object_id] = edge
           collect_reachable_edges(edge.tail, found, next_path)
         end

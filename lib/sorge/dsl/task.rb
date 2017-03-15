@@ -6,21 +6,11 @@ module Sorge
 
       def self.create(name, dsl)
         Class.new(self) do
-          init(name, dsl)
+          init(dsl, name, Task)
 
           include dsl.global_mixin
           extend helpers
         end
-      end
-
-      def self.inspect
-        "#<Sorge::DSL::Task #{name}>"
-      end
-
-      def self.all_upstreams
-        ret = {}
-        mixins.reverse.each { |mixin| ret.update(mixin.upstreams) }
-        ret
       end
 
       def initialize(params = {})
@@ -28,7 +18,15 @@ module Sorge
       end
       attr_reader :params
 
-      def_delegators 'self.class', :name
+      def execute
+        call_action(:action)
+      end
+
+      def to_s
+        task.name + ' ' + params.to_json
+      end
+
+      private
 
       # Call each actions
       # @param tag [Symbol] action name
@@ -48,10 +46,16 @@ module Sorge
         return instance_exec(&block) if block_given?
         true
       end
-      private :eval_setting
+
+      #
+      # Helper methods
+      #
+      def task
+        self.class
+      end
 
       def logger
-        @dsl.logger
+        Sorge.logger
       end
 
       def dryrun?

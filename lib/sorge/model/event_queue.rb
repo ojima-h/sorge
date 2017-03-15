@@ -1,5 +1,4 @@
 require 'sequel/plugins/serialization'
-require 'yaml'
 
 module Sorge
   class Model

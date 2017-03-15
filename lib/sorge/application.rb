@@ -1,13 +1,12 @@
-require 'yaml'
-
 module Sorge
   class Application
     def initialize(config_file: nil)
       @config = load_config(config_file)
-      @model = Model.new(self)
       @dsl = DSL.new(self)
+      @engine = Engine.new(self)
+      @model = Model.new(self)
     end
-    attr_reader :config, :model, :dsl
+    attr_reader :config, :dsl, :engine, :model
 
     private
 
@@ -17,3 +16,7 @@ module Sorge
     end
   end
 end
+
+require 'sorge/dsl'
+require 'sorge/engine'
+require 'sorge/model'

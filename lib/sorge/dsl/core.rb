@@ -4,9 +4,10 @@ module Sorge
     module Core
       attr_reader :name
 
-      def init(name, dsl)
-        @name = name
+      def init(dsl, name, base_class)
         @dsl = dsl
+        @name = name
+        @base_class = base_class
       end
 
       def enhance(&block)
@@ -18,7 +19,17 @@ module Sorge
       end
 
       def successors
-        @dsl.task_graph.direct_successors(self)
+        @dsl.task_graph.successors(self)
+      end
+
+      def predecessors
+        ret = {}
+        mixins.reverse.each { |mixin| ret.update(mixin.upstreams) }
+        ret
+      end
+
+      def inspect
+        format('#<%s:0x00%x name=%s>', @base_class, object_id << 1, name)
       end
 
       # Declare upstreams.

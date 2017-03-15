@@ -12,5 +12,14 @@ module Sorge
         obj
       end
     end
+
+    def format_error_info(error)
+      error_info = ''
+      error_info << "#{error.class}: #{error.message}\n"
+      (error.backtrace || []).each do |line|
+        error_info << ' ' * 8 + 'from ' + line + "\n"
+      end
+      error_info
+    end
   end
 end

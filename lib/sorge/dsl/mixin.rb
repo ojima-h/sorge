@@ -13,7 +13,7 @@ module Sorge
         Module.new do
           include Mixin
           extend Mixin::ClassMethods
-          init(name, dsl)
+          init(dsl, name, Mixin)
 
           include dsl.global_mixin
           extend helpers
@@ -26,7 +26,7 @@ module Sorge
         Module.new do
           include Mixin
           extend Mixin::ClassMethods
-          init(:global_mixin, dsl)
+          init(dsl, :global_mixin, Mixin)
 
           extend helpers
         end

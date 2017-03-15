@@ -13,10 +13,10 @@ module Sorge
       end
 
       def test_upstream
-        us = app.dsl.task_manager[:t2].all_upstreams
+        us = app.dsl.task_manager[:t2].predecessors
         assert_equal ['t1'], us.keys.map(&:name)
 
-        us = app.dsl.task_manager['ns1:t3'].all_upstreams
+        us = app.dsl.task_manager['ns1:t3'].predecessors
         assert_equal ['ns1:ns2:t1', 'ns1:ns2:t2'], us.keys.map(&:name)
       end
 
@@ -25,7 +25,7 @@ module Sorge
       end
 
       def test_call_action
-        app.dsl.task_manager[:t1].new.call_action(:action)
+        app.dsl.task_manager[:t1].new.send(:call_action, :action)
 
         assert_equal [['t1']], SorgeTest.spy
       end

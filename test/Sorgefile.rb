@@ -1,7 +1,7 @@
 global_mixin do
   def spy(*args)
     if defined?(:SorgeTest)
-      SorgeTest.spy << [name, *args]
+      SorgeTest.spy << [task.name, *args]
     else
       puts [name, *args].join(' ')
     end
