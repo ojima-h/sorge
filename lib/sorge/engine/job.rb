@@ -1,21 +1,17 @@
 module Sorge
   class Engine
     class Job
-      def initialize(engine, task, num_waiting)
+      def initialize(engine, batch, task, num_waiting)
         @engine = engine
+        @batch = batch
         @task = task
-        initialize_agent(num_waiting)
+        @status = if num_waiting > 0
+                    JobStatus::Unscheduled.new(num_waiting: num_waiting)
+                  else
+                    JobStatus::Pending.new
+                  end
       end
-
-      def status
-        @agent.value
-      end
-
-      def invoke(params)
-        @agent.send(params) do |_, my_params|
-          JobStatus::Pending.new(params: my_params)
-        end
-      end
+      attr_reader :task, :status
 
       def inspect
         format('#<%s:0x00%x task=%s status=%s>',
@@ -25,59 +21,32 @@ module Sorge
                status.inspect)
       end
 
-      def update_status(message, *args)
-        @agent.send(message, *args) do |status, my_message, *my_args|
-          status.send(my_message, *my_args)
-        end
+      def successors
+        @task.successors.map { |succ| @batch.jobs[succ.name] }
       end
 
-      # status agent observer
-      def on_status_updated(_time, old_status, new_status)
-        return if old_status == new_status
+      def update(message, *args)
+        @status = status.send(message, *args)
+      end
 
-        on_pending(new_status) if new_status.pending?
-        on_complete(new_status) if new_status.complete?
+      def invoke(params = nil)
+        @engine.worker.post_job(params, &method(:execute))
       end
 
       private
-
-      def initialize_agent(num_waiting)
-        status = JobStatus::Unscheduled.new(num_waiting: num_waiting)
-        @agent = Concurrent::Agent.new(
-          status,
-          error_handler: ->(_, error) { log_error(self, error) }
-        )
-        @agent.add_observer(self, :on_status_updated)
-      end
-
-      def on_pending(status)
-        @engine.worker.post_job(status.params, &method(:execute))
-      end
-
-      def on_complete(status)
-        @engine.job_manager.notify_finish(self)
-        notify_to_successors(status)
-      end
 
       def execute(params = {})
         t = @task.new(params)
 
         Sorge.logger.info("start: #{t}")
-        update_status(:start, t.params)
+        @batch.update(self, :start, t.params)
         t.execute
 
         Sorge.logger.info("successed: #{t}")
-        update_status(:successed)
+        @batch.update(self, :successed)
       rescue => error
         log_error(t, error)
-        update_status(:failed, error)
-      end
-
-      def notify_to_successors(status)
-        @task.successors.each do |succ|
-          @engine.job_manager[succ.name]
-                 .update_status(:predecessor_finished, status)
-        end
+        @batch.update(self, :failed, error)
       end
 
       def log_error(name, error)

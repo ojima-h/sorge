@@ -17,7 +17,7 @@ module Sorge
         def initialize(opts = {})
           keys = self.class.fields
           vals = opts.values_at(*keys)
-          @opts = keys.zip(vals).to_h
+          @opts = keys.zip(vals).to_h.freeze
         end
 
         def to(next_status, opts = {})
@@ -88,9 +88,6 @@ module Sorge
 
       # Pending status: waiting for workers to start processing.
       class Pending < Base
-        # `params` is assigned to jobs invoked via JobManager#invoke.
-        fields :params
-
         def start(params)
           to Running, params: params, start_time: Time.now
         end

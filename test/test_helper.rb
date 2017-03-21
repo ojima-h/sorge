@@ -33,10 +33,6 @@ class SorgeTest < Minitest::Test
     app.dsl.task_manager
   end
 
-  def jobs
-    app.engine.job_manager
-  end
-
   def invoke(task, params = {})
     t = task.is_a?(Sorge::DSL::Task) ? t : tasks[task]
     app.engine.driver.invoke(t, params)

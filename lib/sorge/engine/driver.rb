@@ -6,9 +6,9 @@ module Sorge
       end
 
       def invoke(task, params)
-        @engine.job_manager.prepare(task)
-        @engine.job_manager[task.name].invoke(params)
-        @engine.job_manager.wait
+        batch = Batch.new(@engine)
+        batch.start(task, params)
+        batch
       end
     end
   end
