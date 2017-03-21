@@ -4,10 +4,11 @@ module Sorge
 
     def initialize(application)
       @application = application
+      @executor = Executor.new(self)
       @driver = Driver.new(self)
       @worker = Worker.new(self)
     end
-    attr_reader :application, :driver, :worker
+    attr_reader :application, :executor, :driver, :worker
 
     def_delegators 'application.dsl', :task_graph
   end
@@ -15,6 +16,7 @@ end
 
 require 'sorge/engine/batch'
 require 'sorge/engine/driver'
+require 'sorge/engine/executor'
 require 'sorge/engine/job_status'
 require 'sorge/engine/job'
 require 'sorge/engine/worker'

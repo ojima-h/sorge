@@ -29,13 +29,11 @@ module Sorge
         @status = status.send(message, *args)
       end
 
-      def invoke(params = nil)
-        @engine.worker.post_job(params, &method(:execute))
+      def invoke(params = {})
+        @engine.executor.post(self, params)
       end
 
-      private
-
-      def execute(params = {})
+      def execute(params)
         t = @task.new(params)
 
         Sorge.logger.info("start: #{t}")

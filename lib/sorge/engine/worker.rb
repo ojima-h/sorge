@@ -5,12 +5,7 @@ module Sorge
         @engine = engine
         @job_worker = Concurrent::CachedThreadPool.new
       end
-
-      def post_job(*args, &block)
-        @job_worker.post(*args) do
-          capture_exception(&block)
-        end
-      end
+      attr_reader :job_worker
 
       def capture_exception
         yield
