@@ -51,6 +51,10 @@ module Sorge
         Sorge.logger.error("failed: #{name}")
         Sorge.logger.error("error:\n" + Util.format_error_info(error))
       end
+
+      def stash
+        @engine.stash[@task.name]
+      end
     end
   end
 end

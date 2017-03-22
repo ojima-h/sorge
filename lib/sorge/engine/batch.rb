@@ -80,6 +80,7 @@ module Sorge
         return false if old_status == new_status
 
         @summary.update(old_status, new_status)
+        @engine.stash.update(job.task.name) if new_status.successed?
 
         true
       end
