@@ -2,34 +2,23 @@ module Sorge
   class Engine
     # JobsStatus represents each status of a job.
     class JobStatus
+      STATES = %w(unscheduled pending running successed failed cancelled).freeze
+
+      STATES.each do |state|
+        class_eval <<-RUBY, __FILE__, __LINE__ + 1
+        def self.#{state}(*args)
+          #{state.capitalize}.instance(*args)
+        end
+        RUBY
+      end
+
       # Base class for job statuses
       class Base
-        def self.fields(*keys)
-          @fields ||= []
-          return @fields if keys.empty?
-
-          @fields = keys
-          keys.each do |key|
-            define_method(key) { @opts[key] }
-          end
-        end
-
-        def initialize(opts = {})
-          keys = self.class.fields
-          vals = opts.values_at(*keys)
-          @opts = keys.zip(vals).to_h.freeze
-        end
-
-        def to(next_status, opts = {})
-          next_status.new(@opts.merge(opts))
-        end
-
         def name
           self.class.name.split('::').last.downcase
         end
 
-        %w(unscheduled pending
-           running successed failed cancelled).each do |n|
+        STATES.each do |n|
           define_method(n + '?') { name == n }
         end
 
@@ -37,99 +26,85 @@ module Sorge
           successed? || failed? || cancelled?
         end
 
-        def predecessor_finished(_status)
+        def step(_message, *_args)
           self
         end
 
-        def start(_params)
-          self
-        end
-
-        def successed
-          self
-        end
-
-        def failed(_error)
-          self
-        end
-
-        def cancelled
-          self
-        end
-
-        def killed
-          to Cancelled
+        def self.instance
+          @instance ||= new
         end
       end
 
       # Initial status
       class Unscheduled < Base
-        fields :num_waiting
+        def initialize(num_waiting)
+          @num_waiting = num_waiting
+        end
+        attr_reader :num_waiting
 
-        def predecessor_finished(status)
-          case status
-          when Successed
-            predecessor_successed
-          else # Failed, Cancelled
-            to Cancelled
+        def step(message, *args)
+          case message
+          when :predecessor_finished
+            predecessor_finished(*args)
+          when :killed
+            Cancelled.instance
+          else
+            self
           end
         end
 
-        private
-
-        def predecessor_successed
-          if num_waiting > 1
-            to Unscheduled, num_waiting: num_waiting - 1
+        def predecessor_finished(status)
+          if status.successed?
+            Unscheduled.instance(num_waiting - 1)
           else
-            to Pending
+            Cancelled.instance
+          end
+        end
+
+        def self.instance(num_waiting)
+          if num_waiting > 0
+            new(num_waiting)
+          else
+            Pending.instance
           end
         end
       end
 
       # Pending status: waiting for workers to start processing.
       class Pending < Base
-        def start(params)
-          to Running, params: params, start_time: Time.now
+        def step(message)
+          case message
+          when :start
+            Running.instance
+          else
+            self
+          end
         end
       end
 
       # Running status: workers are now executing the job.
       class Running < Base
-        fields :params, :start_time
-
-        def successed
-          to Successed, end_time: Time.now
-        end
-
-        def failed(error)
-          to Failed, error: error, end_time: Time.now
-        end
-      end
-
-      # Common features of complete statuses
-      module Complete
-        def killed
-          self
+        def step(message)
+          case message
+          when :successed
+            Successed.instance
+          when :failed
+            Failed.instance
+          else
+            self
+          end
         end
       end
 
       # Successed status
-      class Successed < Base
-        include Complete
-        fields :params, :start_time, :end_time
-      end
+      class Successed < Base; end
 
       # Failed status
-      class Failed < Base
-        include Complete
-        fields :params, :error, :start_time, :end_time
-      end
+      class Failed < Base; end
 
       # Cancelled status: the job is cancelled because some predecessors were
       # failed.
-      class Cancelled < Base
-        include Complete
-      end
+      class Cancelled < Base; end
     end
   end
 end

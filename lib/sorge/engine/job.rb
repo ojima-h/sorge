@@ -8,13 +8,13 @@ module Sorge
         @task_instance = task.new(self)
         @params = params
 
-        @status = if num_waiting > 0
-                    JobStatus::Unscheduled.new(num_waiting: num_waiting)
-                  else
-                    JobStatus::Pending.new
-                  end
+        @start_time = nil
+        @end_time = nil
+        @error = nil
+
+        @status = JobStatus.unscheduled(num_waiting)
       end
-      attr_reader :task, :params, :status
+      attr_reader :task, :params, :status, :start_time, :end_time, :error
 
       #
       # Attributes
@@ -48,7 +48,7 @@ module Sorge
       #
 
       def update(message, *args)
-        @status = status.send(message, *args)
+        @status = status.step(message, *args)
       end
 
       def invoke
@@ -72,12 +72,14 @@ module Sorge
 
       def start
         Sorge.logger.info("start: #{@task_instance}")
-        @batch.update(self, :start, params)
+        @batch.update(self, :start)
+        @start_time = Time.now
         @task_instance.execute
       end
 
       def successed
         Sorge.logger.info("successed: #{@task_instance}")
+        @end_time = Time.now
         @batch.update(self, :successed)
       end
 
@@ -85,7 +87,9 @@ module Sorge
         Sorge.logger.error("failed: #{@task.name}")
         Sorge.logger.error("error:\n" + Util.format_error_info(error))
 
-        @batch.update(self, :failed, error)
+        @end_time = Time.now
+        @error = error
+        @batch.update(self, :failed)
       end
     end
   end

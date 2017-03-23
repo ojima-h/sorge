@@ -11,11 +11,11 @@ module Sorge
         end
         attr_reader :status, :errors, :pending_jobs
 
-        def update(old_status, new_status)
+        def update(old_status, new_status, error = nil)
           @status[old_status.name] -= 1
           @status[new_status.name] += 1
 
-          @errors << new_status.error if new_status.failed?
+          @errors << error if new_status.failed? && !error.nil?
 
           @pending_jobs -= 1 if new_status.complete?
         end
@@ -79,7 +79,7 @@ module Sorge
 
         return false if old_status == new_status
 
-        @summary.update(old_status, new_status)
+        @summary.update(old_status, new_status, job.error)
         @engine.stash.update(job.task.name) if new_status.successed?
 
         true
