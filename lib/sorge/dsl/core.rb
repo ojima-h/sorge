@@ -2,12 +2,16 @@ module Sorge
   class DSL
     # Common methods for Task and Mixin
     module Core
+      extend Concern
+
       attr_reader :name
 
       def init(dsl, name, base_class)
         @dsl = dsl
         @name = name
         @base_class = base_class
+
+        @actions = Hash.new { |hash, key| hash[key] = [] }
       end
 
       def enhance(&block)
@@ -23,9 +27,8 @@ module Sorge
       end
 
       def predecessors
-        ret = {}
-        mixins.reverse.each { |mixin| ret.update(mixin.upstreams) }
-        ret
+        return {} if base_task?
+        super_mixin.predecessors.merge(upstreams)
       end
 
       def inspect
@@ -39,18 +42,6 @@ module Sorge
       #   end
       def upstream(name, *args)
         upstreams[@dsl.task_manager[name, Scope.current]] = args
-      end
-
-      # All actions defined.
-      #
-      #     task :foo do
-      #       setup { 'this block is added to actions[:setup]' }
-      #       after { ... }
-      #
-      #       actions #=> { setup: [#<Proc ...>], after: [#<Proc ...>] }
-      #     end
-      def actions
-        @actions ||= Hash.new { |hash, key| hash[key] = [] }
       end
 
       # Define helper methods.
@@ -69,10 +60,22 @@ module Sorge
       #
       # @return [Module] helpers module
       def helpers(*extensions, &block)
-        @helpers ||= Module.new
-        @helpers.module_eval { include(*extensions) } if extensions.any?
-        @helpers.module_eval(&block) if block_given?
-        @helpers
+        class_methods { include(*extensions) } unless extensions.empty?
+        class_methods(&block) if block_given?
+        class_methods
+      end
+
+      # All actions defined.
+      #
+      #     task :foo do
+      #       setup { 'this block is added to actions[:setup]' }
+      #       after { ... }
+      #
+      #       actions #=> { setup: [#<Proc ...>], after: [#<Proc ...>] }
+      #     end
+      def find_action(tag)
+        return [] if base_task?
+        super_mixin.find_action(tag) + @actions[tag]
       end
 
       # Declared setting.
@@ -131,7 +134,7 @@ module Sorge
       # @!visibility :private
       def self.define_action(name)
         define_method(name) do |&block|
-          actions[name] << block
+          @actions[name] << block
         end
       end
 
@@ -233,9 +236,14 @@ module Sorge
       private :resolve_mixin
 
       # Return a list of Mixin objects included.
-      def mixins
-        ancestors.select { |o| o.is_a? Core }
+      def super_mixin
+        ancestors[1..-1].find { |o| o.is_a? Core }
       end
+
+      def base_task?
+        self == Task || self == Mixin
+      end
+      private :base_task?
     end
   end
 end

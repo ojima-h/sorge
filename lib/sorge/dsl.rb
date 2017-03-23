@@ -16,6 +16,7 @@ module Sorge
   end
 end
 
+require 'sorge/dsl/concern'
 require 'sorge/dsl/core'
 require 'sorge/dsl/linked_list'
 require 'sorge/dsl/mixin'

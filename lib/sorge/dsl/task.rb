@@ -9,7 +9,6 @@ module Sorge
           init(dsl, name, Task)
 
           include dsl.global_mixin
-          extend helpers
         end
       end
 
@@ -37,10 +36,8 @@ module Sorge
       # @param tag [Symbol] action name
       # @param args [Array] arguments
       def call_action(tag, *args)
-        self.class.mixins.reverse.each do |mixin|
-          mixin.actions[tag].each do |block|
-            instance_exec(*args, &block)
-          end
+        self.class.find_action(tag).each do |block|
+          instance_exec(*args, &block)
         end
       end
 

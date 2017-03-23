@@ -7,47 +7,39 @@ module Sorge
     #     end
     #
     module Mixin
-      # Create new Mixin object.
-      # @param task [Rake::Task] owner task
-      def self.create(name, dsl)
-        Module.new do
-          include Mixin
-          extend Mixin::ClassMethods
-          init(dsl, name, Mixin)
+      extend Concern
 
-          include dsl.global_mixin
-          extend helpers
-        end
-      end
-
-      # Create new global mixin.
-      # `global_mixin` does not include Application#global_mixin.
-      def self.create_global_mixin(dsl)
-        Module.new do
-          include Mixin
-          extend Mixin::ClassMethods
-          init(dsl, :global_mixin, Mixin)
-
-          extend helpers
-        end
-      end
-
-      module ClassMethods
+      class_methods do
         include Core
-
-        def included(obj)
-          return unless obj.is_a? Core
-          merge_helpers(obj)
-        end
-
-        def merge_helpers(obj)
-          my_helpers = helpers
-          obj.helpers.module_eval { include my_helpers }
-          obj.extend(obj.helpers) # re-extend by helpers
-        end
 
         def inspect
           "#<Sorge::DSL::Mixin #{name}>"
+        end
+      end
+
+      class << self
+        # Create new Mixin object.
+        # @param task [Rake::Task] owner task
+        def create(name, dsl)
+          create_base(name, dsl) do
+            include dsl.global_mixin
+          end
+        end
+
+        # Create new global mixin.
+        # `global_mixin` does not include Application#global_mixin.
+        def create_global_mixin(dsl)
+          create_base(:global_mixin, dsl)
+        end
+
+        def create_base(name, dsl, &block)
+          Module.new do
+            include Mixin
+
+            init(dsl, name, Mixin)
+
+            module_eval(&block) if block_given?
+          end
         end
       end
     end
