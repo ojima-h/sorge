@@ -7,9 +7,9 @@ module Sorge
         @queue = {}
       end
 
-      def post(job, params)
+      def post(job)
         assign_queue(job).send_via!(@engine.worker.job_worker,
-                                    job, params, &method(:safe_execute))
+                                    job, &method(:safe_execute))
       end
 
       private
@@ -28,9 +28,9 @@ module Sorge
           .send_via!(@engine.worker.job_worker, job, *args, &block)
       end
 
-      def safe_execute(_, job, params)
+      def safe_execute(_, job)
         @engine.worker.capture_exception do
-          job.execute(params)
+          job.execute
         end
       end
     end

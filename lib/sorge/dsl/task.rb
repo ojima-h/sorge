@@ -13,10 +13,15 @@ module Sorge
         end
       end
 
-      def initialize(params = {})
-        @params = params.dup
+      def initialize(job)
+        @job = job
       end
-      attr_reader :params
+
+      def_delegators :@job, :stash, :params
+
+      def setup
+        call_action(:setup)
+      end
 
       def execute
         call_action(:action)

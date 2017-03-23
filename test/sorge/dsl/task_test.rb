@@ -26,7 +26,7 @@ module Sorge
       end
 
       def test_call_action
-        app.dsl.task_manager[:t1].new.send(:call_action, :action)
+        app.dsl.task_manager[:t1].new(nil).send(:call_action, :action)
 
         assert_equal [['t1']], SorgeTest.spy
       end

@@ -32,8 +32,8 @@ module Sorge
       attr_reader :jobs, :summary
 
       def start(root_task, params)
-        initialize_jobs(root_task)
-        @jobs[root_task.name].invoke(params)
+        initialize_jobs(root_task, params)
+        @jobs[root_task.name].invoke
       end
 
       def update(job, message, *args)
@@ -52,13 +52,13 @@ module Sorge
 
       private
 
-      def initialize_jobs(root_task)
+      def initialize_jobs(root_task, params)
         @engine.task_graph.reachable_edges(root_task)
                .group_by(&:tail)
                .each do |task, edges|
                  @jobs[task.name] = Job.new(@engine, self, task, edges.count)
                end
-        @jobs[root_task.name] = Job.new(@engine, self, root_task, 0)
+        @jobs[root_task.name] = Job.new(@engine, self, root_task, 0, params)
         @summary = Summary.new(@jobs)
       end
 
