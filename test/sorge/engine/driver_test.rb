@@ -33,6 +33,12 @@ module Sorge
 
         assert_equal 'test', batch.jobs['test_failure:t2'].error.message
       end
+
+      def test_failure_while_setup
+        batch = invoke('test_failure:t7').wait
+        assert batch.jobs['test_failure:t7'].status.failed?
+        assert_equal 'test', batch.jobs['test_failure:t7'].error.message
+      end
     end
   end
 end

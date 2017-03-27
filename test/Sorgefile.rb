@@ -61,6 +61,10 @@ namespace :test_failure do
     upstream :t4
     upstream :t5
   end
+
+  task :t7 do
+    setup { raise 'test' }
+  end
 end
 
 namespace :test_params do

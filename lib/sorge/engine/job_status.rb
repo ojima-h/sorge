@@ -76,6 +76,8 @@ module Sorge
           case message
           when :start
             Running.instance
+          when :failed
+            Failed.instance
           else
             self
           end
