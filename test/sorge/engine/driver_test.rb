@@ -30,6 +30,8 @@ module Sorge
         assert batch.jobs['test_failure:t4'].status.cancelled?
         assert batch.jobs['test_failure:t5'].status.successed?
         assert batch.jobs['test_failure:t6'].status.cancelled?
+
+        assert_equal 'test', batch.jobs['test_failure:t2'].error.message
       end
     end
   end

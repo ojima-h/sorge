@@ -15,8 +15,8 @@ module Sorge
         Sorge::DSL.current.task_manager.define(full_name, Mixin, &block)
       end
 
-      def global_mixin(&block)
-        Sorge::DSL.current.global_mixin.class_eval(&block)
+      def global(&block)
+        Sorge::DSL.current.global.class_eval(&block)
       end
     end
   end

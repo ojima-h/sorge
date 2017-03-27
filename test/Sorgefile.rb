@@ -1,4 +1,4 @@
-global_mixin do
+global do
   def spy(*args)
     if defined?(:SorgeTest)
       SorgeTest.spy << [task.name, *args]
@@ -9,7 +9,7 @@ global_mixin do
 
   action { spy }
 
-  helpers do
+  class_methods do
     def h1
       :h1
     end

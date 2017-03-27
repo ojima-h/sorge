@@ -6,17 +6,21 @@ module Sorge
 
     def initialize(application)
       @application = application
-      @global_mixin = Mixin.create_global_mixin(self)
+      @global = Core.create(self, :global)
       @task_manager = TaskManager.new(self)
       @task_graph = TaskGraph.new(self)
 
       self.class.current = self
     end
-    attr_reader :application, :global_mixin, :task_manager, :task_graph
+    attr_reader :application, :global, :task_manager, :task_graph
   end
 end
 
 require 'sorge/dsl/concern'
+require 'sorge/dsl/core_action'
+require 'sorge/dsl/core_include'
+require 'sorge/dsl/core_settings'
+require 'sorge/dsl/core_upstreams'
 require 'sorge/dsl/core'
 require 'sorge/dsl/linked_list'
 require 'sorge/dsl/mixin'

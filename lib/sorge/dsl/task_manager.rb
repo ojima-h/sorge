@@ -11,9 +11,9 @@ module Sorge
       # @param block [Proc] task definition
       def define(name, klass, &block)
         name = name.to_s
-        task = (@tasks[name] ||= klass.create(name, @dsl))
+        task = (@tasks[name] ||= klass.create(@dsl, name))
 
-        task.enhance(&block)
+        task.class_eval(&block) if block_given?
         @dsl.task_graph.add(task) if task < Task
       end
 
