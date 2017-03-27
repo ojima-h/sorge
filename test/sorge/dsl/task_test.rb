@@ -14,11 +14,11 @@ module Sorge
 
       def test_upstream
         us = app.dsl.task_manager[:t2].predecessors
-        assert_equal ['t1'], us.keys.map(&:name)
+        assert_equal ['t1'], us.keys
 
         us = app.dsl.task_manager['test_namespace:t3'].predecessors
         assert_equal ['test_namespace:ns:t1', 'test_namespace:ns:t2'],
-                     us.keys.map(&:name)
+                     us.keys
       end
 
       def test_helper

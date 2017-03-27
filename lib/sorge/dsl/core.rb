@@ -1,31 +1,13 @@
 module Sorge
   class DSL
-    # Common methods for Task and Mixin
     module Core
       extend Concern
-
-      class << self
-        def create(dsl, name)
-          Module.new do
-            include Core
-            init(dsl, name)
-          end
-        end
-      end
-
-      include CoreAction
-      include CoreSettings
-      include CoreInclude
-      include CoreUpstreams
+      extend Forwardable
 
       class_methods do
         def init(dsl, name)
           @dsl = dsl
           @name = name
-
-          init_actions
-          init_upstreams
-
           @initialized = true
         end
         attr_reader :name
@@ -35,13 +17,39 @@ module Sorge
         end
 
         def inspect
-          format('#<Task:0x00%x name=%s>', object_id << 1, name)
+          return super unless initialized?
+          "Task<#{name}>"
         end
 
         # Return a list of Mixin objects included.
         def super_mixin
           ancestors[1..-1].find { |o| o <= Core }
         end
+      end
+
+      def initialize(context)
+        @context = context
+      end
+      attr_reader :context
+
+      def_delegators :context, :job
+      def_delegators :job, :stash, :params
+
+      def to_s
+        task.name + ' ' + params.to_json
+      end
+
+      def inspect
+        format('#<Task:0x00%x name=%s params=%s>',
+               object_id << 1, task.name, params)
+      end
+
+      def task
+        self.class
+      end
+
+      def logger
+        Sorge.logger
       end
     end
   end

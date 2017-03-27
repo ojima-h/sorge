@@ -1,11 +1,13 @@
 module Sorge
   class Engine
     class Job
+      Context = Struct.new(:batch, :job)
+
       def initialize(engine, batch, task, num_waiting, params = {})
         @engine = engine
         @batch = batch
         @task = task
-        @task_instance = task.new(self)
+        @task_instance = task.new(Context[@batch, self])
         @params = params
 
         @start_time = nil
@@ -14,7 +16,8 @@ module Sorge
 
         @status = JobStatus.unscheduled(num_waiting)
       end
-      attr_reader :task, :params, :status, :start_time, :end_time, :error
+      attr_reader :task, :task_instance, :params,
+                  :status, :start_time, :end_time, :error
 
       #
       # Attributes

@@ -7,7 +7,7 @@ module Sorge
     #     end
     #
     module Mixin
-      include Core
+      include Base
 
       class << self
         # Create new Mixin object.

@@ -1,8 +1,7 @@
 module Sorge
   class DSL
     class Task
-      include Core
-      extend Forwardable
+      include Base
 
       class << self
         def create(dsl, name)
@@ -19,27 +18,13 @@ module Sorge
         alias predecessors upstreams
       end
 
-      def initialize(job)
-        @job = job
+      def setup
+        assign_params
+        call_action(:setup)
       end
 
-      def_delegators :@job, :stash, :params
-
-      def to_s
-        task.name + ' ' + params.to_json
-      end
-
-      private
-
-      #
-      # Helper methods
-      #
-      def task
-        self.class
-      end
-
-      def logger
-        Sorge.logger
+      def execute
+        call_action(:action)
       end
     end
   end

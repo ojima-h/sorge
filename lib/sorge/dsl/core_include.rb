@@ -1,7 +1,7 @@
 module Sorge
   class DSL
     module CoreInclude
-      extend Concern
+      include Core
 
       class_methods do
         private

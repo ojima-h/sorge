@@ -1,7 +1,7 @@
 module Sorge
   class DSL
     class TaskGraph
-      Edge = Struct.new(:head, :tail, :opts)
+      Edge = Struct.new(:head, :tail)
 
       def initialize(dsl)
         @dsl = dsl
@@ -9,8 +9,8 @@ module Sorge
       end
 
       def add(task)
-        task.predecessors.each do |u, opts|
-          @matrix[u.name][task.name] = Edge[u, task, opts]
+        task.predecessors.each do |_, up_task|
+          @matrix[up_task.name][task.name] = Edge[up_task, task]
         end
       end
 

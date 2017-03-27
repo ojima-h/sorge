@@ -1,10 +1,11 @@
 module Sorge
   class DSL
     module CoreAction
-      extend Concern
+      include Core
 
       class_methods do
-        def init_actions
+        def init(dsl, name)
+          super
           @actions = Hash.new { |hash, key| hash[key] = [] }
         end
 
@@ -85,14 +86,6 @@ module Sorge
         #   @yieldparam error [StandardError, nil] if run method failed,
         #     otherwise nil.
         define_action :after
-      end
-
-      def setup
-        call_action(:setup)
-      end
-
-      def execute
-        call_action(:action)
       end
 
       private

@@ -1,0 +1,22 @@
+module Sorge
+  class DSL
+    # Common methods for Task and Mixin
+    module Base
+      class << self
+        def create(dsl, name)
+          Module.new do
+            include Base
+            init(dsl, name)
+          end
+        end
+      end
+
+      include Core
+      include CoreAction
+      include CoreInclude
+      include CoreParams
+      include CoreSettings
+      include CoreUpstreams
+    end
+  end
+end

@@ -1,13 +1,11 @@
 global do
-  def spy(*args)
+  action do
     if defined?(:SorgeTest)
-      SorgeTest.spy << [task.name, *args]
+      SorgeTest.spy(task.name, params)
     else
-      puts [name, *args].join(' ')
+      puts [name, params].join(' ')
     end
   end
-
-  action { spy }
 
   class_methods do
     def h1
@@ -62,5 +60,26 @@ namespace :test_failure do
   task :t6 do
     upstream :t4
     upstream :t5
+  end
+end
+
+namespace :test_params do
+  task :t1
+
+  task :t2 do
+    upstream :t1
+    param :i
+  end
+
+  task :t3 do
+    upstream :t1
+    param :i, -> { up(:t1).params[:i] + 1 }
+  end
+
+  task :t4 do
+    upstream :t2
+    upstream :t3
+    param :i
+    param :j, -> { up(:t2).params[:i] + up(:t3).params[:i] }
   end
 end

@@ -1,7 +1,7 @@
 module Sorge
   class DSL
     module CoreSettings
-      extend Concern
+      include Core
 
       class_methods do
         # Declared setting.
@@ -22,21 +22,12 @@ module Sorge
 
           define_method(name) do
             unless instance_variable_defined?(var)
-              val = eval_setting(value, &block)
-              instance_variable_set(var, val)
+              val = Util.assume_proc(value || block || true)
+              instance_variable_set(var, instance_exec(&val))
             end
             instance_variable_get(var)
           end
         end
-      end
-
-      private
-
-      def eval_setting(value = nil, &block)
-        return instance_exec(&value) if value.is_a? Proc
-        return value unless value.nil?
-        return instance_exec(&block) if block_given?
-        true
       end
     end
   end
