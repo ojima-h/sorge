@@ -32,11 +32,6 @@ module Sorge
     end
     map run: :_run
 
-    desc 'hoge', 'hoge'
-    def hoge
-      p options
-    end
-
     private
 
     def migrate
