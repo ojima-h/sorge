@@ -1,9 +1,9 @@
 global do
   action do
-    if defined?(:SorgeTest)
+    if defined?(SorgeTest)
       SorgeTest.spy(task.name, params)
     else
-      puts [name, params].join(' ')
+      puts [task.name, params].join(' ')
     end
   end
 

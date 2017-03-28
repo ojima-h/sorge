@@ -5,20 +5,36 @@ require 'sorge'
 module Sorge
   class CLI < Thor
     class_option :config_file, aliases: '-C', desc: 'config file path'
+    class_option :sorgefile, aliases: '-f', desc: 'Sorgefile path'
 
     def initialize(*args)
       super(*args)
-      @app = Sorge::Application.new(config_file: options[:config_file])
+      @app = Sorge::Application.new(
+        config_file: options[:config_file],
+        sorgefile: options[:sorgefile]
+      )
     end
 
-    desc 'init', 'Create new abid project'
+    desc 'init', 'Create new sorge project'
     def init
       migrate
     end
 
-    desc 'upgrade', 'Upgrade current abid project'
+    desc 'upgrade', 'Upgrade current sorge project'
     def upgrade
       migrate
+    end
+
+    desc 'run TASK [KEY=VAL]...', 'Run task'
+    def _run(task, *args)
+      require 'sorge/cli/run'
+      Run.new(@app, task, args, options).run
+    end
+    map run: :_run
+
+    desc 'hoge', 'hoge'
+    def hoge
+      p options
     end
 
     private

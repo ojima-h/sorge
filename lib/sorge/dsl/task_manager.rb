@@ -20,7 +20,7 @@ module Sorge
       def [](name, scope = Scope.null)
         name = name.to_s
         if scope.root? && !@tasks.include?(name)
-          raise NameError, "uninitialized task #{name}"
+          raise NameError, "undefined task #{name}"
         end
         @tasks[scope.join(name)] || self[name, scope.parent]
       end

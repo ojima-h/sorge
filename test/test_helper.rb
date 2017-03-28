@@ -20,8 +20,9 @@ class SorgeTest < Minitest::Test
   end
 
   def run(*args, &block)
-    @app = Sorge::Application.new
-    load File.expand_path('../Sorgefile.rb', __FILE__)
+    @app = Sorge::Application.new(
+      sorgefile: File.expand_path('../Sorgefile.rb', __FILE__)
+    )
 
     @app.model.database[:event_queue].delete
     SorgeTest.spy.clear

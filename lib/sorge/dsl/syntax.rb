@@ -18,6 +18,12 @@ module Sorge
       def global(&block)
         Sorge::DSL.current.global.class_eval(&block)
       end
+
+      def require_all(path)
+        Dir.glob(File.join(path, '**/*.rb')).each do |file_path|
+          require(file_path) if File.file?(file_path)
+        end
+      end
     end
   end
 end
