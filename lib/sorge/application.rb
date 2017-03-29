@@ -11,6 +11,11 @@ module Sorge
     end
     attr_reader :options, :dsl, :engine, :model, :config
 
+    def invoke(task_name, params)
+      task = dsl.task_manager[task_name]
+      engine.driver.invoke(task, params)
+    end
+
     private
 
     def load_config

@@ -23,10 +23,12 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'minitest'
   spec.add_development_dependency 'pry-byebug'
   spec.add_development_dependency 'yard'
+  spec.add_development_dependency 'rack-test'
 
   spec.add_dependency 'rake'
   spec.add_dependency 'concurrent-ruby-ext'
   spec.add_dependency 'sequel'
   spec.add_dependency 'sqlite3'
   spec.add_dependency 'thor'
+  spec.add_dependency 'sinatra'
 end

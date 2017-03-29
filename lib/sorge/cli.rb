@@ -8,7 +8,7 @@ module Sorge
     class_option :sorgefile, aliases: '-f', desc: 'Sorgefile path'
 
     def initialize(*args)
-      super(*args)
+      super
       @app = Sorge::Application.new(
         config_file: options[:config_file],
         sorgefile: options[:sorgefile]
@@ -31,6 +31,12 @@ module Sorge
       Run.new(@app, task, args, options).run
     end
     map run: :_run
+
+    desc 'server', 'Start Sorge server'
+    def server
+      require 'sorge/server'
+      Sorge::Server.build(@app).run!
+    end
 
     private
 

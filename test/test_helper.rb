@@ -1,4 +1,5 @@
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+ENV['RACK_ENV'] = 'test'
 
 require 'sorge'
 require 'minitest/autorun'
@@ -37,8 +38,7 @@ class SorgeTest < Minitest::Test
     app.dsl.task_manager
   end
 
-  def invoke(task, params = {})
-    t = task.is_a?(Sorge::DSL::Task) ? t : tasks[task]
-    app.engine.driver.invoke(t, params)
+  def invoke(task_name, params = {})
+    app.invoke(task_name, params)
   end
 end
