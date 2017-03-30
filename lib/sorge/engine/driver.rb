@@ -6,9 +6,9 @@ module Sorge
       end
 
       def invoke(task, params)
-        batch = Batch.new(@engine)
-        batch.start(task, params)
-        batch
+        jobflow = Jobflow.new(@engine)
+        jobflow.start(task, params)
+        jobflow
       end
     end
   end

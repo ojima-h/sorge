@@ -1,7 +1,7 @@
 module Sorge
   class Engine
-    class Batch
-      # entire batch status
+    class Jobflow
+      # entire jobflow status
       class Summary
         def initialize(jobs)
           @status = Hash.new { |h, k| h[k] = 0 }

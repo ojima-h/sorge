@@ -15,7 +15,7 @@ module Sorge
   end
 end
 
-require 'sorge/engine/batch'
+require 'sorge/engine/jobflow'
 require 'sorge/engine/driver'
 require 'sorge/engine/executor'
 require 'sorge/engine/job_status'

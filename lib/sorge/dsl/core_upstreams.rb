@@ -48,7 +48,7 @@ module Sorge
 
       def upstreams
         @upstreams ||= task.upstreams.map do |name, up_task|
-          [name, context.batch.jobs[up_task.name].task_instance]
+          [name, context.jobflow.jobs[up_task.name].task_instance]
         end.to_h
       end
 

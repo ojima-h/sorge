@@ -1,13 +1,13 @@
 module Sorge
   class Engine
     class Job
-      Context = Struct.new(:batch, :job)
+      Context = Struct.new(:jobflow, :job)
 
-      def initialize(engine, batch, task, num_waiting, params = {})
+      def initialize(engine, jobflow, task, num_waiting, params = {})
         @engine = engine
-        @batch = batch
+        @jobflow = jobflow
         @task = task
-        @task_instance = task.new(Context[@batch, self])
+        @task_instance = task.new(Context[@jobflow, self])
         @params = params
 
         @start_time = nil
@@ -28,13 +28,13 @@ module Sorge
       end
 
       def successors
-        @successors ||= @task.successors.map { |succ| @batch.jobs[succ.name] }
+        @successors ||= @task.successors.map { |succ| @jobflow.jobs[succ.name] }
       end
 
       def upstreams
         @upstreams ||=
           @task.upstreams.map do |up, _|
-            [up.name, @batch.jobs[up.name]] if @batch.jobs.include?(up.name)
+            [up.name, @jobflow.jobs[up.name]] if @jobflow.jobs.include?(up.name)
           end.compact.to_h
       end
 
@@ -75,7 +75,7 @@ module Sorge
 
       def start
         Sorge.logger.info("start: #{@task_instance}")
-        @batch.update(self, :start)
+        @jobflow.update(self, :start)
         @start_time = Time.now
         @task_instance.execute
       end
@@ -83,7 +83,7 @@ module Sorge
       def successed
         Sorge.logger.info("successed: #{@task_instance}")
         @end_time = Time.now
-        @batch.update(self, :successed)
+        @jobflow.update(self, :successed)
       end
 
       def failed(error)
@@ -92,7 +92,7 @@ module Sorge
 
         @end_time = Time.now
         @error = error
-        @batch.update(self, :failed)
+        @jobflow.update(self, :failed)
       end
     end
   end

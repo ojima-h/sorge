@@ -16,7 +16,7 @@ module Sorge
       end
 
       def test_failure
-        batch = invoke('test_failure:t1').wait
+        jobflow = invoke('test_failure:t1').wait
 
         assert_includes SorgeTest.spy.map(&:name), 'test_failure:t1'
         assert_includes SorgeTest.spy.map(&:name), 'test_failure:t2'
@@ -25,19 +25,19 @@ module Sorge
         refute_includes SorgeTest.spy.map(&:name), 'test_failure:t4'
         refute_includes SorgeTest.spy.map(&:name), 'test_failure:t6'
 
-        assert batch.jobs['test_failure:t2'].status.failed?
-        assert batch.jobs['test_failure:t3'].status.successed?
-        assert batch.jobs['test_failure:t4'].status.cancelled?
-        assert batch.jobs['test_failure:t5'].status.successed?
-        assert batch.jobs['test_failure:t6'].status.cancelled?
+        assert jobflow.jobs['test_failure:t2'].status.failed?
+        assert jobflow.jobs['test_failure:t3'].status.successed?
+        assert jobflow.jobs['test_failure:t4'].status.cancelled?
+        assert jobflow.jobs['test_failure:t5'].status.successed?
+        assert jobflow.jobs['test_failure:t6'].status.cancelled?
 
-        assert_equal 'test', batch.jobs['test_failure:t2'].error.message
+        assert_equal 'test', jobflow.jobs['test_failure:t2'].error.message
       end
 
       def test_failure_while_setup
-        batch = invoke('test_failure:t7').wait
-        assert batch.jobs['test_failure:t7'].status.failed?
-        assert_equal 'test', batch.jobs['test_failure:t7'].error.message
+        jobflow = invoke('test_failure:t7').wait
+        assert jobflow.jobs['test_failure:t7'].status.failed?
+        assert_equal 'test', jobflow.jobs['test_failure:t7'].error.message
       end
     end
   end

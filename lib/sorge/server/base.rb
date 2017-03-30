@@ -15,8 +15,8 @@ module Sorge
         task_name = params[:json][:task]
         task_params = params[:json][:params] || {}
 
-        batch = sorge.invoke(task_name, task_params)
-        batch.wait unless params[:json][:async]
+        jobflow = sorge.invoke(task_name, task_params)
+        jobflow.wait unless params[:json][:async]
 
         200
       end
