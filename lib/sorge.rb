@@ -5,6 +5,7 @@ require 'yaml'
 require 'concurrent'
 
 require 'sorge/application'
+require 'sorge/config'
 require 'sorge/util'
 require 'sorge/version'
 
