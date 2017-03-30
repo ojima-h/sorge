@@ -9,9 +9,8 @@ module Sorge
     }.freeze
 
     DEFAULTS = {
-      'server.bind' => 'localhost',
-      'server.port' => 9900,
-      'server.server' => ''
+      'server.uri' => 'http://localhost:9900',
+      'server.port' => 9900
     }.freeze
 
     def initialize(options = {})

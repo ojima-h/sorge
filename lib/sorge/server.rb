@@ -10,6 +10,9 @@ module Sorge
     def self.build(application, &block)
       Class.new(Base) do
         set :sorge, application
+
+        set :port, application.config.get('server.port')
+
         class_eval(&block) if block_given?
       end
     end
