@@ -7,9 +7,9 @@ module Sorge
           @status = Hash.new { |h, k| h[k] = 0 }
           jobs.each { |_, job| @status[job.status.name] += 1 }
           @errors = []
-          @pending_jobs = jobs.length
+          @active_jobs = jobs.length
         end
-        attr_reader :status, :errors, :pending_jobs
+        attr_reader :status, :errors, :active_jobs
 
         def update(old_status, new_status, error = nil)
           @status[old_status.name] -= 1
@@ -17,7 +17,7 @@ module Sorge
 
           @errors << error if new_status.failed? && !error.nil?
 
-          @pending_jobs -= 1 if new_status.complete?
+          @active_jobs -= 1 if new_status.complete?
         end
       end
 
@@ -37,11 +37,8 @@ module Sorge
       end
 
       def update(job, message, *args)
-        changed, next_jobs = update_jobs(job, message, *args)
-
-        return unless changed
-
-        @event.set if @summary.pending_jobs <= 0
+        next_jobs = update_jobs(job, message, *args)
+        @event.set if @summary.active_jobs <= 0
         next_jobs.each(&:invoke)
       end
 
@@ -53,51 +50,51 @@ module Sorge
       private
 
       def initialize_jobs(root_task, params)
-        @engine.task_graph.reachable_edges(root_task)
-               .group_by(&:tail)
-               .each do |task, edges|
-                 @jobs[task.name] = Job.new(@engine, self, task, edges.count)
-               end
+        root_task.reachable_edges
+                 .group_by(&:tail)
+                 .each do |task, edges|
+                   @jobs[task.name] = Job.new(@engine, self, task, edges.count)
+                 end
         @jobs[root_task.name] = Job.new(@engine, self, root_task, 0, params)
         @summary = Summary.new(@jobs)
       end
 
       def update_jobs(job, message, *args)
-        @mtx.synchronize do
-          next_jobs = []
-          ret = update_job_with_successors(job, message, *args) do |next_job|
-            next_jobs << next_job
-          end
-          [ret, next_jobs]
+        @engine.state_manager.synchronize do
+          ret = update_job(job, message, *args)
+          return [] unless ret && job.status.complete?
+          @engine.state_manager.update(job.task.name, job.stash)
+          update_successors(job)
         end
       end
 
       def update_job(job, message, *args)
-        old_status = job.status
-        job.update(message, *args)
-        new_status = job.status
-
+        old_status, new_status = job.update(message, *args)
         return false if old_status == new_status
 
         @summary.update(old_status, new_status, job.error)
-        @engine.stash.update(job.task.name) if new_status.successed?
-
         true
       end
 
-      def update_job_with_successors(job, message, *args, &block)
-        return unless update_job(job, message, *args)
-
-        yield job if job.status.pending?
-
-        if job.status.complete?
-          job.successors.each do |succ|
-            update_job_with_successors(succ, :predecessor_finished, job.status,
-                                       &block)
-          end
+      def update_successors(job)
+        next_jobs = []
+        each_successors(job) do |succ|
+          next unless update_job(succ, :predecessor_finished, job.status)
+          next_jobs << succ if succ.status.pending?
+          succ.status.complete?
         end
+        next_jobs
+      end
 
-        true
+      # Iterates on all successors of the given job.
+      # It is not called recursively if block returns false.
+      def each_successors(job, found = {}, &block)
+        job.successors.each do |succ|
+          next if found.include?(succ)
+          found[succ] = true
+          ret = yield succ
+          each_successors(succ, found, &block) if ret
+        end
       end
     end
   end

@@ -1,17 +1,13 @@
 module Sorge
   class Engine
-    extend Forwardable
-
     def initialize(application)
       @application = application
       @executor = Executor.new(self)
       @driver = Driver.new(self)
-      @stash = Stash.new(self)
+      @state_manager = StateManager.new(self)
       @worker = Worker.new(self)
     end
-    attr_reader :application, :executor, :driver, :stash, :worker
-
-    def_delegators 'application.dsl', :task_graph
+    attr_reader :application, :executor, :driver, :state_manager, :worker
   end
 end
 
@@ -20,5 +16,5 @@ require 'sorge/engine/driver'
 require 'sorge/engine/executor'
 require 'sorge/engine/job_status'
 require 'sorge/engine/job'
-require 'sorge/engine/stash'
+require 'sorge/engine/state_manager'
 require 'sorge/engine/worker'

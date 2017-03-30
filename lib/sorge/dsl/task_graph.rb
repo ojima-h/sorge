@@ -22,6 +22,10 @@ module Sorge
         successor_edges(task).map(&:tail)
       end
 
+      def all_successors(task)
+        reachable_edges(task).map(&:tail).uniq
+      end
+
       # @return [Array<Edge>]
       def reachable_edges(task)
         found = {}

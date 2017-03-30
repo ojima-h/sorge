@@ -10,12 +10,6 @@ module Sorge
             init(dsl, name)
           end
         end
-
-        def successors
-          @dsl.task_graph.successors(self)
-        end
-
-        alias predecessors upstreams
       end
 
       def setup

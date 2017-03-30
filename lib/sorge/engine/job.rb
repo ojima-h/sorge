@@ -6,26 +6,23 @@ module Sorge
       def initialize(engine, jobflow, task, num_waiting, params = {})
         @engine = engine
         @jobflow = jobflow
+
         @task = task
         @task_instance = task.new(Context[@jobflow, self])
         @params = params
+        @stash = nil
 
+        @status = JobStatus.unscheduled(num_waiting)
         @start_time = nil
         @end_time = nil
         @error = nil
-
-        @status = JobStatus.unscheduled(num_waiting)
       end
-      attr_reader :task, :task_instance, :params,
+      attr_reader :task, :task_instance, :params, :stash,
                   :status, :start_time, :end_time, :error
 
       #
       # Attributes
       #
-
-      def stash
-        @engine.stash[@task.name]
-      end
 
       def successors
         @successors ||= @task.successors.map { |succ| @jobflow.jobs[succ.name] }
@@ -51,7 +48,9 @@ module Sorge
       #
 
       def update(message, *args)
-        @status = status.step(message, *args)
+        old_status = @status
+        @status = @status.step(message, *args)
+        [old_status, @status]
       end
 
       def invoke
@@ -70,6 +69,7 @@ module Sorge
       private
 
       def setup
+        @stash = @engine.state_manager.fetch(@task.name)
         @task_instance.setup
       end
 

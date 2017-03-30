@@ -44,6 +44,16 @@ module Sorge
           || @upstreams[name] \
           || super_mixin.find_upstream(name)
         end
+
+        def successors
+          @dsl.task_graph.successors(self)
+        end
+
+        alias_method :predecessors, :upstreams
+
+        def reachable_edges
+          @dsl.task_graph.reachable_edges(self)
+        end
       end
 
       def upstreams
