@@ -19,7 +19,11 @@ module Sorge
         config = Config.new(config_file: path, sorgefile: 'dummy')
 
         assert_equal 1, config.get('a.b1.c')
+        assert config.include?('a.b1.c')
         assert_equal({ c: 2 }, config.get('a.b2'))
+
+        assert_nil config.get('a.b0.c')
+        refute config.include?('a.b0.c')
 
         config.set('a.b3.c', 3)
         assert_equal 3, config.get('a.b3.c')

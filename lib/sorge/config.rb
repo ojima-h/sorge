@@ -9,8 +9,9 @@ module Sorge
     }.freeze
 
     DEFAULTS = {
-      'server.host' => 'localhost',
-      'server.port' => 9900
+      'server.bind' => 'localhost',
+      'server.port' => 9900,
+      'server.server' => ''
     }.freeze
 
     def initialize(options = {})
@@ -21,8 +22,7 @@ module Sorge
     def_delegators :@hash, :[], :[]=, :fetch
 
     def get(path)
-      keys = path.to_s.split('.').map(&:to_sym)
-      dig(*keys)
+      dig(*split(path))
     end
 
     def dig(*keys)
@@ -32,8 +32,16 @@ module Sorge
       end
     end
 
+    def include?(path)
+      split(path).inject(@hash) do |a, e|
+        return false unless a.include?(e)
+        a[e]
+      end
+      true
+    end
+
     def set(path, value)
-      *parents, key = path.to_s.split('.').map(&:to_sym)
+      *parents, key = split(path)
       h = parents.inject(@hash) do |a, e|
         a[e] = {} unless a[e].is_a?(Hash)
         a[e]
@@ -42,7 +50,7 @@ module Sorge
     end
 
     def set_default(path, value)
-      *parents, key = path.to_s.split('.').map(&:to_sym)
+      *parents, key = split(path)
       h = parents.inject(@hash) do |a, e|
         a[e] ||= {}
         return nil unless a[e].is_a?(Hash)
@@ -52,6 +60,10 @@ module Sorge
     end
 
     private
+
+    def split(path)
+      path.to_s.split('.').map(&:to_sym)
+    end
 
     def load_yaml(file_path)
       return {} if file_path.nil? && !File.file?(DEFAULT_CONFIG_FILE)
