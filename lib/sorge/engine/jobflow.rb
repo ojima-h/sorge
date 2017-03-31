@@ -1,45 +1,40 @@
 module Sorge
   class Engine
     class Jobflow
-      # entire jobflow status
-      class Summary
-        def initialize(jobs)
-          @status = Hash.new { |h, k| h[k] = 0 }
-          jobs.each { |_, job| @status[job.status.name] += 1 }
-          @errors = []
-          @active_jobs = jobs.length
-        end
-        attr_reader :status, :errors, :active_jobs
+      def initialize(driver)
+        @driver = driver
+        @engine = driver.engine
+        @id = Util.generate_id
 
-        def update(old_status, new_status, error = nil)
-          @status[old_status.name] -= 1
-          @status[new_status.name] += 1
-
-          @errors << error if new_status.failed? && !error.nil?
-
-          @active_jobs -= 1 if new_status.complete?
-        end
-      end
-
-      def initialize(engine)
-        @engine = engine
         @jobs = {}
-        @summary = nil
+        @status = Hash.new { |hash, key| hash[key] = 0 }
+        @errors = []
+        @active_jobs = 0
 
         @event = Concurrent::Event.new
         @mtx = Mutex.new
       end
-      attr_reader :jobs, :summary
+      attr_reader :id, :engine, :jobs
 
-      def start(root_task, params)
-        initialize_jobs(root_task, params)
+      def add(task, status, params = {})
+        @jobs[task.name] = Job.new(self, task, status, params)
+        @status[status.name] += 1
+        @active_jobs += 1
+        @jobs[task.name]
+      end
+
+      def start(root_task)
         @jobs[root_task.name].invoke
       end
 
       def update(job, message, *args)
         next_jobs = update_jobs(job, message, *args)
-        @event.set if @summary.active_jobs <= 0
+        finish if @active_jobs <= 0
         next_jobs.each(&:invoke)
+      end
+
+      def complete?
+        @event.set?
       end
 
       def wait(timeout = nil)
@@ -48,16 +43,6 @@ module Sorge
       end
 
       private
-
-      def initialize_jobs(root_task, params)
-        root_task.reachable_edges
-                 .group_by(&:tail)
-                 .each do |task, edges|
-                   @jobs[task.name] = Job.new(@engine, self, task, edges.count)
-                 end
-        @jobs[root_task.name] = Job.new(@engine, self, root_task, 0, params)
-        @summary = Summary.new(@jobs)
-      end
 
       def update_jobs(job, message, *args)
         @engine.state_manager.synchronize do
@@ -72,7 +57,7 @@ module Sorge
         old_status, new_status = job.update(message, *args)
         return false if old_status == new_status
 
-        @summary.update(old_status, new_status, job.error)
+        update_status(old_status, new_status, job.error)
         true
       end
 
@@ -84,6 +69,20 @@ module Sorge
           succ.status.complete?
         end
         next_jobs
+      end
+
+      def update_status(old_status, new_status, error = nil)
+        @status[old_status.name] -= 1
+        @status[new_status.name] += 1
+
+        @errors << error if new_status.failed? && !error.nil?
+
+        @active_jobs -= 1 if new_status.complete?
+      end
+
+      def finish
+        @event.set
+        @engine.driver.update(self)
       end
     end
   end

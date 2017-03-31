@@ -12,6 +12,7 @@ module Sorge
 end
 
 require 'sorge/engine/jobflow'
+require 'sorge/engine/jobflow_builder'
 require 'sorge/engine/driver'
 require 'sorge/engine/executor'
 require 'sorge/engine/job_status'

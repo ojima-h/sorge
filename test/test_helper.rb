@@ -20,6 +20,12 @@ class SorgeTest < Minitest::Test
     @spy << Spy[name, params]
   end
 
+  def self.hook(name = nil, &block)
+    @hooks ||= {}
+    @hooks[name] = block if block_given?
+    @hooks
+  end
+
   def run(*args, &block)
     @app = Sorge::Application.new(
       sorgefile: File.expand_path('../Sorgefile.rb', __FILE__)
@@ -27,6 +33,7 @@ class SorgeTest < Minitest::Test
 
     @app.model.database[:event_queue].delete
     SorgeTest.spy.clear
+    SorgeTest.hook.clear
 
     super
   end

@@ -1,3 +1,5 @@
+require 'securerandom'
+
 module Sorge
   module Util
     module_function
@@ -30,6 +32,10 @@ module Sorge
     def assume_proc(value)
       return value if value.is_a? Proc
       proc { value }
+    end
+
+    def generate_id(n = 8)
+      SecureRandom.hex(n / 2)
     end
   end
 end

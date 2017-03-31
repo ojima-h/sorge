@@ -2,6 +2,7 @@ global do
   action do
     if defined?(SorgeTest)
       SorgeTest.spy(task.name, params)
+      SorgeTest.hook[task.name].call(self) if SorgeTest.hook.include?(task.name)
     else
       puts [task.name, params].join(' ')
     end

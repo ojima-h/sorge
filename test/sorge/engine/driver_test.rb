@@ -39,6 +39,22 @@ module Sorge
         assert jobflow.jobs['test_failure:t7'].status.failed?
         assert_equal 'test', jobflow.jobs['test_failure:t7'].error.message
       end
+
+      def test_jobflows
+        jobflows = []
+        SorgeTest.hook('test_namespace:t3') do |task|
+          jobflows << task.context.engine.driver.jobflows.dup
+        end
+        j1 = invoke('test_namespace:ns:t1')
+        j2 = invoke('test_namespace:ns:t1')
+        j3 = invoke('test_namespace:ns:t1')
+        [j1, j2, j3].each(&:wait)
+
+        assert jobflows.any? { |jf| jf.include? j1.id }
+        assert jobflows.any? { |jf| jf.include? j2.id }
+        assert jobflows.any? { |jf| jf.include? j3.id }
+        assert_empty app.engine.driver.jobflows
+      end
     end
   end
 end

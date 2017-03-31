@@ -1,18 +1,18 @@
 module Sorge
   class Engine
     class Job
-      Context = Struct.new(:jobflow, :job)
+      Context = Struct.new(:engine, :jobflow, :job)
 
-      def initialize(engine, jobflow, task, num_waiting, params = {})
-        @engine = engine
+      def initialize(jobflow, task, status, params = {})
         @jobflow = jobflow
+        @engine = jobflow.engine
 
         @task = task
-        @task_instance = task.new(Context[@jobflow, self])
+        @task_instance = task.new(Context[@engine, @jobflow, self])
         @params = params
         @stash = nil
 
-        @status = JobStatus.unscheduled(num_waiting)
+        @status = status
         @start_time = nil
         @end_time = nil
         @error = nil
