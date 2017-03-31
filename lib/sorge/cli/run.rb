@@ -11,7 +11,7 @@ module Sorge
       end
 
       def run
-        @app.engine.driver.invoke(@task, @params).wait
+        @app.engine.driver.run(@task, @params)
       end
     end
   end

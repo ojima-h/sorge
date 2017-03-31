@@ -10,7 +10,9 @@ module Sorge
 
     DEFAULTS = {
       'server.uri' => 'http://localhost:9900',
-      'server.port' => 9900
+      'server.port' => 9900,
+
+      'savepoint.path' => 'var/sorge/savepoint'
     }.freeze
 
     def initialize(options = {})

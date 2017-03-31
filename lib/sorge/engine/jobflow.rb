@@ -4,7 +4,7 @@ module Sorge
       def initialize(driver)
         @driver = driver
         @engine = driver.engine
-        @id = Util.generate_id
+        @id = Time.now.strftime('%Y%m%d%H%M%S-') + Util.generate_id
 
         @jobs = {}
         @status = Hash.new { |hash, key| hash[key] = 0 }
@@ -29,7 +29,7 @@ module Sorge
 
       def update(job, message, *args)
         next_jobs = update_jobs(job, message, *args)
-        finish if @active_jobs <= 0
+        return if complete?
         next_jobs.each(&:invoke)
       end
 
@@ -37,9 +37,19 @@ module Sorge
         @event.set?
       end
 
+      def failed?
+        complete? && @status['failed'] > 0
+      end
+
       def wait(timeout = nil)
         @event.wait(timeout)
         self
+      end
+
+      def kill
+        @engine.state_manager.synchronize do
+          @jobs.each { |_, job| update_job(job, :kill) }
+        end
       end
 
       private
@@ -78,11 +88,24 @@ module Sorge
         @errors << error if new_status.failed? && !error.nil?
 
         @active_jobs -= 1 if new_status.complete?
+        finish if @active_jobs <= 0
       end
 
       def finish
+        save
         @event.set
         @engine.driver.update(self)
+      end
+
+      # Save failed jobs to snapshot file.
+      def save
+        jobs = []
+        @jobs.each do |_, job|
+          next unless job.status.failed?
+          jobs << { 'name' => job.task.name, 'params' => job.params }
+        end
+        return if jobs.empty?
+        @engine.savepoint.put_jobflow(id, jobs)
       end
     end
   end

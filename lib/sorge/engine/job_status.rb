@@ -46,7 +46,7 @@ module Sorge
           case message
           when :predecessor_finished
             predecessor_finished(*args)
-          when :killed
+          when :kill
             Cancelled.instance
           else
             self
@@ -76,7 +76,7 @@ module Sorge
           case message
           when :start
             Running.instance
-          when :failed
+          when :failed, :kill
             Failed.instance
           else
             self
@@ -90,7 +90,7 @@ module Sorge
           case message
           when :successed
             Successed.instance
-          when :failed
+          when :failed, :kill
             Failed.instance
           else
             self

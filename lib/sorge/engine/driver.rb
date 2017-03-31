@@ -7,20 +7,28 @@ module Sorge
       end
       attr_reader :engine, :jobflows
 
+      # Invoke task asynchronously
       def invoke(task, params)
         jobflow = JobflowBuilder.build(self, task, params)
-        @engine.state_manager.synchronize do
-          @jobflows[jobflow.id] = jobflow
-        end
+        @jobflows[jobflow.id] = jobflow
         jobflow.start(task)
         jobflow
       end
 
+      # Run task synchronously
+      def run(task, params)
+        @engine.worker.capture_exception do
+          invoke.wait(task, params)
+        end
+      end
+
       def update(jobflow)
         return unless jobflow.complete?
-        @engine.state_manager.synchronize do
-          @jobflows.delete(jobflow.id)
-        end
+        @jobflows.delete(jobflow.id)
+      end
+
+      def kill
+        @jobflows.each { |_, j| j.kill }
       end
     end
   end
