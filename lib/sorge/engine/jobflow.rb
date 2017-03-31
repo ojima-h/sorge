@@ -78,23 +78,12 @@ module Sorge
 
       def update_successors(job)
         next_jobs = []
-        each_successors(job) do |succ|
+        job.visit_reachable_edges do |_, succ|
           next unless update_job(succ, :predecessor_finished, job.status)
           next_jobs << succ if succ.status.pending?
           succ.status.complete?
         end
         next_jobs
-      end
-
-      # Iterates on all successors of the given job.
-      # It is not called recursively if block returns false.
-      def each_successors(job, found = {}, &block)
-        job.successors.each do |succ|
-          next if found.include?(succ)
-          found[succ] = true
-          ret = yield succ
-          each_successors(succ, found, &block) if ret
-        end
       end
     end
   end

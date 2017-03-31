@@ -54,6 +54,10 @@ module Sorge
         def reachable_edges
           @dsl.task_graph.reachable_edges(self)
         end
+
+        def visit_reachable_edges(&block)
+          @dsl.task_graph.visit_reachable_edges(self, &block)
+        end
       end
 
       def upstreams

@@ -28,6 +28,14 @@ module Sorge
         @successors ||= @task.successors.map { |succ| @jobflow.jobs[succ.name] }
       end
 
+      def visit_reachable_edges
+        @task.visit_reachable_edges do |edge|
+          head = @jobflow.jobs[edge.head.name]
+          tail = @jobflow.jobs[edge.tail.name]
+          yield head, tail
+        end
+      end
+
       def upstreams
         @upstreams ||=
           @task.upstreams.map do |up, _|

@@ -28,20 +28,27 @@ module Sorge
 
       # @return [Array<Edge>]
       def reachable_edges(task)
-        found = {}
-        path = LinkedList.null
-        collect_reachable_edges(task, found, path)
-        found.values
+        Enumerator.new do |y|
+          visit_reachable_edges(task) { |edge| y << edge }
+        end
+      end
+
+      def visit_reachable_edges(task, &block)
+        collect_reachable_edges(task, {}, LinkedList.null, &block)
       end
 
       private
 
-      def collect_reachable_edges(task, found, path)
+      # Iterates on all reachable edges of the given task.
+      # It stops recursion if block returns false.
+      def collect_reachable_edges(task, found, path, &block)
         next_path = build_next_path(task.name, path)
 
         successor_edges(task).each do |edge|
+          next if found.include?(edge.object_id)
           found[edge.object_id] = edge
-          collect_reachable_edges(edge.tail, found, next_path)
+          next unless yield edge
+          collect_reachable_edges(edge.tail, found, next_path, &block)
         end
       end
 
