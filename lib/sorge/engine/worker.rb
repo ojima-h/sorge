@@ -6,6 +6,7 @@ module Sorge
         @job_worker = Concurrent::CachedThreadPool.new
       end
       attr_reader :job_worker
+      alias task_worker job_worker
 
       def capture_exception(raise_error = false)
         yield

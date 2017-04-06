@@ -18,6 +18,7 @@ module Sorge
   end
 end
 
+require 'sorge/engine/agent'
 require 'sorge/engine/jobflow'
 require 'sorge/engine/jobflow_builder'
 require 'sorge/engine/driver'
@@ -26,4 +27,5 @@ require 'sorge/engine/job_status'
 require 'sorge/engine/job'
 require 'sorge/engine/savepoint'
 require 'sorge/engine/state_manager'
+require 'sorge/engine/task_state'
 require 'sorge/engine/worker'
