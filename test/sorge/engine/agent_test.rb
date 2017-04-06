@@ -7,14 +7,10 @@ module Sorge
         Agent.new(app.engine, tasks[name])
       end
 
-      def spy(*args, &block)
-        (@spy ||= []) << [*args, block]
-      end
-
       def test_execute
         agent = factory('t2')
 
-        agent.execute
+        agent.execute(0)
         assert_equal [SorgeTest::Spy['t2', {}]], SorgeTest.spy
       end
 
@@ -35,21 +31,22 @@ module Sorge
       end
 
       def test_upstream
-        return
         agent = factory('t2')
-        agent.stub(:execute, method(:spy)) do
-          tm = Time.now.to_i
+        tm = Time.now.to_i
 
-          agent.submit(:upstream, name: 't1', time: tm)
-          agent.submit(:upstream, name: 't1', time: tm + 1)
-          agent.submit(:upstream, name: 't1', time: tm + 2)
-
-          assert_equal [
-            [[:time, tm]],
-            [[:time, tm + 1]],
-            [[:time, tm + 2]]
-          ], @spy
+        spy = []
+        agent.stub(:submit, ->(*args) { spy << args }) do
+          agent.state.session do
+            agent.proc_upstream(name: 't1', time: tm)
+            agent.proc_upstream(name: 't1', time: tm + 1)
+            agent.proc_upstream(name: 't1', time: tm + 2)
+          end
         end
+
+        assert_equal [
+          [:run, time: tm],
+          [:run, time: tm + 1]
+        ], spy
       end
     end
   end

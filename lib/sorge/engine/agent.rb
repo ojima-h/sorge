@@ -3,6 +3,12 @@ module Sorge
     class Agent
       extend Forwardable
 
+      Context = Struct.new(:_time, :job) do
+        def time
+          Time.at(_time)
+        end
+      end
+
       def initialize(engine, task)
         @engine = engine
         @task = task
@@ -18,38 +24,54 @@ module Sorge
         JobMock[{}, {}]
       end
 
-      def execute
-        @task.new(self).execute
+      def execute(time)
+        @task.new(Context[time, job]).execute
       end
 
       def submit(method, params)
-        state.update { |s| s.queue << [method, params] }
+        state.session { state.queue << [method, params] }
         async(&method(:dispatch))
       end
 
       def proc_upstream(name:, time:)
+        update_watermark(name, time)
+
+        tm = update_watermark('__self__', min_watermark)
+        return if tm.nil?
+
+        submit :run, time: tm
       end
 
-      def update_watermark(hash, time)
-        current_time = hash[:time]
+      def proc_run(time)
+        execute(time)
+      end
+
+      private
+
+      def update_watermark(name, time)
+        return if time.nil?
+
+        current_time = state.watermarks[name]
         if current_time.nil? || current_time < time
-          hash[:time] = time
+          state.watermarks[name] = time
           current_time
         elsif time < current_time
           time
         end
       end
 
-      private
+      def min_watermark
+        state.watermarks.reject { |k| k == '__self__' }.values.min
+      end
 
+      #
+      # Asynchronous Execution
+      #
       def dispatch
-        state.init
-        method, params = state.queue.first.dup
-
-        send(:"proc_#{method}", params)
-
-        state.queue.shift
-        state.save
+        state.session do
+          method, params = state.queue.shift
+          send(:"proc_#{method}", params)
+        end
       end
 
       def async(*args, &block)
