@@ -15,10 +15,6 @@ module Sorge
             raise NameError, "undefined window type #{type}"
           end
         end
-
-        def null
-          @null ||= self[:null].new(nil)
-        end
       end
 
       class Base
@@ -26,30 +22,14 @@ module Sorge
           Window.register(name, self)
         end
 
-        def initialize(task, **options, &block)
+        def initialize(task, delay: 0, **options, &block)
           @task = task
           @options = options
           @block = block
+
+          @delay = delay
         end
 
-        def update(_state, _name, time)
-          [time]
-        end
-      end
-
-      class Null < Base
-        register :null
-      end
-
-      class Custom < Base
-        register :custom
-
-        def update(state, name, time)
-          @block.call(state, name, time)
-        end
-      end
-
-      module TumblingCommon
         def update(state, name, time)
           init_state(state)
           tm = truncate(time)
@@ -86,7 +66,7 @@ module Sorge
         end
 
         def apply_delay(time)
-          time - @options.fetch(:delay, 1)
+          time - @delay
         end
 
         def update_watermark(state, time)
@@ -100,11 +80,22 @@ module Sorge
         end
       end
 
+      class Null < Base
+        register :null
+      end
+
+      class Custom < Base
+        register :custom
+
+        def update(state, name, time)
+          @block.call(state, name, time)
+        end
+      end
+
       class Tumbling < Base
-        include TumblingCommon
         register :tumbling
 
-        def initialize(task, size:, **options, &block)
+        def initialize(task, size:, delay: 1, **options, &block)
           super
           @size = size
         end
@@ -116,12 +107,10 @@ module Sorge
       end
 
       class Daily < Base
-        include TumblingCommon
         register :daily
 
         def initialize(task, wday: 0, **options, &block)
           super
-          @options[:delay] ||= 0
         end
 
         def truncate(time)
@@ -130,12 +119,10 @@ module Sorge
       end
 
       class Weekly < Base
-        include TumblingCommon
         register :weekly
 
         def initialize(task, wday: 0, **options, &block)
           super
-          @options[:delay] ||= 0
           @wday = wday
         end
 
@@ -147,12 +134,10 @@ module Sorge
       end
 
       class Monthly < Base
-        include TumblingCommon
         register :monthly
 
         def initialize(task, mday: 1, **options, &block)
           super
-          @options[:delay] ||= 0
           @mday = mday
         end
 

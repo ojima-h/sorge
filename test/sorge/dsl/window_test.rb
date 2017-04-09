@@ -8,10 +8,13 @@ module Sorge
       end
 
       def test_null
+        state = {}
         window = tasks['test_window:t1'].window_handler
-        assert_equal [0], window.update(nil, nil, 0)
-        assert_equal [1], window.update(nil, nil, 1)
-        assert_equal [2], window.update(nil, nil, 2)
+
+        t = Time.now.to_i
+        assert_equal [t + 1], window.update(state, 'test_window:t0', t + 1)
+        assert_equal [t + 2], window.update(state, 'test_window:t0', t + 2)
+        assert_equal [t + 3], window.update(state, 'test_window:t0', t + 3)
       end
 
       def test_default

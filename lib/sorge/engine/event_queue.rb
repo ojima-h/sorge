@@ -19,6 +19,14 @@ module Sorge
         TaskHandler.new(@engine, dest).notify(name, time)
       end
 
+      def handle_run(name:, time:)
+        TaskHandler.new(@engine, name).run(time)
+      end
+
+      def handle_complete(name:, time:, state:)
+        TaskHandler.new(@engine, name).complete(time, state)
+      end
+
       private
 
       #
@@ -26,7 +34,7 @@ module Sorge
       #
       def dispatch
         method, params = @mutex.synchronize { @queue.shift }
-        send(:"#{handler_prefix}#{method}", params)
+        send(:"#{@handler_prefix}#{method}", params)
       end
 
       def async(*args, &block)

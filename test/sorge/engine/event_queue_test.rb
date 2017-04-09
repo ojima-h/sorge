@@ -22,6 +22,21 @@ module Sorge
         event.wait(1)
         assert_equal [[:notify, name: 'foo', time: 1, dest: 'bar']], spy
       end
+
+      def test_job_flow
+        event_queue.submit(:run, name: 'test_failure:t1', time: Time.now.to_i)
+
+        10.times do
+          break if SorgeTest.spy.length == 4
+          sleep 0.1
+        end
+
+        assert_equal 4, SorgeTest.spy.length
+        assert_includes SorgeTest.spy, SorgeTest::Spy['test_failure:t1', {}]
+        assert_includes SorgeTest.spy, SorgeTest::Spy['test_failure:t2', {}]
+        assert_includes SorgeTest.spy, SorgeTest::Spy['test_failure:t3', {}]
+        assert_includes SorgeTest.spy, SorgeTest::Spy['test_failure:t5', {}]
+      end
     end
   end
 end

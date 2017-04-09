@@ -90,7 +90,10 @@ namespace :test_params do
 end
 
 namespace :test_window do
-  task :t1
+  task :t0
+  task :t1 do
+    upstream :t0
+  end
   task :t2
 
   task :t3 do

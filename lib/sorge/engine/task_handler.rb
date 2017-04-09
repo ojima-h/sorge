@@ -19,8 +19,19 @@ module Sorge
 
         tms = @task.window_handler.update(@state[:window], name, time)
 
-        tms.each do |tm|
-          @engine.task_runner.post(@task, build_context(tm))
+        tms.each { |tm| run(tm) }
+      end
+
+      def run(time)
+        @engine.task_runner.post(@task, build_context(time))
+      end
+
+      def complete(time, state)
+        @state[:task] = state
+
+        @task.successors.each do |succ|
+          params = { name: @task.name, time: time, dest: succ.name }
+          @engine.event_queue.submit(:notify, params)
         end
       end
 

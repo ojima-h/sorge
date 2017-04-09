@@ -36,6 +36,24 @@ module Sorge
         s2 = spy[0][1].state
         refute_equal s1.object_id, s2.object_id
       end
+
+      def test_complete
+        handler = factory('test_namespace:ns:t1')
+
+        spy = []
+        app.engine.event_queue.stub(:submit, ->(*args) { spy << args }) do
+          handler.complete(1, foo: :bar)
+        end
+
+        assert_equal [
+          [:notify, name: 'test_namespace:ns:t1', time: 1, dest: 'test_namespace:ns:t2'],
+          [:notify, name: 'test_namespace:ns:t1', time: 1, dest: 'test_namespace:t3'],
+          [:notify, name: 'test_namespace:ns:t1', time: 1, dest: 'test_namespace:t4']
+        ], spy
+
+        assert_equal({ foo: :bar },
+                     app.engine.task_states['test_namespace:ns:t1'][:task])
+      end
     end
   end
 end
