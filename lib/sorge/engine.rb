@@ -7,12 +7,13 @@ module Sorge
       @driver = Driver.new(self)
       @savepoint = Savepoint.new(self)
       @state_manager = StateManager.new(self)
+      @task_runner = TaskRunner.new(self)
       @worker = Worker.new(self)
 
       @task_states = Hash.new { |hash, key| hash[key] = {} }
     end
     attr_reader :application, :event_queue, :executor, :driver, :savepoint,
-                :state_manager, :worker,
+                :state_manager, :task_runner, :worker,
                 :task_states
 
     def kill
@@ -33,5 +34,6 @@ require 'sorge/engine/job'
 require 'sorge/engine/savepoint'
 require 'sorge/engine/state_manager'
 require 'sorge/engine/task_handler'
+require 'sorge/engine/task_runner'
 require 'sorge/engine/task_state'
 require 'sorge/engine/worker'
