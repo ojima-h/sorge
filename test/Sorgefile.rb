@@ -88,3 +88,25 @@ namespace :test_params do
     param :j, -> { up(:t2).params[:i] + up(:t3).params[:i] }
   end
 end
+
+namespace :test_window do
+  task :t1
+  task :t2
+
+  task :t3 do
+    window 3
+    upstream :t1
+    upstream :t2
+  end
+
+  task :t4 do
+    window :daily, delay: 60
+    upstream :t1
+  end
+
+  task :t5 do
+    window :daily
+    upstream :t2
+    upstream :t4
+  end
+end
