@@ -77,6 +77,10 @@ module Sorge
         end
 
         def update_upstream(state, name, time)
+          unless state[:up].include?(name)
+            raise Error, "#{name} is not an upstream of #{@task.name}"
+          end
+
           state[:up][name] = [state[:up][name], time].max
           state[:up].values.min
         end

@@ -37,8 +37,10 @@ class SorgeTest < Minitest::Test
 
     super
   ensure
-    f = @app.config.get('savepoint.path')
-    FileUtils.rm_r(f) if File.exist?(f)
+    if @app
+      f = @app.config.get('savepoint.path')
+      FileUtils.rm_r(f) if File.exist?(f)
+    end
   end
 
   #
