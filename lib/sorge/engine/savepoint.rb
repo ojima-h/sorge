@@ -28,11 +28,11 @@ module Sorge
           execution_interval: interval,
           timeout_interval: 60
         ) do
-          @engine.event_queue.peek(:savepoint) unless @stopped
+          @engine.event_queue.submit(:savepoint) unless @stopped
         end
       end
 
-      def dump
+      def update
         Engine.synchronize do
           write(
             queue: @engine.event_queue.queue,
@@ -41,6 +41,11 @@ module Sorge
           )
           clean
         end
+      end
+
+      # update savepoint everytime when event_queue consumes a message.
+      def fine_update
+        update if @interval < 0
       end
 
       private

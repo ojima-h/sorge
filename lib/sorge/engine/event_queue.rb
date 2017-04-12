@@ -19,11 +19,6 @@ module Sorge
         async(&method(:dispatch))
       end
 
-      def peek(method, params)
-        Engine.synchronize { @queue.unshift([method, params]) }
-        async(&method(:dispatch))
-      end
-
       #
       # Handlers
       #
@@ -44,7 +39,7 @@ module Sorge
       end
 
       def handle_savepoint
-        @engine.savepoint.dump
+        @engine.savepoint.update
       end
 
       private
@@ -56,6 +51,7 @@ module Sorge
         method, params = Engine.synchronize { @queue.shift }
         send(:"#{@handler_prefix}#{method}", params)
         @engine.driver.check_finished
+        @engine.savepoint.fine_update
       end
 
       def async(*args, &block)
