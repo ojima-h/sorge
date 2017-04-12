@@ -9,10 +9,10 @@ module Sorge
 
       def test_dump
         stub_q = [[:foo, param: 1], [:foo, param: 2]]
-        stub_run = { 'xxx' => { name: 'bar', time: 100 } }
+        stub_p = { 'bar' => [{ name: 'bar', time: 100 }] }
         stub_st = { 'bar' => { baz: 1 } }
         app.engine.event_queue.stub(:queue, stub_q) do
-          app.engine.task_runner.stub(:running, stub_run) do
+          app.engine.task_runner.stub(:running, stub_p) do
             app.engine.stub(:task_states, stub_st) do
               savepoint.dump
 
@@ -25,8 +25,8 @@ module Sorge
 - - :foo
   - :param: 2
 :running:
-  xxx:
-    :name: bar
+  bar:
+  - :name: bar
     :time: 100
 :states:
   bar:

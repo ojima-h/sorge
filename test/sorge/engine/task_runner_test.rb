@@ -22,24 +22,22 @@ module Sorge
           spy << args
           event.set
         end
-        task = tasks['t1']
-        ctx = context(0, {})
+        job = tasks['t1'].new(context(0, {}))
 
         task_runner.stub(:run, run_stub) do
-          task_runner.post(task, ctx)
+          task_runner.post(job)
           event.wait(1)
         end
 
-        assert_equal [[task, ctx]], spy
+        assert_equal [[job]], spy
       end
 
       def test_run
-        task = tasks['t1']
-        ctx = context(0, {})
+        job = tasks['t1'].new(context(0, {}))
 
         spy = []
         event_queue.stub(:submit, ->(*args) { spy << args }) do
-          task_runner.send(:run, task, ctx)
+          task_runner.send(:run, job)
         end
 
         assert_equal [[:complete, name: 't1', time: 0, state: {}]], spy
@@ -47,12 +45,11 @@ module Sorge
       end
 
       def test_run_failure
-        task = tasks['test_failure:t2']
-        ctx = context(0, {})
+        job = tasks['test_failure:t2'].new(context(0, {}))
 
         spy = []
         event_queue.stub(:submit, ->(*args) { spy << args }) do
-          task_runner.send(:run, task, ctx)
+          task_runner.send(:run, job)
         end
 
         assert_equal [SorgeTest::Spy['test_failure:t2', {}]], SorgeTest.spy

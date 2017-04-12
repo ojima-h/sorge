@@ -30,10 +30,13 @@ module Sorge
         end
 
         ctx = TaskHandler::Context[t, { foo: :bar }]
-        assert_equal [[tasks['test_window:t3'], ctx]], spy
+
+        j = spy[0][0]
+        assert_equal 'test_window:t3', j.name
+        assert_equal ctx, j.context
 
         s1 = app.engine.task_states['test_window:t3'][:task]
-        s2 = spy[0][1].state
+        s2 = spy[0][0].state
         refute_equal s1.object_id, s2.object_id
       end
 

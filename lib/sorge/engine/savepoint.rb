@@ -66,6 +66,7 @@ module Sorge
         file_path = File.join(@path, id + '.yml')
         FileUtils.makedirs(File.dirname(file_path))
         File.write(file_path, YAML.dump(data))
+        Sorge.logger.info("savepoint updated: #{file_path}")
         @files << file_path
       end
 

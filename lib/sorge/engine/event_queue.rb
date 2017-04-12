@@ -20,6 +20,9 @@ module Sorge
         async(&method(:dispatch))
       end
 
+      #
+      # Handlers
+      #
       def handle_notify(name:, time:, dest:)
         TaskHandler.new(@engine, dest).notify(name, time)
       end

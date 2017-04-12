@@ -23,7 +23,7 @@ module Sorge
       end
 
       def run(time)
-        @engine.task_runner.post(@task, build_context(time))
+        @engine.task_runner.post(create_job(time))
       end
 
       def complete(time, state)
@@ -37,8 +37,8 @@ module Sorge
 
       private
 
-      def build_context(time)
-        Context[time, build_task_state]
+      def create_job(time)
+        @task.new(Context[time, build_task_state])
       end
 
       def build_task_state
