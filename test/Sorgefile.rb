@@ -66,6 +66,10 @@ namespace :test_failure do
   task :t7 do
     setup { raise 'test' }
   end
+
+  task :fatal do
+    action { raise Exception, 'test fatal' }
+  end
 end
 
 namespace :test_params do

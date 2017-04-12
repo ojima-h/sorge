@@ -16,6 +16,11 @@ module Sorge
       engine.driver.invoke(task, params)
     end
 
+    def kill(error)
+      Sorge.logger.fatal('sorge application killed')
+      @engine.kill(error)
+    end
+
     private
 
     def load_sorgefile

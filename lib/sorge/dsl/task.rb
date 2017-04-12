@@ -36,7 +36,7 @@ module Sorge
 
       def failed(error)
         Sorge.logger.error("failed: #{name} (#{time})")
-        Sorge.logger.error("error:\n" + Util.format_error_info(error))
+        Sorge.logger.error(Util.format_error_info(error))
       end
     end
   end

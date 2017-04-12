@@ -79,7 +79,7 @@ module Sorge
         j = invoke('test_params:t1', i: 1)
         e.wait
         sleep 0.01 until j.jobs['test_params:t2'].status.complete?
-        app.engine.kill
+        app.engine.kill(RuntimeError)
 
         assert j.failed?
 

@@ -62,6 +62,19 @@ module Sorge
         assert jobflows.any? { |jf| jf.include? j3.id }
         assert_empty app.engine.driver.jobflows
       end
+
+      def test_fatal_error
+        e = assert_raises Exception do
+          app.engine.driver.run('test_failure:fatal', Time.now.to_i)
+        end
+        assert_equal 'test fatal', e.message
+      end
+
+      def test_unexpected_error
+        assert_raises NameError do
+          app.engine.driver.run('undefined_task', Time.now.to_i)
+        end
+      end
     end
   end
 end

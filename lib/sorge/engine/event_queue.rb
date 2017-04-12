@@ -57,15 +57,11 @@ module Sorge
       def async(*args, &block)
         worker = @engine.worker.task_worker
         @agent.send_via!(worker, args, block) do |_, my_args, my_block|
-          capture_exception { my_block.call(*my_args) }
+          @engine.worker.capture_exception do
+            my_block.call(*my_args)
+          end
           nil
         end
-      end
-
-      def capture_exception
-        yield
-      rescue Exception => exception
-        Sorge.logger.error("fatal:\n" + Util.format_error_info(exception))
       end
     end
   end

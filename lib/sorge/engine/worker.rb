@@ -8,12 +8,11 @@ module Sorge
       attr_reader :job_worker
       alias task_worker job_worker
 
-      def capture_exception(raise_error = false)
+      def capture_exception
         yield
       rescue Exception => exception
-        Sorge.logger.error("fatal:\n" + Util.format_error_info(exception))
-        @engine.kill
-        raise if raise_error
+        Sorge.logger.fatal(Util.format_error_info(exception))
+        @engine.application.kill(exception)
       end
 
       def kill

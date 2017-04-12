@@ -5,6 +5,7 @@ module Sorge
         @engine = engine
         @jobflows = {}
         @finish_event = Concurrent::Event.new
+        @error = nil
       end
       attr_reader :engine, :jobflows
 
@@ -24,18 +25,15 @@ module Sorge
         shutdown
       end
 
-      def shutdown(timeout: nil, save: true)
+      def shutdown
         @engine.savepoint.stop
-        @finish_event.wait(timeout)
-        @engine.savepoint.dump if save
+        @finish_event.wait
+        raise @error if @error
       end
 
       def task_finished
-        Engine.synchronize do
-          if @engine.event_queue.empty? && @engine.task_runner.empty?
-            @finish_event.set
-          end
-        end
+        return unless @engine.event_queue.empty? && @engine.task_runner.empty?
+        @finish_event.set
       end
 
       def update(jobflow)
@@ -43,7 +41,9 @@ module Sorge
         @jobflows.delete(jobflow.id)
       end
 
-      def kill
+      def kill(error)
+        @error = error
+        @finish_event.set
         @jobflows.each { |_, j| j.kill }
       end
     end
