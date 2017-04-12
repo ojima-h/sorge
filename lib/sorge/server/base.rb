@@ -13,10 +13,9 @@ module Sorge
         json_body
 
         task_name = params[:json][:task]
-        task_params = params[:json][:params] || {}
+        time = Util.parse_time(params[:json][:time] || Time.now.to_i)
 
-        jobflow = sorge.invoke(task_name, task_params)
-        jobflow.wait unless params[:json][:async]
+        sorge.submit(task_name, time)
 
         200
       end

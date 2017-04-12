@@ -20,6 +20,10 @@ module Sorge
                 :savepoint, :state_manager, :task_runner, :worker,
                 :task_states
 
+    def shutdown
+      @driver.shutdown
+    end
+
     def kill(error)
       @driver.kill(error)
       @worker.kill

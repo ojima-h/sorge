@@ -12,15 +12,7 @@ module Sorge
       end
 
       def run
-        @app.engine.driver.run(@task_name, @time)
-      end
-
-      def parse_time(time)
-        if time =~ /\A\d+$\z/
-          time.to_i
-        else
-          Time.parse(time).to_i
-        end
+        @app.run(@task_name, @time)
       end
     end
   end

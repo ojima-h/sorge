@@ -1,5 +1,7 @@
 module Sorge
   class Application
+    extend Forwardable
+
     def initialize(options = {})
       @config = options[:config] || Config.new(options)
 
@@ -10,10 +12,15 @@ module Sorge
       load_sorgefile
     end
     attr_reader :config, :dsl, :engine, :model, :config
+    def_delegators '@engine.driver', :submit, :run
 
     def invoke(task_name, params)
       task = dsl.task_manager[task_name]
       engine.driver.invoke(task, params)
+    end
+
+    def shutdown
+      @engine.shutdown
     end
 
     def kill(error)

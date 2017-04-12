@@ -37,5 +37,13 @@ module Sorge
     def generate_id(n = 8)
       SecureRandom.hex(n / 2)
     end
+
+    def parse_time(time)
+      if time =~ /\A\d+$\z/ || time.is_a?(Integer)
+        time.to_i
+      else
+        Time.parse(time).to_i
+      end
+    end
   end
 end

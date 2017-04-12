@@ -24,8 +24,14 @@ module Sorge
     end
 
     def test_invoke
-      post_json('jobs', task: 't1', async: false)
+      post_json('jobs', task: 't1')
       assert last_response.ok?
+
+      sorge.shutdown
+      assert_equal [
+        SorgeTest::Spy['t1', {}],
+        SorgeTest::Spy['t2', {}]
+      ], SorgeTest.spy
     end
   end
 end
