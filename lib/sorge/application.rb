@@ -7,11 +7,10 @@ module Sorge
 
       @dsl = DSL.new(self)
       @engine = Engine.new(self)
-      @model = Model.new(self)
 
       load_sorgefile
     end
-    attr_reader :config, :dsl, :engine, :model, :config
+    attr_reader :config, :dsl, :engine, :config
     def_delegators '@engine.driver', :submit, :run
 
     def invoke(task_name, params)
@@ -49,4 +48,3 @@ end
 
 require 'sorge/dsl'
 require 'sorge/engine'
-require 'sorge/model'

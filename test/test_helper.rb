@@ -31,7 +31,6 @@ class SorgeTest < Minitest::Test
       sorgefile: File.expand_path('../Sorgefile.rb', __FILE__)
     )
 
-    @app.model.database[:event_queue].delete
     SorgeTest.spy.clear
     SorgeTest.hook.clear
 
