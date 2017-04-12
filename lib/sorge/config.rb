@@ -12,7 +12,7 @@ module Sorge
       'server.uri' => 'http://localhost:9900',
       'server.port' => 9900,
 
-      'savepoint.interval' => 0,
+      'savepoint.interval' => -1,
       'savepoint.path' => 'var/savepoints'
     }.freeze
 

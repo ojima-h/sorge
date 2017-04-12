@@ -60,7 +60,13 @@ module Sorge
       end
 
       def clean
-        File.delete(*@files[0..-2])
+        @files[0..-2].each do |f|
+          begin
+            File.delete(f)
+          rescue Errno::ENOENT
+            nil
+          end
+        end
       end
     end
   end
