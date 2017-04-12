@@ -10,6 +10,10 @@ module Sorge
       end
       attr_reader :queue
 
+      def empty?
+        @queue.empty?
+      end
+
       def submit(method, params)
         Engine.synchronize { @queue << [method, params] }
         async(&method(:dispatch))
@@ -33,6 +37,7 @@ module Sorge
 
       def handle_complete(name:, time:, state:)
         TaskHandler.new(@engine, name).complete(time, state)
+        @engine.driver.task_finished
       end
 
       def handle_savepoint

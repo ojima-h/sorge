@@ -19,14 +19,16 @@ module Sorge
 
         tms = @task.window_handler.update(@state[:window], name, time)
 
-        tms.each { |tm| run(tm) }
+        tms.each(&method(:run))
       end
 
       def run(time)
-        @engine.task_runner.post(create_job(time))
+        @engine.task_runner.post(to_job(time))
       end
 
       def complete(time, state)
+        @engine.task_runner.complete(@task.name)
+
         @state[:task] = state
 
         @task.successors.each do |succ|
@@ -37,7 +39,7 @@ module Sorge
 
       private
 
-      def create_job(time)
+      def to_job(time)
         @task.new(Context[time, build_task_state])
       end
 

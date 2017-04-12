@@ -5,13 +5,25 @@ module Sorge
         @engine = engine
         @agent = {}
         @running = Hash.new { |hash, key| hash[key] = [] }
+        @counter = 0
       end
       attr_reader :running
 
       def post(job)
-        Engine.synchronize { @running[job.name] << job.to_h }
+        @running[job.name] << job.to_h
+        @counter += 1
 
         async(assign_agent(job.name), job, &method(:run))
+      end
+
+      def complete(task_name)
+        @running[task_name].shift
+        @running.delete(task_name) if @running[task_name].empty?
+        @counter -= 1
+      end
+
+      def empty?
+        @counter.zero?
       end
 
       private
@@ -27,21 +39,14 @@ module Sorge
       end
 
       def assign_agent(task_name)
-        unless @agent.include?(task_name)
-          Engine.synchronize do
-            @agent[task_name] ||= Concurrent::Agent.new(nil)
-          end
-        end
-        @agent[task_name]
+        @agent[task_name] ||= Concurrent::Agent.new(nil)
       end
 
       def run(job)
         result = job.invoke
+        return unless result
 
-        Engine.synchronize do
-          @running[job.name].shift
-          @engine.event_queue.submit(:complete, job.to_h) if result
-        end
+        @engine.event_queue.submit(:complete, job.to_h)
       end
     end
   end

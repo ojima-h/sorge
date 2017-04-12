@@ -4,6 +4,7 @@ module Sorge
       def initialize(engine)
         @engine = engine
         @jobflows = {}
+        @finish_event = Concurrent::Event.new
       end
       attr_reader :engine, :jobflows
 
@@ -18,9 +19,22 @@ module Sorge
       end
 
       # Run task synchronously
-      def run(task, params)
-        @engine.worker.capture_exception do
-          invoke.wait(task, params)
+      def run(task_name, time)
+        @engine.event_queue.submit(:run, name: task_name, time: time)
+        shutdown
+      end
+
+      def shutdown(timeout: nil, save: true)
+        @engine.savepoint.stop
+        @finish_event.wait(timeout)
+        @engine.savepoint.dump if save
+      end
+
+      def task_finished
+        Engine.synchronize do
+          if @engine.event_queue.empty? && @engine.task_runner.empty?
+            @finish_event.set
+          end
         end
       end
 

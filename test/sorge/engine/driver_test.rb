@@ -15,6 +15,13 @@ module Sorge
                      SorgeTest.spy.map(&:name)
       end
 
+      def test_run
+        app.engine.driver.run('test_namespace:ns:t1', Time.now.to_i)
+        assert_equal %w(test_namespace:ns:t1 test_namespace:ns:t2
+                        test_namespace:t3 test_namespace:t4),
+                     SorgeTest.spy.map(&:name)
+      end
+
       def test_failure
         jobflow = invoke('test_failure:t1').wait
 

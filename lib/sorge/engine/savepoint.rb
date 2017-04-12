@@ -9,10 +9,15 @@ module Sorge
         @files = []
         @started = Concurrent::AtomicBoolean.new
         @worker = nil
+        @stopped = false
       end
 
       def latest
         @files.last
+      end
+
+      def stop
+        @stopped = true
       end
 
       def start
@@ -23,7 +28,7 @@ module Sorge
           execution_interval: interval,
           timeout_interval: 60
         ) do
-          @engine.event_queue.peek(:savepoint)
+          @engine.event_queue.peek(:savepoint) unless @stopped
         end
       end
 

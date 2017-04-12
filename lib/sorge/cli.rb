@@ -22,9 +22,9 @@ module Sorge
 
     desc 'run TASK [KEY=VAL]...', 'Run task'
     app_options
-    def _run(task, *args)
+    def _run(task, time, *args)
       require 'sorge/cli/run'
-      Run.new(app, task, args, options).run
+      Run.new(app, task, time, args, options).run
     end
     map run: :_run
 
