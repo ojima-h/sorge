@@ -44,9 +44,8 @@ module Sorge
 
       def run(job)
         result = job.invoke
-        return unless result
-
-        @engine.event_queue.submit(:complete, job.to_h)
+        method = result ? :successed : :failed
+        @engine.event_queue.submit(method, **job.to_h)
       end
     end
   end

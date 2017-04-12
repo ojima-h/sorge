@@ -50,7 +50,7 @@ class SorgeTest < Minitest::Test
     app.dsl.task_manager
   end
 
-  def invoke(task_name, params = {})
-    app.invoke(task_name, params)
+  def invoke(task_name, time = nil)
+    app.run(task_name, time || Time.now.to_i)
   end
 end

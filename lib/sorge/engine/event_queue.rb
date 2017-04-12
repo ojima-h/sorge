@@ -35,9 +35,12 @@ module Sorge
         TaskHandler.new(@engine, name).run(time)
       end
 
-      def handle_complete(name:, time:, state:)
-        TaskHandler.new(@engine, name).complete(time, state)
-        @engine.driver.task_finished
+      def handle_successed(name:, time:, state:)
+        TaskHandler.new(@engine, name).successed(time, state)
+      end
+
+      def handle_failed(name:, time:, state:)
+        TaskHandler.new(@engine, name).failed(time, state)
       end
 
       def handle_savepoint
@@ -52,6 +55,7 @@ module Sorge
       def dispatch
         method, params = Engine.synchronize { @queue.shift }
         send(:"#{@handler_prefix}#{method}", params)
+        @engine.driver.check_finished
       end
 
       def async(*args, &block)

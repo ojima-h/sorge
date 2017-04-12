@@ -40,7 +40,7 @@ module Sorge
           task_runner.send(:run, job)
         end
 
-        assert_equal [[:complete, name: 't1', time: 0, state: {}]], spy
+        assert_equal [[:successed, name: 't1', time: 0, state: {}]], spy
         assert_equal [SorgeTest::Spy['t1', {}]], SorgeTest.spy
       end
 
@@ -53,7 +53,9 @@ module Sorge
         end
 
         assert_equal [SorgeTest::Spy['test_failure:t2', {}]], SorgeTest.spy
-        assert_equal [], spy
+        assert_equal [
+          [:failed, name: 'test_failure:t2', time: 0, state: {}]
+        ], spy
       end
     end
   end

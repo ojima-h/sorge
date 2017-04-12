@@ -26,7 +26,11 @@ module Sorge
         @engine.task_runner.post(to_job(time))
       end
 
-      def complete(time, state)
+      def failed(_time, _state)
+        @engine.task_runner.complete(@task.name)
+      end
+
+      def successed(time, state)
         @engine.task_runner.complete(@task.name)
 
         @state[:task] = state
