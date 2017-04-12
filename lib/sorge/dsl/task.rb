@@ -20,6 +20,24 @@ module Sorge
       def execute
         call_action(:action)
       end
+
+      def invoke
+        execute
+        successed
+        true
+      rescue => error
+        failed(error)
+        false
+      end
+
+      def successed
+        Sorge.logger.info("successed: #{name} (#{time})")
+      end
+
+      def failed(error)
+        Sorge.logger.error("failed: #{name} (#{time})")
+        Sorge.logger.error("error:\n" + Util.format_error_info(error))
+      end
     end
   end
 end

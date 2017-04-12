@@ -31,12 +31,19 @@ module Sorge
         @context = context
       end
       attr_reader :context
-
-      def_delegators :context, :job
+      def_delegators :context, :state, :job
       def_delegators :job, :stash, :params
 
+      def time
+        @time ||= Time.at(context.time)
+      end
+
       def to_s
-        task.name + ' ' + params.to_json
+        task.name
+      end
+
+      def to_h
+        { name: task.name, time: context.time, state: state }
       end
 
       def inspect
@@ -47,6 +54,7 @@ module Sorge
       def task
         self.class
       end
+      def_delegators :task, :name
 
       def logger
         Sorge.logger

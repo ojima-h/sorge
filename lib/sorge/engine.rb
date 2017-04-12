@@ -1,7 +1,11 @@
 module Sorge
   class Engine
+    extend MonitorMixin
+
     def initialize(application)
       @application = application
+      @config = application.config
+
       @event_queue = EventQueue.new(self)
       @executor = Executor.new(self)
       @driver = Driver.new(self)
@@ -12,8 +16,8 @@ module Sorge
 
       @task_states = Hash.new { |hash, key| hash[key] = {} }
     end
-    attr_reader :application, :event_queue, :executor, :driver, :savepoint,
-                :state_manager, :task_runner, :worker,
+    attr_reader :application, :config, :event_queue, :executor, :driver,
+                :savepoint, :state_manager, :task_runner, :worker,
                 :task_states
 
     def kill

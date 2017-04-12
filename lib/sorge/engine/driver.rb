@@ -9,6 +9,8 @@ module Sorge
 
       # Invoke task asynchronously
       def invoke(task, params)
+        @engine.savepoint.start
+
         jobflow = JobflowBuilder.build(self, task, params)
         @jobflows[jobflow.id] = jobflow
         jobflow.start(task)

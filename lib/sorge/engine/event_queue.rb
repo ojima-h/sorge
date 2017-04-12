@@ -4,14 +4,19 @@ module Sorge
       def initialize(engine)
         @engine = engine
         @queue = []
-        @mutex = Mutex.new
 
         @agent = Concurrent::Agent.new(nil)
         @handler_prefix = 'handle_'
       end
+      attr_reader :queue
 
       def submit(method, params)
-        @mutex.synchronize { @queue << [method, params] }
+        Engine.synchronize { @queue << [method, params] }
+        async(&method(:dispatch))
+      end
+
+      def peek(method, params)
+        Engine.synchronize { @queue.unshift([method, params]) }
         async(&method(:dispatch))
       end
 
@@ -27,13 +32,17 @@ module Sorge
         TaskHandler.new(@engine, name).complete(time, state)
       end
 
+      def handle_savepoint
+        @engine.savepoint.dump
+      end
+
       private
 
       #
       # Asynchronous Execution
       #
       def dispatch
-        method, params = @mutex.synchronize { @queue.shift }
+        method, params = Engine.synchronize { @queue.shift }
         send(:"#{@handler_prefix}#{method}", params)
       end
 
