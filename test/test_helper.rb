@@ -14,10 +14,15 @@ class SorgeTest < Minitest::Test
   attr_reader :app
 
   Spy = Struct.new(:name, :params)
+
   def self.spy(name = nil, params = {})
     @spy ||= []
     return @spy if name.nil?
     @spy << Spy[name, params]
+  end
+
+  def spy(name, params = {})
+    Spy[name, params]
   end
 
   def self.hook(name = nil, &block)

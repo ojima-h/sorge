@@ -13,7 +13,6 @@ module Sorge
       end
 
       def setup
-        assign_params
         call_action(:setup)
       end
 

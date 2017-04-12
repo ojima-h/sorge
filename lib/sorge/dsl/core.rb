@@ -32,7 +32,7 @@ module Sorge
       end
       attr_reader :context
       def_delegators :context, :state, :job
-      def_delegators :job, :stash, :params
+      def_delegators :job, :stash
 
       def time
         @time ||= Time.at(context.time)
@@ -47,8 +47,8 @@ module Sorge
       end
 
       def inspect
-        format('#<Task:0x00%x name=%s params=%s>',
-               object_id << 1, task.name, params)
+        format('#<Task:0x00%x name=%s time=%d>',
+               object_id << 1, task.name, time)
       end
 
       def task

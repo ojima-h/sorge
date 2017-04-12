@@ -1,10 +1,10 @@
 global do
   action do
     if defined?(SorgeTest)
-      SorgeTest.spy(task.name, params)
+      SorgeTest.spy(task.name)
       SorgeTest.hook[task.name].call(self) if SorgeTest.hook.include?(task.name)
     else
-      puts [task.name, params].join(' ')
+      puts self
     end
   end
 
@@ -69,27 +69,6 @@ namespace :test_failure do
 
   task :fatal do
     action { raise Exception, 'test fatal' }
-  end
-end
-
-namespace :test_params do
-  task :t1
-
-  task :t2 do
-    upstream :t1
-    param :i
-  end
-
-  task :t3 do
-    upstream :t1
-    param :i, -> { up(:t1).params[:i] + 1 }
-  end
-
-  task :t4 do
-    upstream :t2
-    upstream :t3
-    param :i
-    param :j, -> { up(:t2).params[:i] + up(:t3).params[:i] }
   end
 end
 

@@ -14,7 +14,6 @@ module Sorge
       include Core
       include CoreAction
       include CoreInclude
-      include CoreParams
       include CoreSettings
       include CoreUpstreams
       include CoreWindow

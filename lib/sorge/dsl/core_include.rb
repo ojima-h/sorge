@@ -6,22 +6,6 @@ module Sorge
       class_methods do
         private
 
-        # Include mixins.
-        #
-        # All methods, actions and settings are inherited.
-        #
-        #     mixin :foo do
-        #       param :country
-        #     end
-        #
-        #     play :bar do
-        #       include :bar
-        #       params_spec #=> { country: {} }
-        #     end
-        #
-        # When Module objects are given, it includes them as usual.
-        #
-        # @param mod [Array<Symbol, String, Module>] mixin name or module.
         def include(*mod)
           ms = mod.map { |m| resolve_mixin(m) }
           super(*ms)

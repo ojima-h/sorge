@@ -28,10 +28,7 @@ module Sorge
       assert last_response.ok?
 
       sorge.shutdown
-      assert_equal [
-        SorgeTest::Spy['t1', {}],
-        SorgeTest::Spy['t2', {}]
-      ], SorgeTest.spy
+      assert_equal [spy('t1'), spy('t2')], SorgeTest.spy
     end
   end
 end

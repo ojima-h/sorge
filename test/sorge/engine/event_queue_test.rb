@@ -32,10 +32,10 @@ module Sorge
         end
 
         assert_equal 4, SorgeTest.spy.length
-        assert_includes SorgeTest.spy, SorgeTest::Spy['test_failure:t1', {}]
-        assert_includes SorgeTest.spy, SorgeTest::Spy['test_failure:t2', {}]
-        assert_includes SorgeTest.spy, SorgeTest::Spy['test_failure:t3', {}]
-        assert_includes SorgeTest.spy, SorgeTest::Spy['test_failure:t5', {}]
+        assert_includes SorgeTest.spy, spy('test_failure:t1')
+        assert_includes SorgeTest.spy, spy('test_failure:t2')
+        assert_includes SorgeTest.spy, spy('test_failure:t3')
+        assert_includes SorgeTest.spy, spy('test_failure:t5')
       end
     end
   end
