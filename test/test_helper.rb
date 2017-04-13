@@ -31,20 +31,27 @@ class SorgeTest < Minitest::Test
     @hooks
   end
 
-  def run(*args, &block)
-    @app = Sorge::Application.new(
-      sorgefile: File.expand_path('../Sorgefile.rb', __FILE__)
-    )
-
+  def setup
     SorgeTest.spy.clear
     SorgeTest.hook.clear
 
-    super
-  ensure
-    if @app
-      f = @app.config.get('savepoint.path')
-      FileUtils.rm_r(f) if File.exist?(f)
-    end
+    @app = Sorge::Application.new(
+      sorgefile: File.expand_path('../Sorgefile.rb', __FILE__)
+    )
+  end
+
+  def teardown
+    return unless @app
+
+    @app.kill('test finish')
+    clear_savepoint
+  end
+
+  def clear_savepoint
+    f = @app.config.get('savepoint.path')
+    FileUtils.rm_r(f) if File.exist?(f)
+  rescue
+    nil # this may fail if a new savepoint is created while cleaning.
   end
 
   #

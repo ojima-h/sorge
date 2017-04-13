@@ -1,5 +1,7 @@
 module Sorge
   class DSL
+    extend MonitorMixin
+
     class << self
       attr_accessor :current
     end
@@ -9,10 +11,20 @@ module Sorge
       @global = Base.create(self, :global)
       @task_manager = TaskManager.new(self)
       @task_graph = TaskGraph.new(self)
-
-      self.class.current = self
     end
     attr_reader :application, :global, :task_manager, :task_graph
+
+    def with_current
+      DSL.synchronize do
+        begin
+          orig = DSL.current
+          DSL.current = self
+          yield
+        ensure
+          DSL.current = orig
+        end
+      end
+    end
   end
 end
 

@@ -21,6 +21,7 @@ module Sorge
       end
 
       def invoke
+        Sorge.logger.info("start: #{name} (#{time})")
         execute
         successed
         true

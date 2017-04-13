@@ -11,22 +11,13 @@ module Sorge
       load_sorgefile
     end
     attr_reader :config, :dsl, :engine, :config
-    def_delegators '@engine.driver', :submit, :run
-
-    def shutdown
-      @engine.shutdown
-    end
-
-    def kill(error)
-      Sorge.logger.fatal('sorge application killed')
-      @engine.kill(error)
-    end
+    def_delegators :'@engine.driver', :kill, :shutdown, :submit, :run
 
     private
 
     def load_sorgefile
       @sorgefile = find_sorgefile
-      load(@sorgefile) if @sorgefile
+      @dsl.with_current { load(@sorgefile) } if @sorgefile
     end
 
     def find_sorgefile

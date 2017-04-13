@@ -28,18 +28,12 @@ module Sorge
 
       private
 
-      def async(agent, *args)
-        worker = @engine.worker.task_worker
-        agent.send_via!(worker, *args) do |_, *my_args|
-          @engine.worker.capture_exception do
-            yield(*my_args)
-          end
-          nil
-        end
+      def async(agent, *args, &block)
+        @engine.worker.post_agent(agent, *args, &block)
       end
 
       def assign_agent(task_name)
-        @agent[task_name] ||= Concurrent::Agent.new(nil)
+        @agent[task_name] ||= @engine.worker.new_agent
       end
 
       def run(job)

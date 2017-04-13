@@ -1,31 +1,25 @@
 module Sorge
   class Engine
-    extend MonitorMixin
+    extend Forwardable
 
     def initialize(application)
       @application = application
       @config = application.config
 
+      @worker = Worker.new(self)
       @event_queue = EventQueue.new(self)
       @driver = Driver.new(self)
       @savepoint = Savepoint.new(self)
       @task_runner = TaskRunner.new(self)
-      @worker = Worker.new(self)
 
       @task_states = Hash.new { |hash, key| hash[key] = {} }
+      @mon = Monitor.new
     end
     attr_reader :application, :config, :event_queue, :driver,
                 :savepoint, :task_runner, :worker,
                 :task_states
-
-    def shutdown
-      @driver.shutdown
-    end
-
-    def kill(error)
-      @driver.kill(error)
-      @worker.kill
-    end
+    def_delegators :@mon, :synchronize
+    def_delegators :@driver, :kill, :shutdown, :run, :submit
   end
 end
 

@@ -5,18 +5,27 @@ module Sorge
         @engine = engine
         @queue = []
 
-        @agent = Concurrent::Agent.new(nil)
+        @agent = @engine.worker.new_agent
         @handler_prefix = 'handle_'
+
+        @stopping = Concurrent::AtomicBoolean.new
+        @stop_event = Concurrent::Event.new
       end
       attr_reader :queue
 
-      def empty?
-        @queue.empty?
+      def submit(method, *args)
+        @engine.synchronize { @queue << [method, *args] }
+        async(&method(:dispatch))
       end
 
-      def submit(method, params)
-        Engine.synchronize { @queue << [method, params] }
-        async(&method(:dispatch))
+      def shutdown
+        submit(:stop) if @stopping.make_true
+        @stop_event.wait
+      end
+
+      def kill
+        @stopping.make_true
+        @stop_event.set
       end
 
       #
@@ -42,26 +51,37 @@ module Sorge
         @engine.savepoint.update
       end
 
+      def handle_stop
+        return unless @stopping.true?
+
+        if @queue.empty? && @engine.task_runner.empty?
+          @stop_event.set
+        else
+          sleep 0.01
+          submit(:stop) # check again
+        end
+      end
+
       private
+
+      SKIP_FINE_SAVEPOINT = %i(savepoint stop).freeze
 
       #
       # Asynchronous Execution
       #
       def dispatch
-        method, params = Engine.synchronize { @queue.shift }
-        send(:"#{@handler_prefix}#{method}", params)
-        @engine.driver.check_finished
-        @engine.savepoint.fine_update
+        return if @stop_event.set?
+
+        method, *args = @engine.synchronize { @queue.shift }
+        send(:"#{@handler_prefix}#{method}", *args)
+
+        @engine.savepoint.fine_update \
+          unless SKIP_FINE_SAVEPOINT.include?(method)
       end
 
       def async(*args, &block)
-        worker = @engine.worker.task_worker
-        @agent.send_via!(worker, args, block) do |_, my_args, my_block|
-          @engine.worker.capture_exception do
-            my_block.call(*my_args)
-          end
-          nil
-        end
+        return if @stop_event.set?
+        @engine.worker.post_agent(@agent, *args, &block)
       end
     end
   end

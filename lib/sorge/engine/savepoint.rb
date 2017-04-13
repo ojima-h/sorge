@@ -6,18 +6,14 @@ module Sorge
         @path = engine.config.get('savepoint.path')
         @interval = engine.config.get('savepoint.interval')
 
-        @files = []
+        @latest = nil
         @started = Concurrent::AtomicBoolean.new
         @worker = nil
-        @stopped = false
       end
-
-      def latest
-        @files.last
-      end
+      attr_reader :latest
 
       def stop
-        @stopped = true
+        @worker.shutdown if @worker
       end
 
       def start
@@ -28,19 +24,14 @@ module Sorge
           execution_interval: interval,
           timeout_interval: 60
         ) do
-          @engine.event_queue.submit(:savepoint) unless @stopped
-        end
+          @engine.event_queue.submit(:savepoint)
+        end.execute
       end
 
       def update
-        Engine.synchronize do
-          write(
-            queue: @engine.event_queue.queue,
-            running: @engine.task_runner.running,
-            states: @engine.task_states
-          )
-          clean
-        end
+        file_path = @engine.synchronize { write }
+        swap(file_path)
+        Sorge.logger.info("savepoint updated: #{file_path}")
       end
 
       # update savepoint everytime when event_queue consumes a message.
@@ -50,23 +41,32 @@ module Sorge
 
       private
 
-      def write(data)
+      def data
+        {
+          queue: @engine.event_queue.queue,
+          running: @engine.task_runner.running,
+          states: @engine.task_states
+        }
+      end
+
+      def write
         id = 'savepoint-' + Util.generate_id
         file_path = File.join(@path, id + '.yml')
         FileUtils.makedirs(File.dirname(file_path))
         File.write(file_path, YAML.dump(data))
-        Sorge.logger.info("savepoint updated: #{file_path}")
-        @files << file_path
+        file_path
       end
 
-      def clean
-        @files[0..-2].each do |f|
-          begin
-            File.delete(f)
-          rescue Errno::ENOENT
-            nil
-          end
-        end
+      def swap(file_path)
+        f = @latest
+        @latest = file_path
+        try_delete(f) if f
+      end
+
+      def try_delete(file_path)
+        File.delete(file_path)
+      rescue
+        nil # savepoint file may be deleted while test running
       end
     end
   end

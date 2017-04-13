@@ -3,20 +3,31 @@ module Sorge
     class Worker
       def initialize(engine)
         @engine = engine
-        @job_worker = Concurrent::CachedThreadPool.new
+        @task_worker = Concurrent::CachedThreadPool.new
       end
-      attr_reader :job_worker
-      alias task_worker job_worker
+      attr_reader :task_worker
 
-      def capture_exception
+      def error_handler(error)
+        Sorge.logger.fatal(Util.format_error_info(error))
+        @engine.application.kill(error)
+      end
+
+      def with_error_handler
         yield
       rescue Exception => exception
-        Sorge.logger.fatal(Util.format_error_info(exception))
-        @engine.application.kill(exception)
+        error_handler(exception)
+        raise
       end
 
-      def kill
-        @job_worker.kill
+      def new_agent
+        Concurrent::Agent.new(nil, error_handler: method(:error_handler))
+      end
+
+      def post_agent(agent, *args)
+        agent.send_via(task_worker, *args) do |_, *my_args|
+          with_error_handler { yield(*my_args) }
+          nil
+        end
       end
     end
   end

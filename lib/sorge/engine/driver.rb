@@ -3,7 +3,6 @@ module Sorge
     class Driver
       def initialize(engine)
         @engine = engine
-        @finish_event = Concurrent::Event.new
         @error = nil
       end
       attr_reader :engine
@@ -20,18 +19,13 @@ module Sorge
 
       def shutdown
         @engine.savepoint.stop
-        @finish_event.wait
+        @engine.event_queue.shutdown
         raise @error if @error
-      end
-
-      def check_finished
-        return unless @engine.event_queue.empty? && @engine.task_runner.empty?
-        @finish_event.set
       end
 
       def kill(error)
         @error = error
-        @finish_event.set
+        @engine.event_queue.kill
       end
     end
   end
