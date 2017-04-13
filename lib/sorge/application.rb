@@ -6,19 +6,15 @@ module Sorge
       @config = options[:config] || Config.new(options)
 
       @dsl = DSL.new(self)
-      @engine = Engine.new(self)
+      @sorgefile = find_sorgefile
+      @dsl.load_sorgefile(@sorgefile) if @sorgefile
 
-      load_sorgefile
+      @engine = Engine.new(self)
     end
     attr_reader :config, :dsl, :engine, :config
     def_delegators :'@engine.driver', :kill, :shutdown, :submit, :run
 
     private
-
-    def load_sorgefile
-      @sorgefile = find_sorgefile
-      @dsl.with_current { load(@sorgefile) } if @sorgefile
-    end
 
     def find_sorgefile
       config.get('core.sorgefile').tap { |f| return f if f }

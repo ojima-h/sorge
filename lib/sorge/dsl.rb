@@ -14,6 +14,10 @@ module Sorge
     end
     attr_reader :application, :global, :task_manager, :task_graph
 
+    def load_sorgefile(file_path)
+      with_current { load(file_path) }
+    end
+
     def with_current
       DSL.synchronize do
         begin
