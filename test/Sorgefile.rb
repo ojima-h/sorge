@@ -67,7 +67,7 @@ namespace :test_failure do
   end
 
   task :t7 do
-    setup { raise 'test' }
+    before { raise 'test' }
   end
 
   task :fatal do
@@ -100,5 +100,37 @@ namespace :test_window do
     window :daily
     upstream :t2
     upstream :t4
+  end
+end
+
+namespace :test_hook do
+  mixin :m1 do
+    successed { SorgeTest.spy :successed_in_mixin }
+  end
+
+  task :t1 do
+    include :m1
+
+    before { SorgeTest.spy :before }
+
+    def run
+      SorgeTest.spy :run
+    end
+
+    successed { SorgeTest.spy :successed }
+    failed { |error| SorgeTest.spy :failed, error }
+    after { SorgeTest.spy :after }
+  end
+
+  task :t2 do
+    before { SorgeTest.spy :before }
+
+    def run
+      raise 'test'
+    end
+
+    successed { SorgeTest.spy :successed }
+    failed { |error| SorgeTest.spy :failed, error: error }
+    after { SorgeTest.spy :after }
   end
 end

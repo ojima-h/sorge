@@ -23,8 +23,14 @@ module Sorge
           end
         end
 
-        # @!method setup(&block)
-        define_hook :setup
+        # @!method before(&block)
+        define_hook :before
+
+        # @!method successed(&block)
+        define_hook :successed
+
+        # @!method failed(error, &block)
+        define_hook :failed
 
         # @!method after(&block)
         define_hook :after

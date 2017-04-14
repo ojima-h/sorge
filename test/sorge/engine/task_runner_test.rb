@@ -59,6 +59,22 @@ module Sorge
           [:failed, job_id: 'job_id', name: 'test_failure:t2', time: 0, state: {}]
         ], spy
       end
+
+      def test_hook
+        job = app.dsl.task_manager['test_hook:t1'].new(context(0, {}))
+        job.invoke
+        assert_equal [:before, :run, :successed_in_mixin, :successed, :after],
+                     SorgeTest.spy.map(&:name)
+      end
+
+      def test_hook2
+        job = app.dsl.task_manager['test_hook:t2'].new(context(0, {}))
+        job.invoke
+        assert_equal [:before, :failed, :after], SorgeTest.spy.map(&:name)
+
+        e = SorgeTest.spy.find { |s| s.name == :failed }.params[:error]
+        assert_equal 'test', e.message
+      end
     end
   end
 end

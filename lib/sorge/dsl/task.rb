@@ -12,27 +12,36 @@ module Sorge
         end
       end
 
-      def setup
-        call_hook(:setup)
-      end
-
       def invoke
-        Sorge.logger.info("start: #{name} (#{time})")
+        invoke_before
         run
-        successed
+        invoke_successed
         true
       rescue => error
-        failed(error)
+        invoke_failed(error)
         false
+      ensure
+        invoke_after
       end
 
-      def successed
+      def invoke_before
+        Sorge.logger.info("start: #{name} (#{time})")
+        call_hook(:before)
+      end
+
+      def invoke_successed
         Sorge.logger.info("successed: #{name} (#{time})")
+        call_hook(:successed)
       end
 
-      def failed(error)
+      def invoke_failed(error)
         Sorge.logger.error("failed: #{name} (#{time})")
         Sorge.logger.error(Util.format_error_info(error))
+        call_hook(:failed, error)
+      end
+
+      def invoke_after
+        call_hook(:after)
       end
     end
   end
