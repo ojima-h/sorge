@@ -18,19 +18,27 @@ module Sorge
     end
     map run: :_run
 
-    desc 'server', 'Start Sorge server'
-    app_options
-    def server
-      require 'sorge/server'
-      Sorge::Server.build(app).run!
-    end
-
-    desc 'resume SAVEPOINT_FILE_PATH', 'Resume server from savepoint'
+    desc 'resume SAVEPOINT_FILE_PATH', 'Resume from savepoint'
     app_options
     def resume(file_path)
-      require 'sorge/server'
-      app.resume(file_path)
-      Sorge::Server.build(app).run!
+      app.resume(file_path).shutdown
+    end
+
+    desc 'start', 'Start sorge server'
+    app_options
+    option :daemonize, aliases: '-d', desc: 'run in the background'
+    option :savepoint, aliases: '-s', banner: 'FILE_PATH',
+                       desc: 'resume from savepoint ' \
+                             '(from latest savepoint if \'latest\' given)'
+    def start
+      require 'sorge/cli/daemons'
+      Daemons.new(app, options).start
+    end
+
+    desc 'stop', 'Stop sorge daemon'
+    def stop
+      require 'sorge/cli/daemons'
+      Daemons.new(app, options).stop
     end
 
     desc 'submit', 'Submit a job to server'

@@ -9,6 +9,9 @@ module Sorge
     }.freeze
 
     DEFAULTS = {
+      'core.app_name' => 'sorge',
+      'core.process_dir' => 'var/sorge',
+
       'server.uri' => 'http://localhost:9900',
       'server.port' => 9900,
 

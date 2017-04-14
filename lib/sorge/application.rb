@@ -4,6 +4,7 @@ module Sorge
 
     def initialize(options = {})
       @config = options[:config] || Config.new(options)
+      @exit_on_terminate = options.fetch(:exit_on_terminate, true)
 
       @dsl = DSL.new(self)
       @sorgefile = find_sorgefile
@@ -13,6 +14,20 @@ module Sorge
     end
     attr_reader :config, :dsl, :engine, :config
     def_delegators :'@engine.driver', :kill, :shutdown, :submit, :run, :resume
+
+    def shutdown
+      @engine.driver.shutdown
+      Process.kill(:TERM, 0) if @exit_on_terminate
+    end
+
+    def kill(error)
+      @engine.driver.kill(error)
+      Process.kill(:TERM, 0) if @exit_on_terminate
+    end
+
+    def name
+      @name ||= @config.get('core.app_name')
+    end
 
     private
 

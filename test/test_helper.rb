@@ -37,7 +37,8 @@ class SorgeTest < Minitest::Test
     SorgeTest.hook.clear
 
     @app = Sorge::Application.new(
-      sorgefile: File.expand_path('../Sorgefile.rb', __FILE__)
+      sorgefile: File.expand_path('../Sorgefile.rb', __FILE__),
+      exit_on_terminate: false
     )
   end
 
