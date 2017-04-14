@@ -86,7 +86,7 @@ module Sorge
         method, *args = @engine.synchronize { @queue.shift }
         send(:"#{@handler_prefix}#{method}", *args)
 
-        @engine.savepoint.fine_update if control_method?(method)
+        @engine.savepoint.fine_update unless control_method?(method)
       end
 
       def async(*args, &block)
