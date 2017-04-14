@@ -39,7 +39,7 @@ module Sorge
         end
       end
 
-      def test_resume
+      def test_restore
         savepoint = {
           queue: [
             [:successed, job_id: '1', name: 'test_namespace:ns:t1', time: 100, state: {}],
@@ -79,6 +79,26 @@ module Sorge
         ], event_queue_spy
 
         assert_equal ['test_namespace:ns:t2'], task_runner_spy.map(&:name)
+      end
+
+      def test_resume
+        savepoint = {
+          queue: [[:run, name: 'test_namespace:ns:t1', time: 100]],
+          running: [],
+          states: {}
+        }
+
+        Tempfile.open('resume-test.yml') do |f|
+          f.write(YAML.dump(savepoint))
+          f.close
+
+          app.engine.driver.resume(f.path)
+          app.shutdown
+        end
+
+        assert_equal %w(test_namespace:ns:t1 test_namespace:ns:t2
+                        test_namespace:t3 test_namespace:t4),
+                     SorgeTest.spy.map(&:name)
       end
     end
   end

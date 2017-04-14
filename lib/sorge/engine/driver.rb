@@ -26,10 +26,10 @@ module Sorge
       end
 
       def resume(file_path = nil)
-        file_path ||= @engine.savepoint.latest_file_path
+        file_path ||= File.read(@engine.savepoint.latest_file_path)
 
         hash = @engine.savepoint.read(file_path)
-        @engine.task_states.replace(hash[:states])
+        hash[:states].each { |k, v| @engine.task_states[k] = v }
         @engine.event_queue.resume(hash[:queue], hash[:running])
         self
       end

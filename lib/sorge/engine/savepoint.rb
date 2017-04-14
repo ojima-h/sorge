@@ -12,6 +12,10 @@ module Sorge
       end
       attr_reader :latest
 
+      def latest_file_path
+        File.join(@path, 'latest')
+      end
+
       def stop
         @worker.shutdown if @worker
       end
@@ -32,6 +36,8 @@ module Sorge
         file_path = @engine.synchronize { write }
         swap(file_path)
         Sorge.logger.info("savepoint updated: #{file_path}")
+      ensure
+        try_write(latest_file_path, latest)
       end
 
       # update savepoint everytime when event_queue consumes a message.
@@ -69,6 +75,12 @@ module Sorge
 
       def try_delete(file_path)
         File.delete(file_path)
+      rescue
+        nil # savepoint file may be deleted while test running
+      end
+
+      def try_write(file_path, body)
+        File.write(file_path, body)
       rescue
         nil # savepoint file may be deleted while test running
       end
