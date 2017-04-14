@@ -11,18 +11,19 @@ module Sorge
       @dsl.load_sorgefile(@sorgefile) if @sorgefile
 
       @engine = Engine.new(self)
+      @server = Server.new(self)
     end
-    attr_reader :config, :dsl, :engine, :config
+    attr_reader :config, :dsl, :engine, :config, :server
     def_delegators :'@engine.driver', :kill, :shutdown, :submit, :run, :resume
 
     def shutdown
+      @server.stop
       @engine.driver.shutdown
-      Process.kill(:TERM, 0) if @exit_on_terminate
     end
 
     def kill(error)
+      @server.stop
       @engine.driver.kill(error)
-      Process.kill(:TERM, 0) if @exit_on_terminate
     end
 
     def name
@@ -45,3 +46,4 @@ end
 
 require 'sorge/dsl'
 require 'sorge/engine'
+require 'sorge/server'

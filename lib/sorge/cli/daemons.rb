@@ -1,5 +1,4 @@
 require 'daemons'
-require 'sorge/server'
 
 module Sorge
   class Daemons
@@ -15,7 +14,7 @@ module Sorge
 
       resume(@options['savepoint']) if @options['savepoint']
 
-      Sorge::Server.build(@app).run!
+      @app.server.start
     end
 
     def stop

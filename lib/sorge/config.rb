@@ -17,6 +17,10 @@ module Sorge
       end,
       'core.savepoint_interval' => -1,
 
+      'core.socket_file' => lambda do |c|
+        File.join(c.get('core.process_dir'), c.get('core.app_name') + '.sock')
+      end,
+
       'server.uri' => 'http://localhost:9900',
       'server.port' => 9900
     }.freeze

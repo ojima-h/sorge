@@ -7,8 +7,8 @@ module Sorge
       end
       attr_reader :engine
 
-      def submit(task_name, time)
-        @engine.event_queue.submit(:run, name: task_name, time: time)
+      def submit(name, time)
+        @engine.event_queue.submit(:run, name: name, time: time)
         self
       end
 

@@ -15,10 +15,13 @@ module Sorge
       end
     end
 
-    def format_error_info(error)
+    def format_error_info(error, depth = nil)
       error_info = ''
       error_info << "#{error.class}: #{error.message}\n"
-      (error.backtrace || []).each do |line|
+
+      bt = error.backtrace || []
+      bt = bt.head(depth) if depth
+      bt.each do |line|
         error_info << ' ' * 8 + 'from ' + line + "\n"
       end
       error_info

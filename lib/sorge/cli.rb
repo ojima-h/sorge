@@ -42,9 +42,9 @@ module Sorge
     end
 
     desc 'submit', 'Submit a job to server'
-    def submit(task, *args)
+    def submit(task, time, *args)
       require 'sorge/cli/submit'
-      Submit.new(config, task, args, options).run
+      Submit.new(config, task, time, args, options).run
     end
 
     private
