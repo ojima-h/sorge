@@ -12,7 +12,7 @@ module Sorge
       end
 
       def run
-        @app.run(@task_name, @time)
+        @app.submit(@task_name, @time).shutdown
       end
     end
   end

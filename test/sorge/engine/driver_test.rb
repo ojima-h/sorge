@@ -28,7 +28,7 @@ module Sorge
 
       def test_fatal_error
         e = assert_raises Exception do
-          app.engine.driver.run('test_failure:fatal', Time.now.to_i)
+          invoke('test_failure:fatal', Time.now.to_i)
         end
         assert_equal 'test fatal', e.message
       end

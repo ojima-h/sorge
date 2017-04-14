@@ -63,6 +63,6 @@ class SorgeTest < Minitest::Test
   end
 
   def invoke(task_name, time = nil)
-    app.run(task_name, time || Time.now.to_i)
+    app.submit(task_name, time || Time.now.to_i).shutdown
   end
 end
