@@ -25,6 +25,14 @@ module Sorge
       Sorge::Server.build(app).run!
     end
 
+    desc 'resume SAVEPOINT_FILE_PATH', 'Resume server from savepoint'
+    app_options
+    def resume(file_path)
+      require 'sorge/server'
+      app.resume(file_path)
+      Sorge::Server.build(app).run!
+    end
+
     desc 'submit', 'Submit a job to server'
     def submit(task, *args)
       require 'sorge/cli/submit'

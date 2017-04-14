@@ -6,7 +6,7 @@ module Sorge
       def initialize(app, task_name, time, args, options)
         @app = app
         @task_name = task_name
-        @time = parse_time(time)
+        @time = Util.parse_time(time)
         @params = Parser.parse(args)
         @options = options
       end

@@ -27,6 +27,12 @@ module Sorge
         @error = error
         @engine.event_queue.kill
       end
+
+      def resume(file_path)
+        hash = @engine.savepoint.read(file_path)
+        @engine.task_states.replace(hash[:states])
+        @engine.event_queue.resume(hash[:queue], hash[:running])
+      end
     end
   end
 end

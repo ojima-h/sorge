@@ -45,7 +45,7 @@ module Sorge
 
         spy = []
         app.engine.event_queue.stub(:submit, ->(*args) { spy << args }) do
-          handler.successed(1, foo: :bar)
+          handler.successed('job_id', 1, foo: :bar)
         end
 
         assert_equal [

@@ -39,6 +39,10 @@ module Sorge
         update if @interval < 0
       end
 
+      def read(file_path)
+        YAML.load_file(file_path)
+      end
+
       private
 
       def data

@@ -26,12 +26,12 @@ module Sorge
         @engine.task_runner.post(to_job(time))
       end
 
-      def failed(_time, _state)
-        @engine.task_runner.complete(@task.name)
+      def failed(job_id, _time, _state)
+        @engine.task_runner.complete(job_id)
       end
 
-      def successed(time, state)
-        @engine.task_runner.complete(@task.name)
+      def successed(job_id, time, state)
+        @engine.task_runner.complete(job_id)
 
         @state[:task] = state
 
@@ -39,6 +39,11 @@ module Sorge
           params = { name: @task.name, time: time, dest: succ.name }
           @engine.event_queue.submit(:notify, params)
         end
+      end
+
+      def self.restore_job(engine, hash)
+        task = engine.application.dsl.task_manager[hash[:name]]
+        task.new(Context[hash[:time], hash[:state]])
       end
 
       private

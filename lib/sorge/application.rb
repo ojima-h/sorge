@@ -12,7 +12,7 @@ module Sorge
       @engine = Engine.new(self)
     end
     attr_reader :config, :dsl, :engine, :config
-    def_delegators :'@engine.driver', :kill, :shutdown, :submit, :run
+    def_delegators :'@engine.driver', :kill, :shutdown, :submit, :run, :resume
 
     private
 

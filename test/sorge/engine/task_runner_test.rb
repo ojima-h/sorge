@@ -29,7 +29,7 @@ module Sorge
           event.wait(1)
         end
 
-        assert_equal [[job]], spy
+        assert_equal job, spy[0][1]
       end
 
       def test_run
@@ -37,10 +37,12 @@ module Sorge
 
         spy = []
         event_queue.stub(:submit, ->(*args) { spy << args }) do
-          task_runner.send(:run, job)
+          task_runner.send(:run, 'job_id', job)
         end
 
-        assert_equal [[:successed, name: 't1', time: 0, state: {}]], spy
+        assert_equal [
+          [:successed, job_id: 'job_id', name: 't1', time: 0, state: {}]
+        ], spy
         assert_equal [spy('t1')], SorgeTest.spy
       end
 
@@ -49,12 +51,12 @@ module Sorge
 
         spy = []
         event_queue.stub(:submit, ->(*args) { spy << args }) do
-          task_runner.send(:run, job)
+          task_runner.send(:run, 'job_id', job)
         end
 
         assert_equal [spy('test_failure:t2')], SorgeTest.spy
         assert_equal [
-          [:failed, name: 'test_failure:t2', time: 0, state: {}]
+          [:failed, job_id: 'job_id', name: 'test_failure:t2', time: 0, state: {}]
         ], spy
       end
     end

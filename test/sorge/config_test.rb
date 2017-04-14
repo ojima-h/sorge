@@ -1,5 +1,4 @@
 require 'test_helper'
-require 'tempfile'
 
 module Sorge
   class ConfigTest < SorgeTest

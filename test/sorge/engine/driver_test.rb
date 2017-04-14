@@ -38,6 +38,48 @@ module Sorge
           app.engine.driver.run('undefined_task', Time.now.to_i)
         end
       end
+
+      def test_resume
+        savepoint = {
+          queue: [
+            [:successed, job_id: '1', name: 'test_namespace:ns:t1', time: 100, state: {}],
+            [:stop],
+            [:run, name: 'test_namespace:t3', time: 100],
+            [:savepoint]
+          ],
+          running: {
+            '1' => { name: 'test_namespace:ns:t1', time: 100, state: {} },
+            '2' => { name: 'test_namespace:ns:t2', time: 100, state: {} }
+          },
+          states: {
+            'foo' => { bar: 1 }
+          }
+        }
+
+        event_queue_spy = []
+        event_queue_stub = ->(*args) { event_queue_spy << args }
+
+        task_runner_spy = []
+        task_runner_stub = ->(job) { task_runner_spy << job }
+
+        Tempfile.open('resume-test.yml') do |f|
+          f.write(YAML.dump(savepoint))
+          f.close
+
+          app.engine.event_queue.stub(:submit, event_queue_stub) do
+            app.engine.task_runner.stub(:post, task_runner_stub) do
+              app.engine.driver.resume(f.path)
+            end
+          end
+        end
+
+        assert_equal [
+          [:successed, job_id: '1', name: 'test_namespace:ns:t1', time: 100, state: {}],
+          [:run, name: 'test_namespace:t3', time: 100]
+        ], event_queue_spy
+
+        assert_equal ['test_namespace:ns:t2'], task_runner_spy.map(&:name)
+      end
     end
   end
 end

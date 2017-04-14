@@ -8,32 +8,23 @@ module Sorge
       end
 
       def test_update
-        stub_q = [[:foo, param: 1], [:foo, param: 2]]
-        stub_p = { 'bar' => [{ name: 'bar', time: 100 }] }
-        stub_st = { 'bar' => { baz: 1 } }
-        app.engine.event_queue.stub(:queue, stub_q) do
-          app.engine.task_runner.stub(:running, stub_p) do
-            app.engine.stub(:task_states, stub_st) do
-              savepoint.update
+        stub_data = {
+          queue: [
+            [:foo, param: 1],
+            [:foo, param: 2]
+          ],
+          running: {
+            'job_id' => { name: 'bar', time: 100 }
+          },
+          states: {
+            'bar' => { baz: 1 }
+          }
+        }
+        app.engine.savepoint.stub(:data, stub_data) do
+          savepoint.update
 
-              assert File.file?(savepoint.latest)
-              assert_equal <<-YAML, File.read(savepoint.latest)
----
-:queue:
-- - :foo
-  - :param: 1
-- - :foo
-  - :param: 2
-:running:
-  bar:
-  - :name: bar
-    :time: 100
-:states:
-  bar:
-    :baz: 1
-              YAML
-            end
-          end
+          assert File.file?(savepoint.latest)
+          assert_equal stub_data, YAML.load_file(savepoint.latest)
         end
       end
 

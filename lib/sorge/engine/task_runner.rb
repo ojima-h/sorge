@@ -4,26 +4,30 @@ module Sorge
       def initialize(engine)
         @engine = engine
         @agent = {}
-        @running = Hash.new { |hash, key| hash[key] = [] }
-        @counter = 0
+        @running = {}
       end
       attr_reader :running
 
       def post(job)
-        @running[job.name] << job.to_h
-        @counter += 1
+        job_id = Util.generate_id
+        @running[job_id] = job.to_h
 
-        async(assign_agent(job.name), job, &method(:run))
+        async(assign_agent(job.name), job_id, job, &method(:run))
       end
 
-      def complete(task_name)
-        @running[task_name].shift
-        @running.delete(task_name) if @running[task_name].empty?
-        @counter -= 1
+      def complete(job_id)
+        @running.delete(job_id)
       end
 
       def empty?
-        @counter.zero?
+        @running.empty?
+      end
+
+      def resume(running, finished)
+        running.each do |job_id, job_hash|
+          next if finished.include?(job_id)
+          post(TaskHandler.restore_job(@engine, job_hash))
+        end
       end
 
       private
@@ -36,10 +40,10 @@ module Sorge
         @agent[task_name] ||= @engine.worker.new_agent
       end
 
-      def run(job)
+      def run(job_id, job)
         result = job.invoke
-        method = result ? :successed : :failed
-        @engine.event_queue.submit(method, **job.to_h)
+        m = result ? :successed : :failed
+        @engine.event_queue.submit(m, job_id: job_id, **job.to_h)
       end
     end
   end

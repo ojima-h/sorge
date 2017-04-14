@@ -3,6 +3,7 @@ ENV['RACK_ENV'] = 'test'
 
 require 'sorge'
 require 'minitest/autorun'
+require 'tempfile'
 
 # # Disable Sorge logger
 # Sorge.logger = Logger.new(nil)

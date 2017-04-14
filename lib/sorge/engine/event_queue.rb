@@ -28,6 +28,15 @@ module Sorge
         @stop_event.set
       end
 
+      def resume(queue, running)
+        @engine.synchronize do
+          @engine.task_runner.resume(running, collect_finished(queue))
+          queue.each do |method, *args|
+            submit(method, *args) unless control_method?(method)
+          end
+        end
+      end
+
       #
       # Handlers
       #
@@ -39,12 +48,12 @@ module Sorge
         TaskHandler.new(@engine, name).run(time)
       end
 
-      def handle_successed(name:, time:, state:)
-        TaskHandler.new(@engine, name).successed(time, state)
+      def handle_successed(name:, time:, state:, job_id:)
+        TaskHandler.new(@engine, name).successed(job_id, time, state)
       end
 
-      def handle_failed(name:, time:, state:)
-        TaskHandler.new(@engine, name).failed(time, state)
+      def handle_failed(name:, time:, state:, job_id:)
+        TaskHandler.new(@engine, name).failed(job_id, time, state)
       end
 
       def handle_savepoint
@@ -64,7 +73,9 @@ module Sorge
 
       private
 
-      SKIP_FINE_SAVEPOINT = %i(savepoint stop).freeze
+      def control_method?(name)
+        %i(savepoint stop).include?(name)
+      end
 
       #
       # Asynchronous Execution
@@ -75,13 +86,21 @@ module Sorge
         method, *args = @engine.synchronize { @queue.shift }
         send(:"#{@handler_prefix}#{method}", *args)
 
-        @engine.savepoint.fine_update \
-          unless SKIP_FINE_SAVEPOINT.include?(method)
+        @engine.savepoint.fine_update if control_method?(method)
       end
 
       def async(*args, &block)
         return if @stop_event.set?
         @engine.worker.post_agent(@agent, *args, &block)
+      end
+
+      def collect_finished(queue)
+        ret = {}
+        queue.each do |method, params|
+          next unless %i(successed failed).include?(method)
+          ret[params[:job_id]] = true
+        end
+        ret
       end
     end
   end

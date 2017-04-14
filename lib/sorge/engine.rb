@@ -19,7 +19,7 @@ module Sorge
                 :savepoint, :task_runner, :worker,
                 :task_states
     def_delegators :@mon, :synchronize
-    def_delegators :@driver, :kill, :shutdown, :run, :submit
+    def_delegators :@driver, :kill, :shutdown, :run, :submit, :resume
   end
 end
 
