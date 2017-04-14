@@ -12,11 +12,13 @@ module Sorge
       'core.app_name' => 'sorge',
       'core.process_dir' => 'var/sorge',
 
-      'server.uri' => 'http://localhost:9900',
-      'server.port' => 9900,
+      'core.savepoint_path' => lambda do |c|
+        File.join(c.get('core.process_dir'), 'savepoints')
+      end,
+      'core.savepoint_interval' => -1,
 
-      'savepoint.interval' => -1,
-      'savepoint.path' => 'var/savepoints'
+      'server.uri' => 'http://localhost:9900',
+      'server.port' => 9900
     }.freeze
 
     def initialize(options = {})
@@ -85,7 +87,7 @@ module Sorge
 
     def assign_defaults
       DEFAULTS.each do |path, value|
-        set_default(path, value)
+        set_default(path, value.is_a?(Proc) ? value.call(self) : value)
       end
     end
   end

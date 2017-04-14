@@ -3,8 +3,8 @@ module Sorge
     class Savepoint
       def initialize(engine)
         @engine = engine
-        @path = engine.config.get('savepoint.path')
-        @interval = engine.config.get('savepoint.interval')
+        @path = engine.config.get('core.savepoint_path')
+        @interval = engine.config.get('core.savepoint_interval')
 
         @latest = nil
         @started = Concurrent::AtomicBoolean.new

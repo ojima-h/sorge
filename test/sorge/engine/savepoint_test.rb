@@ -29,8 +29,8 @@ module Sorge
       end
 
       def test_clean
-        FileUtils.makedirs(app.config.get('savepoint.path'))
-        junk = File.join(app.config.get('savepoint.path'), 'junk')
+        FileUtils.makedirs(app.config.get('core.savepoint_path'))
+        junk = File.join(app.config.get('core.savepoint_path'), 'junk')
         File.write(junk, '')
 
         savepoint.update

@@ -39,5 +39,13 @@ module Sorge
         assert_equal 'dummy', config.get('core.sorgefile')
       end
     end
+
+    def test_default
+      create_tmp_yaml('core' => { 'process_dir' => 'foo' }) do |path|
+        config = Config.new(config_file: path)
+
+        assert_equal 'foo/savepoints', config.get('core.savepoint_path')
+      end
+    end
   end
 end
