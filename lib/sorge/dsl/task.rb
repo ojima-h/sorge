@@ -13,16 +13,12 @@ module Sorge
       end
 
       def setup
-        call_action(:setup)
-      end
-
-      def execute
-        call_action(:action)
+        call_hook(:setup)
       end
 
       def invoke
         Sorge.logger.info("start: #{name} (#{time})")
-        execute
+        run
         successed
         true
       rescue => error

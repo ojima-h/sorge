@@ -1,5 +1,5 @@
 global do
-  action do
+  def run
     if defined?(SorgeTest)
       SorgeTest.spy(task.name)
       SorgeTest.hook[task.name].call(self) if SorgeTest.hook.include?(task.name)
@@ -51,7 +51,10 @@ namespace :test_failure do
 
   task :t2 do
     upstream :t1
-    action { raise 'test' }
+    def run
+      super
+      raise 'test'
+    end
   end
   task(:t3) { upstream :t1 }
 
@@ -68,7 +71,10 @@ namespace :test_failure do
   end
 
   task :fatal do
-    action { raise Exception, 'test fatal' }
+    def run
+      super
+      raise Exception, 'test fatal'
+    end
   end
 end
 

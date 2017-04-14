@@ -38,6 +38,10 @@ module Sorge
         @time ||= Time.at(context.time)
       end
 
+      def run
+        nil
+      end
+
       def to_s
         task.name
       end
