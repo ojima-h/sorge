@@ -2,6 +2,7 @@ require 'fileutils'
 require 'forwardable'
 require 'json'
 require 'monitor'
+require 'socket'
 require 'yaml'
 
 require 'concurrent'
