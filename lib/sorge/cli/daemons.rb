@@ -6,20 +6,23 @@ module Sorge
       @app = app
       @options = options
 
-      @daemon_dir = @app.config.get('core.process_dir')
+      @process_dir = @app.config.get('core.process_dir')
+    end
+
+    def app_group
+      @app_group ||= ::Daemons::ApplicationGroup.new(@app.name, daemon_options)
+                                                .tap(&:setup)
     end
 
     def start
-      daemonize if @options['daemonize']
+      abort 'sorge server is already running' if app_group.running?
 
+      daemonize
       resume(@options['savepoint']) if @options['savepoint']
-
       @app.server.start
     end
 
     def stop
-      app_group = ::Daemons::ApplicationGroup.new(@app.name, daemon_options)
-      app_group.setup
       abort 'no process found' if app_group.applications.empty?
       app_group.stop_all
     end
@@ -27,14 +30,15 @@ module Sorge
     private
 
     def daemon_options
-      { app_name: @app.name,
+      { ontop: !@options['daemonize'],
+        app_name: @app.name,
         dir_mode: :normal,
-        dir: @daemon_dir,
+        dir: @process_dir,
         log_output: true }
     end
 
     def daemonize
-      FileUtils.makedirs(@daemon_dir)
+      FileUtils.makedirs(@process_dir)
       pwd = Dir.pwd
       ::Daemons.daemonize(daemon_options)
       Dir.chdir pwd
