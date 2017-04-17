@@ -14,7 +14,7 @@ module Sorge
 
       def invoke
         invoke_before
-        run
+        run unless dryrun? && !support_dryrun
         invoke_successed
         true
       rescue => error

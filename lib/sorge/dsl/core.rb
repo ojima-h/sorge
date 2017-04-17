@@ -5,12 +5,15 @@ module Sorge
       extend Forwardable
 
       class_methods do
+        extend Forwardable
+
         def init(dsl, name)
           @dsl = dsl
           @name = name
           @initialized = true
         end
         attr_reader :name
+        def_delegators :'@dsl.application', :dryrun?, :env
 
         def initialized?
           defined?(@initialized) && @initialized
@@ -58,7 +61,7 @@ module Sorge
       def task
         self.class
       end
-      def_delegators :task, :name
+      def_delegators :task, :name, :dryrun?, :env
 
       def logger
         Sorge.logger

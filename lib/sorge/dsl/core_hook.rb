@@ -42,6 +42,7 @@ module Sorge
       # @param tag [Symbol] hook name
       # @param args [Array] arguments
       def call_hook(tag, *args)
+        return if dryrun? && !support_dryrun
         self.class.each_hook(tag) do |block|
           instance_exec(*args, &block)
         end

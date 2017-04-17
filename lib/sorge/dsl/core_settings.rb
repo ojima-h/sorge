@@ -17,18 +17,24 @@ module Sorge
         #     end
         #
         # Settings are defiend as an intance methods of the task.
-        def set(name, value = nil, &block)
+        def set(name, *args, &block)
           var = :"@#{name}"
 
           define_method(name) do
             unless instance_variable_defined?(var)
-              val = Util.assume_proc(value || block || true)
+              val = Util.assume_proc(args.fetch(0, block || true))
               instance_variable_set(var, instance_exec(&val))
             end
             instance_variable_get(var)
           end
         end
+
+        def support_dryrun(val = true)
+          set(:support_dryrun, val)
+        end
       end
+
+      set :support_dryrun, false
     end
   end
 end

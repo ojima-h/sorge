@@ -11,8 +11,14 @@ module Sorge
       option :sorgefile, aliases: '-f', desc: 'Sorgefile path'
     end
 
+    def self.local_options
+      option :dryrun, aliases: '-n', type: :boolean, default: false,
+                      desc: 'dryrun'
+    end
+
     desc 'run TASK TIME [KEY=VAL]...', 'Run task'
     app_options
+    local_options
     def _run(task, time, *args)
       require 'sorge/cli/run'
       Run.new(app, task, time, args, options).run
@@ -21,6 +27,7 @@ module Sorge
 
     desc 'exec TASK TIME [KEY=VAL]...', 'Execute single task'
     app_options
+    local_options
     def exec(task, time, *args)
       require 'sorge/cli/run'
       Run.new(app, task, time, args, options).exec
@@ -28,6 +35,7 @@ module Sorge
 
     desc 'resume SAVEPOINT_FILE_PATH', 'Resume from savepoint'
     app_options
+    local_options
     def resume(file_path)
       app.resume(file_path).shutdown
     end

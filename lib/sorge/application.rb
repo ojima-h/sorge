@@ -3,6 +3,7 @@ module Sorge
     extend Forwardable
 
     def initialize(options = {})
+      @options = options
       @config = ConfigLoader.new(options).load
       @env = options[:environment]
       @exit_on_terminate = options.fetch(:exit_on_terminate, true)
@@ -29,6 +30,10 @@ module Sorge
 
     def name
       config.app_name
+    end
+
+    def dryrun?
+      @options[:dryrun]
     end
 
     private
