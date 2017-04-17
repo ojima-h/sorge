@@ -1,12 +1,12 @@
 module Sorge
   class Server
     def self.client(config)
-      JsonRPCCLient.new(config.get('core.socket_file'))
+      JsonRPCCLient.new(config.socket_file)
     end
 
     def initialize(app)
       @app = app
-      @socket_file = app.config.get('core.socket_file')
+      @socket_file = app.config.socket_file
       @client = nil
       @running = false
     end

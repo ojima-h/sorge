@@ -50,7 +50,7 @@ class SorgeTest < Minitest::Test
   end
 
   def clear_savepoint
-    f = @app.config.get('core.savepoint_path')
+    f = @app.config.savepoint_path
     FileUtils.rm_r(f) if File.exist?(f)
   rescue
     nil # this may fail if a new savepoint is created while cleaning.

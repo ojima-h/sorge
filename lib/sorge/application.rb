@@ -3,7 +3,8 @@ module Sorge
     extend Forwardable
 
     def initialize(options = {})
-      @config = options[:config] || Config.new(options)
+      @config = ConfigLoader.new(options).load
+      @env = options[:environment]
       @exit_on_terminate = options.fetch(:exit_on_terminate, true)
 
       @dsl = DSL.new(self)
@@ -13,7 +14,7 @@ module Sorge
       @engine = Engine.new(self)
       @server = Server.new(self)
     end
-    attr_reader :config, :dsl, :engine, :config, :server
+    attr_reader :config, :env, :dsl, :engine, :config, :server
     def_delegators :'@engine.driver', :kill, :shutdown, :submit, :run, :resume
 
     def shutdown
@@ -27,13 +28,13 @@ module Sorge
     end
 
     def name
-      @name ||= @config.get('core.app_name')
+      config.app_name
     end
 
     private
 
     def find_sorgefile
-      config.get('core.sorgefile').tap { |f| return f if f }
+      return config.sorgefile if config.sorgefile
 
       %w(Sorgefile Sorgefile.rb).each do |filename|
         return filename if File.file?(filename)

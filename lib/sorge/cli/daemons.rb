@@ -6,7 +6,7 @@ module Sorge
       @app = app
       @options = options
 
-      @process_dir = @app.config.get('core.process_dir')
+      @process_dir = @config.process_dir
     end
 
     def app_group

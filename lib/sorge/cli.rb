@@ -5,12 +5,13 @@ require 'sorge'
 module Sorge
   class CLI < Thor
     class_option :config_file, aliases: '-C', desc: 'config file path'
+    class_option :environment, aliases: '-e', desc: 'environment'
 
     def self.app_options
       option :sorgefile, aliases: '-f', desc: 'Sorgefile path'
     end
 
-    desc 'run TASK [KEY=VAL]...', 'Run task'
+    desc 'run TASK TIME [KEY=VAL]...', 'Run task'
     app_options
     def _run(task, time, *args)
       require 'sorge/cli/run'
