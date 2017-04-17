@@ -1,5 +1,7 @@
 module Sorge
   class Server
+    class Error < StandardError; end
+
     def self.client(config)
       JsonRPCCLient.new(config.socket_file)
     end
@@ -71,7 +73,7 @@ module Sorge
         result = dispatch(JSON.parse(request))
         JSON.dump(result: result)
       rescue => error
-        JSON.dump(process_error(error))
+        JSON.dump(error: process_error(error))
       end
 
       def dispatch(request)
@@ -90,14 +92,12 @@ module Sorge
         Sorge.logger.error('server error:')
         Sorge.logger.error(Util.format_error_info(error))
 
-        { message: error.class + ': ' + error.message,
+        { message: error.class.to_s + ': ' + error.message,
           backtrace: error.backtrace }
       end
     end
 
     class JsonRPCCLient
-      class Error < StandardError; end
-
       def initialize(socket_file)
         @socket_file = socket_file
       end

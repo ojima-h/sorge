@@ -8,6 +8,7 @@ module Sorge
       attr_reader :engine
 
       def submit(name, time)
+        @engine.application.dsl.task_manager.validate_name(name)
         @engine.event_queue.submit(:run, name: name, time: time)
         self
       end

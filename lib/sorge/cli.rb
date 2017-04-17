@@ -74,7 +74,7 @@ module Sorge
     end
 
     def config
-      @config ||= Config.new(sorge_options)
+      @config ||= ConfigLoader.new(sorge_options).load
     end
   end
 end

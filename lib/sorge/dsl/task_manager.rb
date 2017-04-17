@@ -24,6 +24,7 @@ module Sorge
         end
         @tasks[scope.join(name)] || self[name, scope.parent]
       end
+      alias validate_name []
     end
   end
 end
