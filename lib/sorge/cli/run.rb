@@ -14,6 +14,10 @@ module Sorge
       def run
         @app.submit(@task_name, @time).shutdown
       end
+
+      def exec
+        Engine::TaskHandler.new(@app.engine, @task_name).to_job(@time).invoke
+      end
     end
   end
 end

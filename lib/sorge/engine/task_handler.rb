@@ -46,11 +46,11 @@ module Sorge
         task.new(Context[hash[:time], hash[:state]])
       end
 
-      private
-
       def to_job(time)
         @task.new(Context[time, build_task_state])
       end
+
+      private
 
       def build_task_state
         return {} unless @state.include?(:task)

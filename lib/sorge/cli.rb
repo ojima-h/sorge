@@ -19,6 +19,13 @@ module Sorge
     end
     map run: :_run
 
+    desc 'exec TASK TIME [KEY=VAL]...', 'Execute single task'
+    app_options
+    def exec(task, time, *args)
+      require 'sorge/cli/run'
+      Run.new(app, task, time, args, options).exec
+    end
+
     desc 'resume SAVEPOINT_FILE_PATH', 'Resume from savepoint'
     app_options
     def resume(file_path)
