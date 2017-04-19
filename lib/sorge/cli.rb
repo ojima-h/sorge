@@ -19,7 +19,7 @@ module Sorge
     desc 'run TASK TIME [KEY=VAL]...', 'Run task'
     app_options
     local_options
-    def _run(task, time, *args)
+    def _run(task, time = Time.now.to_i, *args)
       require 'sorge/cli/run'
       Run.new(app, task, time, args, options).run
     end
@@ -28,7 +28,7 @@ module Sorge
     desc 'exec TASK TIME [KEY=VAL]...', 'Execute single task'
     app_options
     local_options
-    def exec(task, time, *args)
+    def exec(task, time = Time.now.to_i, *args)
       require 'sorge/cli/run'
       Run.new(app, task, time, args, options).exec
     end
