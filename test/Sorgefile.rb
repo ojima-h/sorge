@@ -1,7 +1,7 @@
 global do
   def run
     if defined?(SorgeTest)
-      SorgeTest.spy(task.name)
+      SorgeTest.spy(name: task.name, time: time)
       SorgeTest.hook[task.name].call(self) if SorgeTest.hook.include?(task.name)
     else
       puts self
@@ -105,32 +105,47 @@ end
 
 namespace :test_hook do
   mixin :m1 do
-    successed { SorgeTest.spy :successed_in_mixin }
+    successed { SorgeTest.spy(name: :successed_in_mixin) }
   end
 
   task :t1 do
     use :m1
 
-    before { SorgeTest.spy :before }
+    before { SorgeTest.spy(name: :before) }
 
     def run
-      SorgeTest.spy :run
+      SorgeTest.spy(name: :run)
     end
 
-    successed { SorgeTest.spy :successed }
-    failed { |error| SorgeTest.spy :failed, error }
-    after { SorgeTest.spy :after }
+    successed { SorgeTest.spy(name: :successed) }
+    failed { |error| SorgeTest.spy(name: :failed, error: error) }
+    after { SorgeTest.spy(name: :after) }
   end
 
   task :t2 do
-    before { SorgeTest.spy :before }
+    before { SorgeTest.spy(name: :before) }
 
     def run
       raise 'test'
     end
 
-    successed { SorgeTest.spy :successed }
-    failed { |error| SorgeTest.spy :failed, error: error }
-    after { SorgeTest.spy :after }
+    successed { SorgeTest.spy(name: :successed) }
+    failed { |error| SorgeTest.spy(name: :failed, error: error) }
+    after { SorgeTest.spy(name: :after) }
+  end
+end
+
+namespace :test_emit do
+  task :t1 do
+    def run
+      super
+      emit 100
+      emit 200
+      emit 300
+    end
+  end
+
+  task :t2 do
+    upstream :t1
   end
 end

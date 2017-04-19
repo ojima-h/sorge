@@ -35,6 +35,10 @@ module Sorge
 
         @state[:task] = state
 
+        Util.assume_array(time).each(&method(:broadcast))
+      end
+
+      def broadcast(time)
         @task.successors.each do |succ|
           params = { name: @task.name, time: time, dest: succ.name }
           @engine.event_queue.submit(:notify, params)

@@ -31,11 +31,14 @@ module Sorge
           sleep 0.1
         end
 
-        assert_equal 4, SorgeTest.spy.length
-        assert_includes SorgeTest.spy, spy('test_failure:t1')
-        assert_includes SorgeTest.spy, spy('test_failure:t2')
-        assert_includes SorgeTest.spy, spy('test_failure:t3')
-        assert_includes SorgeTest.spy, spy('test_failure:t5')
+        ns = SorgeTest.spy.map(&:name)
+        assert_equal 4, ns.length
+        assert_equal [
+          'test_failure:t1',
+          'test_failure:t2',
+          'test_failure:t3',
+          'test_failure:t5'
+        ], ns.sort
       end
     end
   end

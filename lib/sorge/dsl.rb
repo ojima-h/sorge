@@ -35,6 +35,7 @@ end
 require 'sorge/dsl/concern'
 
 require 'sorge/dsl/core'
+require 'sorge/dsl/core_emit'
 require 'sorge/dsl/core_hook'
 require 'sorge/dsl/core_settings'
 require 'sorge/dsl/core_upstreams'

@@ -14,16 +14,10 @@ Concurrent.use_stdlib_logger(Logger::DEBUG)
 class SorgeTest < Minitest::Test
   attr_reader :app
 
-  Spy = Struct.new(:name, :params)
-
-  def self.spy(name = nil, params = {})
+  def self.spy(params = {})
     @spy ||= []
-    return @spy if name.nil?
-    @spy << Spy[name, params]
-  end
-
-  def spy(name, params = {})
-    Spy[name, params]
+    return @spy if params.empty?
+    @spy << OpenStruct.new(params)
   end
 
   def self.hook(name = nil, &block)

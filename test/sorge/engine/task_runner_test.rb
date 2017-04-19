@@ -43,7 +43,7 @@ module Sorge
         assert_equal [
           [:successed, job_id: 'job_id', name: 't1', time: 0, state: {}]
         ], spy
-        assert_equal [spy('t1')], SorgeTest.spy
+        assert_equal ['t1'], SorgeTest.spy.map(&:name)
       end
 
       def test_run_failure
@@ -54,7 +54,7 @@ module Sorge
           task_runner.send(:run, 'job_id', job)
         end
 
-        assert_equal [spy('test_failure:t2')], SorgeTest.spy
+        assert_equal ['test_failure:t2'], SorgeTest.spy.map(&:name)
         assert_equal [
           [:failed, job_id: 'job_id', name: 'test_failure:t2', time: 0, state: {}]
         ], spy
@@ -72,7 +72,7 @@ module Sorge
         job.invoke
         assert_equal [:before, :failed, :after], SorgeTest.spy.map(&:name)
 
-        e = SorgeTest.spy.find { |s| s.name == :failed }.params[:error]
+        e = SorgeTest.spy.find { |s| s.name == :failed }.error
         assert_equal 'test', e.message
       end
     end

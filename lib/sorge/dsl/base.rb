@@ -12,6 +12,7 @@ module Sorge
       end
 
       include Core
+      include CoreEmit
       include CoreHook
       include CoreSettings
       include CoreUpstreams

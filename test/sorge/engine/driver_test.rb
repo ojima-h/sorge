@@ -39,6 +39,23 @@ module Sorge
         end
       end
 
+      def test_emit
+        invoke('test_emit:t1', 0)
+
+        assert_equal [
+          'test_emit:t1',
+          'test_emit:t2',
+          'test_emit:t2',
+          'test_emit:t2'
+        ], SorgeTest.spy.map(&:name)
+        assert_equal [
+          0,
+          100,
+          200,
+          300
+        ], SorgeTest.spy.map { |x| x.time.to_i }
+      end
+
       def test_restore
         savepoint = {
           queue: [
