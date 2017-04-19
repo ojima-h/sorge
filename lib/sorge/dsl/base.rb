@@ -12,10 +12,10 @@ module Sorge
       end
 
       include Core
-      include CoreInclude
       include CoreHook
       include CoreSettings
       include CoreUpstreams
+      include CoreUse
       include CoreWindow
     end
   end

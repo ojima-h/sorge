@@ -35,7 +35,7 @@ namespace :test_namespace do
   end
 
   task :t3 do
-    include 'ns:m1'
+    use 'ns:m1'
 
     upstream 'ns:t2'
   end
@@ -109,7 +109,7 @@ namespace :test_hook do
   end
 
   task :t1 do
-    include :m1
+    use :m1
 
     before { SorgeTest.spy :before }
 
