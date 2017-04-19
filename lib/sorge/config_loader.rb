@@ -30,7 +30,7 @@ module Sorge
       @config.app_name ||= 'sorge'
       assign_default_process_dir
       assign_default_savepoint
-      assign_default_socket_file
+      assign_default_server
     end
 
     def assign_default_process_dir
@@ -48,9 +48,9 @@ module Sorge
       @config.savepoint_interval ||= -1 # fine savepoints
     end
 
-    def assign_default_socket_file
-      @config.socket_file ||=
-        File.join(@config.process_dir, @config.app_name + '.sock')
+    def assign_default_server
+      @config.server_rpc_port ||= 39410
+      @config.server_rpc_retry ||= 3
     end
 
     def merge_options

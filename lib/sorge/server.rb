@@ -3,25 +3,24 @@ module Sorge
     class Error < StandardError; end
 
     def self.client(config)
-      JsonRPCCLient.new(config.socket_file)
+      JsonRPCCLient.new(config)
     end
 
     def initialize(app)
       @app = app
-      @socket_file = app.config.socket_file
       @client = nil
       @running = false
     end
 
     def start
       @running = true
-      JsonRPCServer.new(@socket_file, self).start
+      JsonRPCServer.new(@app.config, self).start
     ensure
       @running = false
     end
 
     def call(method, params = {})
-      JsonRPCCLient.new(@socket_file).call(method, params)
+      JsonRPCCLient.new(@app.config).call(method, params)
     end
 
     def stop
@@ -39,22 +38,24 @@ module Sorge
     # Backend
     #
     class JsonRPCServer
-      def initialize(socket_file, server)
-        @socket_file = socket_file
+      def initialize(config, server)
+        @port = config.server_rpc_port
         @server = server
         @stopped = false
       end
 
       def start
         Sorge.logger.info('Start sorge server')
-        Sorge.logger.info("pid: #{Process.pid}, socket: #{@socket_file}")
-        FileUtils.makedirs(File.dirname(@socket_file))
+        Sorge.logger.info("pid: #{Process.pid}, port: #{@port}")
         catch :stop do
-          Socket.unix_server_loop(@socket_file) do |socket, _|
+          ServerSocket.tcp_server_loop(@port) do |socket, _|
             process_connection(socket)
             break if @stopped
           end
         end
+      rescue Exception => exception
+        Sorge.logger.error(Util.format_error_info(exception))
+        raise
       end
 
       private
@@ -98,8 +99,9 @@ module Sorge
     end
 
     class JsonRPCCLient
-      def initialize(socket_file)
-        @socket_file = socket_file
+      def initialize(config)
+        @port = config.server_rpc_port
+        @retry_count = config.server_rpc_retry
       end
 
       def call(method, params = {})
@@ -116,18 +118,28 @@ module Sorge
       end
 
       def send_request(body)
-        wait_server
-        Socket.unix(@socket_file) do |socket|
+        connect do |socket|
           socket.puts(body)
           socket.flush
           socket.gets
         end
       end
 
-      def wait_server
-        10.times do |i|
-          break if File.exist?(@socket_file)
-          sleep 0.01 * 2**i
+      def connect
+        socket = with_retry(@retry_count) { TCPSocket.new(@host, @port) }
+        yield socket
+      ensure
+        socket.close
+      end
+
+      def with_retry(retry_count)
+        i = 0
+        begin
+          yield
+        rescue
+          raise if (i += 1) > retry_count
+          sleep 1
+          retry
         end
       end
 

@@ -25,3 +25,6 @@ module Sorge
     attr_writer :logger
   end
 end
+
+# for jruby compatibility
+ServerSocket = Socket unless defined?(ServerSocket)
