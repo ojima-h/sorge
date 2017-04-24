@@ -1,42 +1,28 @@
-module Sorge
-  class Plugin
-    class Command < Base
-      register :command
+mixin 'plugin:command' do
+  set :command, nil
+  set :script, nil
 
-      def setup
-        DSL.instance.define('plugin:command', CommandMixin)
-      end
+  def run
+    cmd = Sorge::Util.assume_array(command)
+    ret = system(*cmd)
 
-      module CommandMixin
-        include DSL::Mixin
+    return if ret
 
-        set :command, nil
-        set :script, nil
+    status = $CHILD_STATUS
+    status_code = status ? status.exitstatus : 1
+    raise "Command faild with status (#{status_code}): " \
+          "[#{show_command(cmd)}]"
+  end
 
-        def run
-          cmd = Util.assume_array(command)
-          ret = system(*cmd)
+  def show_command(cmd)
+    cmd = cmd.dup
 
-          return if ret
-
-          status = $CHILD_STATUS
-          status_code = status ? status.exitstatus : 1
-          raise "Command faild with status (#{status_code}): " \
-                "[#{show_command(cmd)}]"
-        end
-
-        def show_command(cmd)
-          cmd = cmd.dup
-
-          if cmd.first.is_a?(Hash)
-            env = cmd.first
-            env = env.map { |name, value| "#{name}=#{value}" }.join ' '
-            cmd[0] = env
-          end
-
-          cmd.join ' '
-        end
-      end
+    if cmd.first.is_a?(Hash)
+      env = cmd.first
+      env = env.map { |name, value| "#{name}=#{value}" }.join ' '
+      cmd[0] = env
     end
+
+    cmd.join ' '
   end
 end

@@ -5,10 +5,10 @@ module Sorge
         @plugins ||= OpenStruct.new
       end
 
-      def build(app)
+      def build(application)
         ret = OpenStruct.new
         plugins.each_pair do |name, klass|
-          ret[name] = klass.new(app)
+          ret[name] = klass.new(application).tap(&:setup)
         end
         ret
       end
@@ -16,20 +16,13 @@ module Sorge
 
     class Base
       def self.register(name)
-        name = name.to_sym
-
-        Plugin.plugins[name] = self
-
-        if (app = DSL.current)
-          app.plugins[name] ||= new(app)
-        end
+        Plugin.plugins[name.to_sym] = self
       end
 
-      def initialize(app)
-        @app = app
-        setup
+      def initialize(application)
+        @application = application
       end
-      attr_reader :app
+      attr_reader :application
 
       def setup; end
     end

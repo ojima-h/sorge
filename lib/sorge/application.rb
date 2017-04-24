@@ -7,11 +7,11 @@ module Sorge
       @config = ConfigLoader.new(options).load
       @env = options[:environment]
 
-      @engine = Engine.new(self)
-      @server = Server.new(self)
+      load_sorgefile
       @plugins = Plugin.build(self)
 
-      load_sorgefile
+      @engine = Engine.new(self)
+      @server = Server.new(self)
     end
     attr_reader :config, :env, :engine, :config, :server, :plugins
     def_delegators :'@engine.driver', :kill, :shutdown, :submit, :run, :resume
