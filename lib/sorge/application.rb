@@ -7,14 +7,13 @@ module Sorge
       @config = ConfigLoader.new(options).load
       @env = options[:environment]
 
-      @dsl = DSL.new(self)
       @engine = Engine.new(self)
       @server = Server.new(self)
       @plugins = Plugin.build(self)
 
       load_sorgefile
     end
-    attr_reader :config, :env, :dsl, :engine, :config, :server, :plugins
+    attr_reader :config, :env, :engine, :config, :server, :plugins
     def_delegators :'@engine.driver', :kill, :shutdown, :submit, :run, :resume
 
     def shutdown
@@ -39,7 +38,7 @@ module Sorge
 
     def load_sorgefile
       sorgefile = find_sorgefile
-      @dsl.load_sorgefile(sorgefile) if sorgefile
+      require(sorgefile) if sorgefile
     end
 
     def find_sorgefile
@@ -54,7 +53,6 @@ module Sorge
   end
 end
 
-require 'sorge/dsl'
 require 'sorge/engine'
 require 'sorge/plugin'
 require 'sorge/server'

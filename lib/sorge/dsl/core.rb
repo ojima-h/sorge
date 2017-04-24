@@ -13,7 +13,6 @@ module Sorge
           @initialized = true
         end
         attr_reader :name
-        def_delegators :'@dsl.application', :dryrun?, :env
 
         def initialized?
           defined?(@initialized) && @initialized
@@ -34,7 +33,8 @@ module Sorge
         @context = context
       end
       attr_reader :context
-      def_delegators :context, :state, :job
+      def_delegators :context, :app, :state, :job
+      def_delegators :app, :env, :dryrun?
       def_delegators :job, :stash
 
       def time
@@ -61,7 +61,7 @@ module Sorge
       def task
         self.class
       end
-      def_delegators :task, :name, :dryrun?, :env
+      def_delegators :task, :name
 
       def logger
         Sorge.logger

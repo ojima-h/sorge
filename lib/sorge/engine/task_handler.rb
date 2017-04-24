@@ -3,14 +3,14 @@ module Sorge
     class TaskHandler
       extend Forwardable
 
-      Context = Struct.new(:time, :state)
+      Context = Struct.new(:app, :time, :state)
 
       # TODO: DELETE
       Context.send(:define_method, :job) { Struct.new(:stash, :params)[{}, {}] }
 
       def initialize(engine, task_name)
         @engine = engine
-        @task = @engine.application.dsl.task_manager[task_name]
+        @task = DSL.instance[task_name]
         @state = @engine.task_states[task_name]
       end
 
@@ -46,12 +46,12 @@ module Sorge
       end
 
       def self.restore_job(engine, hash)
-        task = engine.application.dsl.task_manager[hash[:name]]
-        task.new(Context[hash[:time], hash[:state]])
+        task = DSL.instance[hash[:name]]
+        task.new(Context[engine.application, hash[:time], hash[:state]])
       end
 
       def to_job(time)
-        @task.new(Context[time, build_task_state])
+        @task.new(Context[@engine.application, time, build_task_state])
       end
 
       private

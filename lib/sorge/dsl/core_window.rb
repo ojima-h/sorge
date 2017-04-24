@@ -4,7 +4,7 @@ module Sorge
       include Core
 
       class_methods do
-        def init(name, dsl)
+        def init(dsl, name)
           super
           @window_spec = nil
           @window_handler = nil

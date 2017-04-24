@@ -53,7 +53,7 @@ class SorgeTest < Minitest::Test
   # Helpers
   #
   def tasks
-    app.dsl.task_manager
+    Sorge::DSL.instance.task_manager
   end
 
   def invoke(task_name, time = nil)

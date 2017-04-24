@@ -4,7 +4,7 @@ module Sorge
       register :command
 
       def setup
-        app.dsl.define('plugin:command', CommandMixin)
+        DSL.instance.define('plugin:command', CommandMixin)
       end
 
       module CommandMixin

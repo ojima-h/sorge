@@ -29,7 +29,7 @@ module Sorge
           handler.notify('test_window:t2', t + 3)
         end
 
-        ctx = TaskHandler::Context[t, { foo: :bar }]
+        ctx = TaskHandler::Context[app, t, { foo: :bar }]
 
         j = spy[0][0]
         assert_equal 'test_window:t3', j.name

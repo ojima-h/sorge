@@ -4,7 +4,7 @@ module Sorge
   class Engine
     class TaskRunnerTest < SorgeTest
       def context(time, state = {})
-        TaskHandler::Context[time, state]
+        TaskHandler::Context[app, time, state]
       end
 
       def task_runner
@@ -61,14 +61,14 @@ module Sorge
       end
 
       def test_hook
-        job = app.dsl.task_manager['test_hook:t1'].new(context(0, {}))
+        job = DSL.instance['test_hook:t1'].new(context(0, {}))
         job.invoke
         assert_equal [:before, :run, :successed_in_mixin, :successed, :after],
                      SorgeTest.spy.map(&:name)
       end
 
       def test_hook2
-        job = app.dsl.task_manager['test_hook:t2'].new(context(0, {}))
+        job = DSL.instance['test_hook:t2'].new(context(0, {}))
         job.invoke
         assert_equal [:before, :failed, :after], SorgeTest.spy.map(&:name)
 

@@ -4,11 +4,13 @@ require 'forwardable'
 require 'json'
 require 'monitor'
 require 'ostruct'
+require 'singleton'
 require 'socket'
 require 'yaml'
 
 require 'concurrent'
 
+require 'sorge/dsl'
 require 'sorge/application'
 require 'sorge/config_loader'
 require 'sorge/util'

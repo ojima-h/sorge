@@ -2,35 +2,15 @@ module Sorge
   class DSL
     extend MonitorMixin
     extend Forwardable
+    include Singleton
 
-    class << self
-      attr_accessor :current
-    end
-
-    def initialize(application)
-      @application = application
+    def initialize
       @global = Base.create(self, :global)
       @task_manager = TaskManager.new(self)
       @task_graph = TaskGraph.new(self)
     end
-    attr_reader :application, :global, :task_manager, :task_graph
-    def_delegators :@task_manager, :define
-
-    def load_sorgefile(file_path)
-      with_current { load(file_path) }
-    end
-
-    def with_current
-      DSL.synchronize do
-        begin
-          orig = DSL.current
-          DSL.current = self
-          yield
-        ensure
-          DSL.current = orig
-        end
-      end
-    end
+    attr_reader :global, :task_manager, :task_graph
+    def_delegators :@task_manager, :define, :[]
   end
 end
 
