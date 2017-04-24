@@ -28,13 +28,7 @@ module Sorge
             instance_variable_get(var)
           end
         end
-
-        def support_dryrun(val = true)
-          set(:support_dryrun, val)
-        end
       end
-
-      set :support_dryrun, false
     end
   end
 end

@@ -14,7 +14,7 @@ module Sorge
 
       def invoke
         invoke_before
-        run unless dryrun? && !support_dryrun
+        invoke_run
         invoke_successed
         true
       rescue => error
@@ -27,6 +27,14 @@ module Sorge
       def invoke_before
         Sorge.logger.info("start: #{name} (#{time})")
         call_hook(:before)
+      end
+
+      def invoke_run
+        if dryrun?
+          dryrun if respond_to?(:dryrun)
+        else
+          run
+        end
       end
 
       def invoke_successed
