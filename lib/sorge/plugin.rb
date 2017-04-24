@@ -1,28 +1,38 @@
 module Sorge
-  def self.plugins
-    @plugins ||= OpenStruct.new
-  end
-
   class Plugin
-    def self.register(name)
-      Sorge.plugins[name.to_sym] = self
-    end
-
-    def self.build(app)
-      plugins = OpenStruct.new
-      Sorge.plugins.each_pair do |name, klass|
-        plugins[name] = klass.new(app)
+    class << self
+      def plugins
+        @plugins ||= OpenStruct.new
       end
-      plugins
+
+      def build(app)
+        ret = OpenStruct.new
+        plugins.each_pair do |name, klass|
+          ret[name] = klass.new(app)
+        end
+        ret
+      end
     end
 
-    def initialize(app)
-      @app = app
-      setup
-    end
-    attr_reader :app
+    class Base
+      def self.register(name)
+        name = name.to_sym
 
-    def setup; end
+        Plugin.plugins[name] = self
+
+        if (app = DSL.current)
+          app.plugins[name] ||= new(app)
+        end
+      end
+
+      def initialize(app)
+        @app = app
+        setup
+      end
+      attr_reader :app
+
+      def setup; end
+    end
   end
 end
 

@@ -1,6 +1,6 @@
 module Sorge
   class Plugin
-    class Command < Plugin
+    class Command < Base
       register :command
 
       def setup
