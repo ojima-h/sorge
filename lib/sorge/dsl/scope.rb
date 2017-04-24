@@ -8,10 +8,10 @@ module Sorge
 
       # Evaluate block in given namespace
       def self.with(name)
-        @current = @current.conj(name)
+        @current = current.conj(name)
         yield
       ensure
-        @current = @current.tail
+        @current = current.tail
       end
 
       alias name head
