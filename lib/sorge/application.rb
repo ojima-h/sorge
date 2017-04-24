@@ -45,7 +45,7 @@ module Sorge
       return config.sorgefile if config.sorgefile
 
       %w(Sorgefile Sorgefile.rb).each do |filename|
-        return filename if File.file?(filename)
+        return File.expand_path(filename) if File.file?(filename)
       end
 
       nil
