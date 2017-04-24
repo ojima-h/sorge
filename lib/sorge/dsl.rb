@@ -1,6 +1,7 @@
 module Sorge
   class DSL
     extend MonitorMixin
+    extend Forwardable
 
     class << self
       attr_accessor :current
@@ -13,6 +14,7 @@ module Sorge
       @task_graph = TaskGraph.new(self)
     end
     attr_reader :application, :global, :task_manager, :task_graph
+    def_delegators :@task_manager, :define
 
     def load_sorgefile(file_path)
       with_current { load(file_path) }

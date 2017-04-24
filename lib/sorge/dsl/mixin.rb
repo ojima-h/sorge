@@ -9,7 +9,7 @@ module Sorge
     module Mixin
       include Base
 
-      class << self
+      class_methods do
         # Create new Mixin object.
         # @param task [Rake::Task] owner task
         def create(dsl, name)

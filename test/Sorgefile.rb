@@ -149,3 +149,11 @@ namespace :test_emit do
     upstream :t1
   end
 end
+
+namespace :test_plugin do
+  task :t1 do
+    use 'plugin:command'
+
+    set :command, ['ls', '.']
+  end
+end
