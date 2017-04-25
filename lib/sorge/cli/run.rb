@@ -9,6 +9,8 @@ module Sorge
         @time = Util.parse_time(time)
         @params = Parser.parse(args)
         @options = options
+
+        @app.resume(@options['savepoint']) if @options['savepoint']
       end
 
       def run

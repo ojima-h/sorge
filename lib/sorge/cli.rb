@@ -9,6 +9,9 @@ module Sorge
 
     def self.app_options
       option :sorgefile, aliases: '-f', desc: 'Sorgefile path'
+      option :savepoint, aliases: '-s', banner: 'FILE_PATH',
+                         desc: 'resume from savepoint ' \
+                               '(from latest savepoint if \'latest\' given)'
     end
 
     def self.local_options
@@ -33,19 +36,9 @@ module Sorge
       Run.new(app, task, time, args, options).exec
     end
 
-    desc 'resume SAVEPOINT_FILE_PATH', 'Resume from savepoint'
-    app_options
-    local_options
-    def resume(file_path)
-      app.resume(file_path).shutdown
-    end
-
     desc 'start', 'Start sorge server'
     app_options
     option :daemonize, aliases: '-d', desc: 'run in the background'
-    option :savepoint, aliases: '-s', banner: 'FILE_PATH',
-                       desc: 'resume from savepoint ' \
-                             '(from latest savepoint if \'latest\' given)'
     def start
       require 'sorge/cli/daemons'
       Daemons.new(app, options).start

@@ -26,12 +26,13 @@ module Sorge
         self
       end
 
-      def resume(file_path = nil)
-        file_path ||= File.read(@engine.savepoint.latest_file_path)
-
+      def resume(file_path = 'latest')
         hash = @engine.savepoint.read(file_path)
         hash[:states].each { |k, v| @engine.task_states[k] = v }
-        @engine.event_queue.resume(hash[:queue], hash[:running])
+
+        if @engine.application.remote_mode?
+          @engine.event_queue.resume(hash[:queue], hash[:running])
+        end
         self
       end
     end

@@ -8,6 +8,7 @@ module Sorge
       end
 
       def test_update
+        app.remote_mode = true
         stub_data = {
           queue: [
             [:foo, param: 1],
@@ -29,6 +30,7 @@ module Sorge
       end
 
       def test_clean
+        app.remote_mode = true
         FileUtils.makedirs(app.config.savepoint_path)
         junk = File.join(app.config.savepoint_path, 'junk')
         File.write(junk, '')

@@ -33,11 +33,15 @@ module Sorge
       end
 
       def update
-        file_path = @engine.synchronize { write }
-        swap(file_path)
-        Sorge.logger.info("savepoint updated: #{file_path}")
-      ensure
-        try_write(latest_file_path, latest)
+        return unless @engine.application.remote_mode?
+
+        begin
+          file_path = @engine.synchronize { write }
+          swap(file_path)
+          Sorge.logger.info("savepoint updated: #{file_path}")
+        ensure
+          try_write(latest_file_path, latest)
+        end
       end
 
       # update savepoint everytime when event_queue consumes a message.
@@ -46,6 +50,10 @@ module Sorge
       end
 
       def read(file_path)
+        if file_path == 'latest'
+          file_path = File.read(@engine.savepoint.latest_file_path)
+        end
+
         YAML.load_file(file_path)
       end
 

@@ -12,9 +12,14 @@ module Sorge
 
       @engine = Engine.new(self)
       @server = Server.new(self)
+
+      @remote_mode = false
     end
     attr_reader :config, :env, :engine, :config, :server, :plugins
     def_delegators :'@engine.driver', :kill, :shutdown, :submit, :run, :resume
+
+    attr_accessor :remote_mode
+    alias remote_mode? remote_mode
 
     def shutdown
       @server.stop
@@ -38,14 +43,14 @@ module Sorge
 
     def load_sorgefile
       sorgefile = find_sorgefile
-      require(sorgefile) if sorgefile
+      require(File.expand_path(sorgefile)) if sorgefile
     end
 
     def find_sorgefile
       return config.sorgefile if config.sorgefile
 
       %w(Sorgefile Sorgefile.rb).each do |filename|
-        return File.expand_path(filename) if File.file?(filename)
+        return filename if File.file?(filename)
       end
 
       nil

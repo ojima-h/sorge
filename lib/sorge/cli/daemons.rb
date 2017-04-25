@@ -18,7 +18,8 @@ module Sorge
       abort 'sorge server is already running' if app_group.running?
 
       daemonize
-      resume(@options['savepoint']) if @options['savepoint']
+      @app.remote_mode = true
+      @app.resume(@options['savepoint']) if @options['savepoint']
       @app.server.start
     end
 
@@ -42,11 +43,6 @@ module Sorge
       pwd = Dir.pwd
       ::Daemons.daemonize(daemon_options)
       Dir.chdir pwd
-    end
-
-    def resume(file_path)
-      file_path = nil if file_path == 'latest'
-      @app.resume(file_path)
     end
   end
 end

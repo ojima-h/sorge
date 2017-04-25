@@ -57,6 +57,8 @@ module Sorge
       end
 
       def test_restore
+        app.remote_mode = true
+
         savepoint = {
           queue: [
             [:successed, job_id: '1', name: 'test_namespace:ns:t1', time: 100, state: {}],
@@ -99,6 +101,8 @@ module Sorge
       end
 
       def test_resume
+        app.remote_mode = true
+
         savepoint = {
           queue: [[:run, name: 'test_namespace:ns:t1', time: 100]],
           running: [],
