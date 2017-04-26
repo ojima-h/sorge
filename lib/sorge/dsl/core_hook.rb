@@ -23,6 +23,9 @@ module Sorge
           end
         end
 
+        # @!method setup(&block)
+        define_hook :setup
+
         # @!method before(&block)
         define_hook :before
 
@@ -42,7 +45,6 @@ module Sorge
       # @param tag [Symbol] hook name
       # @param args [Array] arguments
       def call_hook(tag, *args)
-        return if dryrun?
         self.class.each_hook(tag) do |block|
           instance_exec(*args, &block)
         end
