@@ -30,7 +30,7 @@ module Sorge
       end
 
       def invoke_before
-        Sorge.logger.info("start: #{name} (#{time})")
+        Sorge.logger.info("start: #{name} '#{time}'")
         call_hook(:before) unless dryrun?
       end
 
@@ -43,12 +43,12 @@ module Sorge
       end
 
       def invoke_successed
-        Sorge.logger.info("successed: #{name} (#{time})")
+        Sorge.logger.info("successed: #{name} '#{time}'")
         call_hook(:successed) unless dryrun?
       end
 
       def invoke_failed(error)
-        Sorge.logger.error("failed: #{name} (#{time})")
+        Sorge.logger.error("failed: #{name} '#{time}'")
         Sorge.logger.error(Util.format_error_info(error))
         call_hook(:failed, error) unless dryrun?
       end

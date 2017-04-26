@@ -50,10 +50,6 @@ module Sorge
       end
 
       def read(file_path)
-        if file_path == 'latest'
-          file_path = File.read(@engine.savepoint.latest_file_path)
-        end
-
         YAML.load_file(file_path)
       end
 

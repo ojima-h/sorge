@@ -51,7 +51,7 @@ module Sorge
     end
 
     desc 'submit', 'Submit a job to server'
-    def submit(task, time, *args)
+    def submit(task, time = Time.now.to_i, *args)
       require 'sorge/cli/submit'
       Submit.new(config, task, time, args, options).run
     end
