@@ -3,7 +3,7 @@ module Sorge
     class Worker
       def initialize(engine)
         @engine = engine
-        @task_worker = Concurrent::CachedThreadPool.new
+        @task_worker = Concurrent::FixedThreadPool.new(4)
       end
       attr_reader :task_worker
 
