@@ -109,7 +109,7 @@ module Sorge
       class Daily < Base
         register :daily
 
-        def initialize(task, wday: 0, **options, &block)
+        def initialize(task, delay: 1, **options, &block)
           super
         end
 
@@ -121,7 +121,7 @@ module Sorge
       class Weekly < Base
         register :weekly
 
-        def initialize(task, wday: 0, **options, &block)
+        def initialize(task, wday: 0, delay: 1, **options, &block)
           super
           @wday = wday
         end
@@ -136,7 +136,7 @@ module Sorge
       class Monthly < Base
         register :monthly
 
-        def initialize(task, mday: 1, **options, &block)
+        def initialize(task, mday: 1, delay: 1, **options, &block)
           super
           @mday = mday
         end

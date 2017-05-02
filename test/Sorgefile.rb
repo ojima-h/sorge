@@ -92,12 +92,12 @@ namespace :test_window do
   end
 
   task :t4 do
-    window :daily, delay: 60
+    window :daily
     upstream :t1
   end
 
   task :t5 do
-    window :daily
+    window :daily, delay: 0
     upstream :t2
     upstream :t4
   end
