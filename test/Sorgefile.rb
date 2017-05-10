@@ -157,3 +157,26 @@ namespace :test_plugin do
     set :command, ['ls', '.']
   end
 end
+
+namespace :test_trigger do
+  task :t1
+
+  task :t2 do
+    time_trunc 10
+  end
+
+  task :t3 do
+    time_trunc :week, 3
+    trigger :periodic, 3
+  end
+
+  task :t4 do
+    time_trunc { |time| time - 1 }
+    trigger { |pending| [pending, []] }
+  end
+
+  task :t5 do
+    time_trunc ->(time) { time - 1 }
+    trigger ->(pending) { [pending, []] }
+  end
+end

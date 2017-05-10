@@ -15,6 +15,7 @@ module Sorge
       include CoreEmit
       include CoreHook
       include CoreSettings
+      include CoreTime
       include CoreUpstreams
       include CoreUse
       include CoreWindow
