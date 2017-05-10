@@ -29,6 +29,12 @@ module Sorge
           nil
         end
       end
+
+      def post(&block)
+        @task_worker.post(block) do |my_block|
+          with_error_handler(&my_block)
+        end
+      end
     end
   end
 end

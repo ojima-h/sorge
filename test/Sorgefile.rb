@@ -179,4 +179,9 @@ namespace :test_trigger do
     time_trunc ->(time) { time - 1 }
     trigger ->(pending) { [pending, []] }
   end
+
+  task :t6 do
+    time_trunc 60
+    trigger :lag, 3600
+  end
 end
