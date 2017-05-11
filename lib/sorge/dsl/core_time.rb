@@ -6,20 +6,28 @@ module Sorge
       class_methods do
         def init(dsl, name)
           super
-          @trigger = Trigger.default
-          @time_trunc = TimeTrunc.default
+          @trigger = nil
+          @time_trunc = nil
         end
 
         def time_trunc(type = nil, *args, &block)
-          return @time_trunc if type.nil? && !block_given?
-
-          @time_trunc = TimeTrunc.build(type, *args, &block)
+          if type || block_given?
+            @time_trunc = TimeTrunc.build(type, *args, &block)
+          elsif !initialized?
+            TimeTrunc.default
+          else
+            @time_trunc || super_mixin.time_trunc
+          end
         end
 
         def trigger(type = nil, *args, &block)
-          return @trigger if type.nil? && !block_given?
-
-          @trigger = Trigger.build(type, *args, &block)
+          if type || block_given?
+            @trigger = Trigger.build(type, *args, &block)
+          elsif !initialized?
+            Trigger.default
+          else
+            @trigger || super_mixin.trigger
+          end
         end
       end
     end
