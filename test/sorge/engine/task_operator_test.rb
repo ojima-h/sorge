@@ -7,14 +7,14 @@ module Sorge
         TaskOperator.new(app.engine, task_name)
       end
 
-      def make_jobflow_context(finished = {})
+      def make_jobflow_status(finished = {})
         Hash.new do |hash, key|
           hash[key] = TaskStatus.new
           hash[key].finished = finished.fetch(key, [])
           hash[key].freeze!
         end
       end
-      alias ctx make_jobflow_context
+      alias ctx make_jobflow_status
 
       def test_post
         task_operator = make_task_operator('t1')

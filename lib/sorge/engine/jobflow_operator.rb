@@ -10,7 +10,7 @@ module Sorge
         @worker = Concurrent::IVar.new
 
         @task_operators = {}
-        @jobflow_context = {}
+        @jobflow_status = {}
         initialize_with_tasks
 
         @heartbeat_interval = 0.1
@@ -51,32 +51,32 @@ module Sorge
       def initialize_with_tasks
         Sorge.tasks.each do |task_name, _|
           @task_operators[task_name] = TaskOperator.new(@engine, task_name)
-          @jobflow_context[task_name] = TaskStatus.new.freeze!
+          @jobflow_status[task_name] = TaskStatus.new.freeze!
         end
-        @jobflow_context.freeze
+        @jobflow_status.freeze
       end
 
       def post_task(task_name, time)
         task_operator = @task_operators[task_name]
-        st = task_operator.post(time, @jobflow_context)
-        @jobflow_context = @jobflow_context.merge(task_name => st).freeze
+        st = task_operator.post(time, @jobflow_status)
+        @jobflow_status = @jobflow_status.merge(task_name => st).freeze
       end
 
       def update_tasks
-        next_jobflow_context = {}
+        next_jobflow_status = {}
 
         @task_operators.each do |task_name, task_operator|
-          next_jobflow_context[task_name] =
-            task_operator.update(@jobflow_context)
+          next_jobflow_status[task_name] =
+            task_operator.update(@jobflow_status)
         end
 
-        @jobflow_context = next_jobflow_context.freeze
-        # TODO: savepoint.update(jobflow_context)
+        @jobflow_status = next_jobflow_status.freeze
+        # TODO: savepoint.update(jobflow_status)
       end
 
       def complete?
         @task_operators.each_value.all?(&:complete?) \
-        && !@jobflow_context.each_value.any?(&:next?)
+        && !@jobflow_status.each_value.any?(&:next?)
       end
 
       #
