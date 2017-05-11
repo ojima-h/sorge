@@ -25,8 +25,10 @@ end
 
 require 'sorge/engine/event_queue'
 require 'sorge/engine/driver'
+require 'sorge/engine/jobflow_operator'
 require 'sorge/engine/savepoint'
 require 'sorge/engine/task_handler'
 require 'sorge/engine/task_operator'
 require 'sorge/engine/task_runner'
+require 'sorge/engine/timeout_queue'
 require 'sorge/engine/worker'

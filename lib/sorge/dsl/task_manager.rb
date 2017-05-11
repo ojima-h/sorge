@@ -25,6 +25,12 @@ module Sorge
         @tasks[scope.join(name)] || self[name, scope.parent]
       end
       alias validate_name []
+
+      def each
+        @tasks.each do |name, task|
+          yield name, task if task < Task
+        end
+      end
     end
   end
 end

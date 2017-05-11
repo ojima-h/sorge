@@ -23,6 +23,12 @@ module Sorge
         @stopped = Concurrent::Event.new
       end
 
+      def complete?
+        @mutex.synchronize do
+          @stop || [@pending, @running, @finished].all?(&:empty?)
+        end
+      end
+
       def post(time)
         @mutex.synchronize do
           ns_enqueue(time)
