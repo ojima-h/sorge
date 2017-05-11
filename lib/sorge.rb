@@ -18,6 +18,7 @@ require 'sorge/version'
 
 module Sorge
   class Error < StandardError; end
+  class AlreadyStopped < StandardError; end
 
   class << self
     def logger

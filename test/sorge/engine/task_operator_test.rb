@@ -87,6 +87,17 @@ module Sorge
         assert_equal [0, 1], finished
         assert_equal({ foo: 0 }, status.state)
       end
+
+      def test_shutdown
+        task_operator = make_task_operator('t1')
+
+        task_operator.post(10)
+        task_operator.shutdown
+        assert_raises Sorge::AlreadyStopped do
+          task_operator.post(11)
+        end
+        task_operator.wait_for_termination
+      end
     end
   end
 end

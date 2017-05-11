@@ -18,6 +18,9 @@ module Sorge
         @running = []
         @finished = []
         @mutex = Mutex.new
+
+        @stop = false
+        @stopped = Concurrent::Event.new
       end
 
       def post(time)
@@ -43,9 +46,21 @@ module Sorge
         end
       end
 
+      def shutdown
+        @mutex.synchronize do
+          @stop = true
+          @stopped.set if @running.empty?
+        end
+      end
+
+      def wait_for_termination(timeout = nil)
+        @stopped.wait(timeout)
+      end
+
       private
 
       def ns_enqueue(*times)
+        raise AlreadyStopped if @stop
         ns_merge_pending(*times)
 
         ready = ns_collect_ready
@@ -66,6 +81,8 @@ module Sorge
       end
 
       def perform
+        return @stopped.set if @stop
+
         time = @mutex.synchronize { @running.first }
         return if time.nil?
 
