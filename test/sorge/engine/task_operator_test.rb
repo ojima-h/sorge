@@ -7,20 +7,26 @@ module Sorge
         TaskOperator.new(app.engine, task_name)
       end
 
+      def make_jobflow_context(finished = {})
+        Hash.new do |hash, key|
+          hash[key] = TaskStatus.new
+          hash[key].finished = finished.fetch(key, [])
+          hash[key].freeze!
+        end
+      end
+      alias ctx make_jobflow_context
+
       def test_post
         task_operator = make_task_operator('t1')
 
-        status, = task_operator.post(10)
-        status, = task_operator.post(11)
-        status, = task_operator.post(12)
-        assert_kind_of Hash, status.state
-        assert_kind_of Array, status.queue
-
         finished_all = []
+        finished_all += task_operator.post(10).finished
+        finished_all += task_operator.post(11).finished
+        finished_all += task_operator.post(12).finished
+
         loop do
-          status, finished = task_operator.update
-          finished_all += finished
-          break if status.queue.empty?
+          finished_all += task_operator.update(ctx).finished
+          break if finished_all.length == 3
           sleep 0.1
         end
 
@@ -31,17 +37,14 @@ module Sorge
       def test_update
         task_operator = make_task_operator('t2')
 
-        status, f1 = task_operator.update('t1' => [10])
-        status, f2 = task_operator.update('t1' => [11], 'dummy' => [0])
-        status, f3 = task_operator.update('t1' => [12])
-        assert_kind_of Hash, status.state
-        assert_kind_of Array, status.queue
+        finished_all = []
+        finished_all += task_operator.update(ctx('t1' => [10])).finished
+        finished_all += task_operator.update(ctx('t1' => [11], 'dummy' => [0])).finished
+        finished_all += task_operator.update(ctx('t1' => [12])).finished
 
-        finished_all = f1 + f2 + f3
         loop do
-          status, finished = task_operator.update
-          finished_all += finished
-          break if status.queue.empty?
+          finished_all += task_operator.update(ctx).finished
+          break if finished_all.length == 3
           sleep 0.1
         end
 
@@ -56,26 +59,26 @@ module Sorge
 
         task_operator.post(t1)
         sleep 0.1
-        status, = task_operator.update
-        assert_equal [t0], status.queue
+        status = task_operator.update(ctx)
+        assert_equal [t0], status.pending
 
         task_operator.post(t1 + 1)
         sleep 0.1
-        status, finished = task_operator.update
-        assert_equal [t0], status.queue, 'time is truncated'
-        assert_empty finished, 'no tasks run'
+        status = task_operator.update(ctx)
+        assert_equal [t0], status.pending, 'time is truncated'
+        assert_empty status.finished, 'no tasks run'
 
         task_operator.post(t1 - 60)
         sleep 0.1
-        status, finished = task_operator.update
-        assert_equal [t0, t0 - 60], status.queue
-        assert_empty finished, 'no tasks run'
+        status = task_operator.update(ctx)
+        assert_equal [t0, t0 - 60], status.pending
+        assert_empty status.finished, 'no tasks run'
 
         task_operator.post(t1 + 3600)
         sleep 0.1
-        status, finished = task_operator.update
-        assert_equal [t0 + 3600], status.queue
-        assert_equal [t0, t0 - 60], finished
+        status = task_operator.update(ctx)
+        assert_equal [t0 + 3600], status.pending
+        assert_equal [t0, t0 - 60], status.finished
       end
 
       def test_resume
@@ -83,8 +86,8 @@ module Sorge
 
         task_operator.resume([0, 1], foo: 0)
         sleep 0.1
-        status, finished = task_operator.update
-        assert_equal [0, 1], finished
+        status = task_operator.update(ctx)
+        assert_equal [0, 1], status.finished
         assert_equal({ foo: 0 }, status.state)
       end
 

@@ -7,18 +7,18 @@ module Sorge
         end
       end
 
-      Status = Struct.new(:state, :queue)
-
       def initialize(engine, task_name)
         @engine = engine
         @task = DSL.instance[task_name]
 
         @state = {}
+        @trigger_state = {}
         @pending = []
         @running = []
         @finished = []
-        @mutex = Mutex.new
+        @position = 0
 
+        @mutex = Mutex.new
         @stop = false
         @stopped = Concurrent::Event.new
       end
@@ -36,11 +36,12 @@ module Sorge
         end
       end
 
-      def update(finished_tasks = {})
+      def update(jobflow_context)
         @mutex.synchronize do
-          @task.upstreams.each do |task_name, _|
-            ns_enqueue(*finished_tasks[task_name])
-          end
+          times = @task.upstreams.map do |task_name, _|
+            jobflow_context[task_name].finished
+          end.flatten
+          ns_enqueue(*times)
           ns_collect_status
         end
       end
@@ -102,6 +103,7 @@ module Sorge
         @mutex.synchronize do
           @running = @running[1..-1]
           @finished += [time]
+          @position = [@position, time].max
           @engine.worker.post { perform } unless @running.empty?
         end
       end
@@ -113,11 +115,20 @@ module Sorge
       end
 
       def ns_collect_status
-        status = Status[@state, @pending + @running]
-        finished = @finished
+        status = ns_build_status
         @finished = []
+        status
+      end
 
-        [status, finished]
+      def ns_build_status
+        TaskStatus[
+          @state,
+          @trigger_state,
+          @pending,
+          @running,
+          @finished,
+          @position
+        ].freeze!
       end
     end
   end
