@@ -63,6 +63,11 @@ module Sorge
         @stopped.wait(timeout)
       end
 
+      def kill
+        @stop = true
+        @stopped.set
+      end
+
       private
 
       def ns_enqueue(*times)

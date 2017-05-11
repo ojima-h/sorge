@@ -18,6 +18,18 @@ module Sorge
           'test_namespace:t4', 'test_namespace:t4', 'test_namespace:t4'
         ], SorgeTest.spy.map(&:name).sort
       end
+
+      def test_kill
+        jobflow = make_jobflow_operator
+        t = Thread.new { jobflow.invoke('test_namespace:ns:t1', Time.now.to_i) }
+        jobflow.kill
+        begin
+          t.join(0.1)
+        rescue
+          nil
+        end
+        assert t.stop?
+      end
     end
   end
 end

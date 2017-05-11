@@ -15,6 +15,7 @@ module Sorge
         @heartbeat_interval = 0.1
         @next_heartbeat = nil
         @stopped = Concurrent::Event.new
+        @killed = Concurrent::Event.new
       end
 
       def submit(task_name, time)
@@ -25,8 +26,12 @@ module Sorge
 
       def invoke(task_name, time)
         @task_operators[task_name].post(time)
-        sleep(heartbeat) until @task_operators.values.all?(&:complete?) \
-                               && @finished_tasks.values.all?(&:empty?)
+        loop do
+          @killed.wait(heartbeat)
+          break if @task_operators.values.all?(&:complete?) \
+                   && @finished_tasks.values.all?(&:empty?)
+          break if @killed.set?
+        end
       end
 
       def shutdown
@@ -36,6 +41,11 @@ module Sorge
 
       def wait_for_termination
         @task_operators.each_value(&:wait_for_termination)
+      end
+
+      def kill
+        @task_operators.each_value(&:kill)
+        @killed.set
       end
 
       private
