@@ -29,9 +29,9 @@ module Sorge
         end
       end
 
-      def post(time)
+      def post(time, jobflow_context)
         @mutex.synchronize do
-          ns_enqueue(time)
+          ns_enqueue([time], jobflow_context)
           ns_collect_status
         end
       end
@@ -41,15 +41,8 @@ module Sorge
           times = @task.upstreams.map do |task_name, _|
             jobflow_context[task_name].finished
           end.flatten
-          ns_enqueue(*times)
+          ns_enqueue(times, jobflow_context)
           ns_collect_status
-        end
-      end
-
-      def resume(times, state)
-        @mutex.synchronize do
-          @state = state
-          ns_enqueue(*times)
         end
       end
 
@@ -71,7 +64,7 @@ module Sorge
 
       private
 
-      def ns_enqueue(*times)
+      def ns_enqueue(times, _jobflow_context)
         raise AlreadyStopped if @stop
         ns_merge_pending(*times)
 

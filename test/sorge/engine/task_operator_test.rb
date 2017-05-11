@@ -20,9 +20,9 @@ module Sorge
         task_operator = make_task_operator('t1')
 
         finished_all = []
-        finished_all += task_operator.post(10).finished
-        finished_all += task_operator.post(11).finished
-        finished_all += task_operator.post(12).finished
+        finished_all += task_operator.post(10, ctx).finished
+        finished_all += task_operator.post(11, ctx).finished
+        finished_all += task_operator.post(12, ctx).finished
 
         loop do
           finished_all += task_operator.update(ctx).finished
@@ -57,47 +57,37 @@ module Sorge
         t0 = Time.new(2000, 1, 1, 12, 34, 0).to_i
         t1 = Time.new(2000, 1, 1, 12, 34, 56).to_i
 
-        task_operator.post(t1)
+        task_operator.post(t1, ctx)
         sleep 0.1
         status = task_operator.update(ctx)
         assert_equal [t0], status.pending
 
-        task_operator.post(t1 + 1)
+        task_operator.post(t1 + 1, ctx)
         sleep 0.1
         status = task_operator.update(ctx)
         assert_equal [t0], status.pending, 'time is truncated'
         assert_empty status.finished, 'no tasks run'
 
-        task_operator.post(t1 - 60)
+        task_operator.post(t1 - 60, ctx)
         sleep 0.1
         status = task_operator.update(ctx)
         assert_equal [t0, t0 - 60], status.pending
         assert_empty status.finished, 'no tasks run'
 
-        task_operator.post(t1 + 3600)
+        task_operator.post(t1 + 3600, ctx)
         sleep 0.1
         status = task_operator.update(ctx)
         assert_equal [t0 + 3600], status.pending
         assert_equal [t0, t0 - 60], status.finished
       end
 
-      def test_resume
-        task_operator = make_task_operator('t1')
-
-        task_operator.resume([0, 1], foo: 0)
-        sleep 0.1
-        status = task_operator.update(ctx)
-        assert_equal [0, 1], status.finished
-        assert_equal({ foo: 0 }, status.state)
-      end
-
       def test_shutdown
         task_operator = make_task_operator('t1')
 
-        task_operator.post(10)
+        task_operator.post(10, ctx)
         task_operator.shutdown
         assert_raises Sorge::AlreadyStopped do
-          task_operator.post(11)
+          task_operator.post(11, ctx)
         end
         task_operator.wait_for_termination
       end

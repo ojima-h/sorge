@@ -20,13 +20,11 @@ module Sorge
       end
 
       def submit(task_name, time)
-        enqueue do
-          @task_operators[task_name].post(time)
-        end
+        enqueue { post_task(task_name, time) }
       end
 
       def invoke(task_name, time)
-        @task_operators[task_name].post(time)
+        post_task(task_name, time)
         loop do
           @killed.wait(heartbeat)
           break if complete?
@@ -56,6 +54,12 @@ module Sorge
           @jobflow_context[task_name] = TaskStatus.new.freeze!
         end
         @jobflow_context.freeze
+      end
+
+      def post_task(task_name, time)
+        task_operator = @task_operators[task_name]
+        st = task_operator.post(time, @jobflow_context)
+        @jobflow_context = @jobflow_context.merge(task_name => st).freeze
       end
 
       def update_tasks
