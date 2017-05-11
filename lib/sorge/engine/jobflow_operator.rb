@@ -23,13 +23,10 @@ module Sorge
         end
       end
 
-      def complete
-        stop_worker
-        loop do
-          break if @task_operators.values.all?(&:complete?) \
-                   && @finished_tasks.values.all?(&:empty?)
-          sleep(heartbeat)
-        end
+      def invoke(task_name, time)
+        @task_operators[task_name].post(time)
+        sleep(heartbeat) until @task_operators.values.all?(&:complete?) \
+                               && @finished_tasks.values.all?(&:empty?)
       end
 
       def shutdown

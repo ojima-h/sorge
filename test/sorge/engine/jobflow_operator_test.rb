@@ -9,8 +9,7 @@ module Sorge
 
       def test_submit
         jobflow = make_jobflow_operator
-        jobflow.submit('test_namespace:ns:t1', Time.now.to_i)
-        jobflow.complete
+        jobflow.invoke('test_namespace:ns:t1', Time.now.to_i)
 
         assert_equal [
           'test_namespace:ns:t1',
