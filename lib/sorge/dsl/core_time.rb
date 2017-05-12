@@ -22,7 +22,7 @@ module Sorge
 
         def trigger(type = nil, *args, &block)
           if type || block_given?
-            @trigger = Trigger.build(type, *args, &block)
+            @trigger = Trigger.build(self, type, *args, &block)
           elsif !initialized?
             Trigger.default
           else

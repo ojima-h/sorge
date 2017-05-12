@@ -17,12 +17,12 @@ module Sorge
         end
 
         def default
-          @default ||= self[:default].new
+          @default ||= self[:default].new(nil)
         end
 
-        def build(type, *args, &block)
+        def build(task, type, *args, &block)
           if type.is_a?(Symbol)
-            self[type].new(*args, &block)
+            self[type].new(task, *args, &block)
           else
             type || block
           end
@@ -30,71 +30,109 @@ module Sorge
       end
 
       class Base
-        def self.register(name)
-          Trigger.register(name, self)
+        class << self
+          attr_accessor :type
+
+          def register(name)
+            Trigger.register(name, self)
+            self.type = name
+          end
         end
 
-        def call(_pending)
+        def initialize(task)
+          @task = task
+        end
+
+        def call(_pane_set, _jobflow_status)
           raise NotImplementedError
+        end
+
+        def state
+          {}
+        end
+
+        def state=(state); end
+
+        def dump
+          state.merge(type: self.class.type)
+        end
+
+        def restore(state)
+          self.state = state if state[:type] == self.class.type
         end
       end
 
       class Default < Base
         register :default
 
-        def call(pending)
-          [pending, []] # trigger all
+        def call(pane_set, _jobflow_status)
+          [pane_set, []] # trigger all
         end
       end
 
       class Periodic < Base
         register :periodic
 
-        def initialize(period)
+        def initialize(_task, period)
           @period = period
-          @last_triggered = Time.now.to_i
+          @last = Time.now.to_i
         end
 
-        def call(pending)
+        def state
+          { last: @last }
+        end
+
+        def state=(state)
+          @last = state[:last]
+        end
+
+        def call(pane_set, _jobflow_status)
           now = Time.now.to_i
 
-          return [[], pending] if now - @last_triggered < @period
+          return [[], pane_set] if now - @last < @period
 
-          @last_triggered = now
-          [pending, []]
+          @last = now
+          [pane_set, []]
         end
       end
 
       class Lag < Base
         register :lag
 
-        def initialize(lag)
+        def initialize(_task, lag)
           @lag = lag
-          @max_time = 0
+          @latest = 0
         end
 
-        def call(pending)
-          @max_time = [@max_time, *pending].max
-          ready, rest = pending.partition do |time|
-            @max_time - time >= @lag
+        def state
+          { latest: @latest }
+        end
+
+        def state=(state)
+          @latest = state[:latest]
+        end
+
+        def call(pane_set, _jobflow_status)
+          @latest = [@latest, *pane_set.times].max
+
+          pane_set.partition do |pane|
+            @latest - pane.time >= @lag
           end
-          [ready, rest]
         end
       end
 
       class Delay < Base
         register :delay
 
-        def initialize(delay)
+        def initialize(_task, delay)
           @delay = delay
         end
 
-        def call(pending)
+        def call(pane_set, _jobflow_status)
           now = Time.now.to_i
-          ready, rest = pending.partition do |time|
-            now - time >= @delay
+          pane_set.partition do |pane|
+            now - pane.time >= @delay
           end
-          [ready, rest]
         end
       end
     end
