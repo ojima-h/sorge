@@ -9,7 +9,7 @@ module Sorge
 
       def test_submit
         jobflow = make_jobflow_operator
-        jobflow.submit('test_namespace:ns:t1', Time.now.to_i)
+        jobflow.submit('test_namespace:ns:t1', now)
         jobflow.wait_complete
 
         assert_equal [
@@ -22,7 +22,7 @@ module Sorge
 
       def test_kill
         jobflow = make_jobflow_operator
-        t = Thread.new { jobflow.invoke('test_namespace:ns:t1', Time.now.to_i) }
+        t = Thread.new { jobflow.invoke('test_namespace:ns:t1', now) }
         jobflow.kill
         begin
           t.join(0.1)
@@ -36,7 +36,7 @@ module Sorge
         jobflow = make_jobflow_operator
         data = {
           'test_namespace:ns:t1' => {
-            run: [{ tm: 100, es: [{ name: nil }] }]
+            run: [{ tm: now, es: [{ name: nil }] }]
           }
         }
 

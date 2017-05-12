@@ -27,35 +27,35 @@ module Sorge
       end
 
       def test_fatal_error
-        invoke('test_failure:fatal', Time.now.to_i)
+        invoke('test_failure:fatal', now)
         assert app.engine.jobflow_operator.instance_eval { @killed.set? }
       end
 
       def test_unexpected_error
         assert_raises NameError do
-          app.engine.driver.submit('undefined_task', Time.now.to_i)
+          app.engine.driver.submit('undefined_task', now)
         end
       end
 
       def test_emit
-        invoke('test_emit:t1', 0)
+        invoke('test_emit:t1', now)
 
         assert_equal [
           'test_emit:t1',
           'test_emit:t2'
         ], SorgeTest.spy.map(&:name).uniq
         assert_equal [
-          0,
-          100,
-          200,
-          300
-        ], SorgeTest.spy.map { |x| x.time.to_i }.uniq
+          now,
+          Time.at(100),
+          Time.at(200),
+          Time.at(300)
+        ], SorgeTest.spy.map(&:time).uniq
       end
 
       def test_restore
         data = {
           'test_namespace:ns:t2' => {
-            run: [{ tm: 100, es: [{ name: nil }] }]
+            run: [{ tm: now, es: [{ name: nil }] }]
           }
         }
 

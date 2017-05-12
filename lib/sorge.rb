@@ -6,6 +6,7 @@ require 'monitor'
 require 'ostruct'
 require 'singleton'
 require 'socket'
+require 'time'
 require 'yaml'
 
 require 'concurrent'

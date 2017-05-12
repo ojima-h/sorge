@@ -13,7 +13,7 @@ module Sorge
         @pending = PaneSet.new
         @running = [] # Array<Pane>
         @finished = []
-        @position = 0
+        @position = Time.at(0)
 
         @mutex = Mutex.new
         @stop = false

@@ -44,12 +44,13 @@ module Sorge
       class Default < Base
         register :default
 
-        def initialize(sec = 1)
+        def initialize(sec = 0)
           @sec = sec
         end
 
         def call(time)
-          time / @sec * @sec
+          return time if @sec.zero?
+          Time.at(time.to_i / @sec * @sec)
         end
       end
 
@@ -57,7 +58,7 @@ module Sorge
         register :hour
 
         def call(time)
-          time / 3600 * 3600
+          Time.at(time.to_i / 3600 * 3600)
         end
       end
 
@@ -65,7 +66,7 @@ module Sorge
         register :day
 
         def call(time)
-          Time.at(time).to_date.to_time.to_i
+          time.to_date.to_time
         end
       end
 
@@ -77,9 +78,9 @@ module Sorge
         end
 
         def call(time)
-          dt = Time.at(time).to_date
+          dt = time.to_date
           delta = dt.wday - @wday
-          ((dt - (delta < 0 ? 7 : 0)) - delta).to_time.to_i
+          ((dt - (delta < 0 ? 7 : 0)) - delta).to_time
         end
       end
 
@@ -91,9 +92,9 @@ module Sorge
         end
 
         def call(time)
-          dt = Time.at(time).to_date
+          dt = time.to_date
           delta = dt.mday - @mday
-          (dt.prev_month(delta < 0 ? 1 : 0) - delta).to_time.to_i
+          (dt.prev_month(delta < 0 ? 1 : 0) - delta).to_time
         end
       end
     end

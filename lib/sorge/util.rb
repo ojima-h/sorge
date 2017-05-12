@@ -27,20 +27,23 @@ module Sorge
       error_info
     end
 
+    def generate_id(n = 8)
+      SecureRandom.hex(n / 2)
+    end
+
     def Proc(value)
       return value if value.is_a? Proc
       proc { value }
     end
 
-    def generate_id(n = 8)
-      SecureRandom.hex(n / 2)
-    end
-
-    def parse_time(time)
-      if time =~ /\A\d+$\z/ || time.is_a?(Integer)
-        time.to_i
-      else
-        Time.parse(time).to_i
+    def Time(time)
+      case time
+      when /\A\d+(.\d+)\z/ then Time.at(time.to_f)
+      when Numeric then Time.at(time)
+      when Date then time.to_time
+      when Time then time
+      when String then Time.parse(time)
+      else Time.parse(time)
       end
     end
   end

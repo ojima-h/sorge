@@ -6,13 +6,7 @@ module Sorge
       end
 
       def emit(time)
-        tm = case time
-             when Date then time.to_time.to_i
-             when Time then time.to_i
-             when String then Time.parse(time).to_i
-             else time.to_i
-             end
-        emitted << tm
+        emitted << Util::Time(time)
       end
     end
   end

@@ -131,7 +131,7 @@ module Sorge
       end
 
       def heartbeat
-        now = Time.now.to_i
+        now = Time.now
         @next_heartbeat ||= now + @heartbeat_interval
         return @next_heartbeat - now if @next_heartbeat > now
 

@@ -114,9 +114,9 @@ namespace :test_emit do
   task :t1 do
     def run
       super
-      emit 100
-      emit 200
-      emit 300
+      emit Time.at(100)
+      emit Time.at(200)
+      emit Time.at(300)
     end
   end
 

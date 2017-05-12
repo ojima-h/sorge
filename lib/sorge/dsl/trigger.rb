@@ -88,7 +88,7 @@ module Sorge
 
         def initialize(_task, period)
           @period = period
-          @last = Time.now.to_i
+          @last = Time.now
         end
 
         def state
@@ -100,7 +100,7 @@ module Sorge
         end
 
         def call(panes, _jobflow_status)
-          now = Time.now.to_i
+          now = Time.now
 
           return [[], panes] if now - @last < @period
 
@@ -114,7 +114,7 @@ module Sorge
 
         def initialize(_task, lag)
           @lag = lag
-          @latest = 0
+          @latest = Time.at(0)
         end
 
         def state
@@ -142,7 +142,7 @@ module Sorge
         end
 
         def call(panes, _jobflow_status)
-          now = Time.now.to_i
+          now = Time.now
           panes.partition do |pane|
             now - pane.time >= @delay
           end

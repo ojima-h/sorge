@@ -10,14 +10,14 @@ module Sorge
 
       def test_default
         trigger = Trigger.default
-        panes = Array(10) { |i| pane(Time.now.to_i + i) }
+        panes = Array(10) { |i| pane(now + i) }
         ready, = trigger.call(panes, {})
         assert_equal panes, ready
       end
 
       def test_periodic
         trigger = Trigger::Periodic.new(nil, 0.2)
-        panes = Array(10) { |i| pane(Time.now.to_i + i) }
+        panes = Array(10) { |i| pane(now + i) }
 
         count = 0
         5.times do
@@ -32,38 +32,39 @@ module Sorge
       def test_lag
         trigger = Trigger::Lag.new(nil, 1)
 
-        ready, pending = trigger.call([pane(8), pane(9), pane(10)], {})
-        assert_equal [8, 9], ready.map(&:time)
-        assert_equal [10], pending.map(&:time)
+        ps = ->(i) { pane(now + i) }
+        ready, pending = trigger.call([ps[8], ps[9], ps[10]], {})
+        assert_equal [ps[8], ps[9]], ready
+        assert_equal [ps[10]], pending.to_a
 
-        ready, pending = trigger.call([pane(1), pane(2), pane(3)], {})
-        assert_equal [1, 2, 3], ready.map(&:time)
-        assert_equal [], pending.map(&:time)
+        ready, pending = trigger.call([ps[1], ps[2], ps[3]], {})
+        assert_equal [ps[1], ps[2], ps[3]], ready
+        assert_equal [], pending.to_a
 
-        ready, pending = trigger.call([pane(9), pane(10), pane(11)], {})
-        assert_equal [9, 10], ready.map(&:time)
-        assert_equal [11], pending.map(&:time)
+        ready, pending = trigger.call([ps[9], ps[10], ps[11]], {})
+        assert_equal [ps[9], ps[10]], ready
+        assert_equal [ps[11]], pending.to_a
 
-        assert_equal({ latest: 11 }, trigger.state)
+        assert_equal({ latest: now + 11 }, trigger.state)
       end
 
       def test_delay
         trigger = Trigger::Delay.new(nil, 3600)
-        now = Time.now.to_i
-        t = ->(i) { pane(now + i * 3600) }
+        ps = ->(i) { pane(now + (i - 2) * 3600) }
 
-        ready, pending = trigger.call([t[-2], t[-1], t[0]], {})
-        assert_equal [t[-2], t[-1]], ready
-        assert_equal [t[0]], pending
+        ready, pending = trigger.call([ps[0], ps[1], ps[2]], {})
+        assert_equal [ps[0], ps[1]], ready
+        assert_equal [ps[2]], pending
       end
 
       def test_align
         task = Sorge.tasks['test_namespace:t3']
         trigger = Trigger::Align.new(task, 1)
 
-        now = Time.now.to_i
-        pos = ->(i) { Engine::TaskStatus.new.tap { |st| st.position = now + i } }
-        t = ->(i) { pane(now + i) }
+        pos = lambda do |i|
+          Engine::TaskStatus.new.tap { |st| st.position = now + i }
+        end
+        ps = ->(i) { pane(now + i) }
 
         jobflow_status = {
           'test_namespace:ns:t1' => pos[10],
@@ -71,11 +72,11 @@ module Sorge
         }
 
         ready, pending = trigger.call(
-          [t[8], t[9], t[10], t[11], t[12], t[13]],
+          [ps[8], ps[9], ps[10], ps[11], ps[12], ps[13]],
           jobflow_status
         )
-        assert_equal [t[8], t[9]], ready
-        assert_equal [t[10], t[11], t[12], t[13]], pending
+        assert_equal [ps[8], ps[9]], ready
+        assert_equal [ps[10], ps[11], ps[12], ps[13]], pending
       end
     end
   end

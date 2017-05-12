@@ -14,58 +14,48 @@ module Sorge
       end
 
       def test_pane
-        time = Time.now.to_i
-
-        pane = Pane[time, PaneEntry['foo', 3], PaneEntry['bar']]
-        assert_equal time, pane.time
+        pane = Pane[now, PaneEntry['foo', 3], PaneEntry['bar']]
+        assert_equal now, pane.time
         assert_equal 2, pane.length
         assert_equal %w(foo bar), pane.task_names
 
-        assert_equal pane, Pane[time, ['foo', 3], 'bar']
-        assert_equal pane, Pane[time, 'foo' => 3, 'bar' => 1]
+        assert_equal pane, Pane[now, ['foo', 3], 'bar']
+        assert_equal pane, Pane[now, 'foo' => 3, 'bar' => 1]
       end
 
       def test_pane_add
-        time = Time.now.to_i
-        pane = Pane[time, 'foo' => 3, 'bar' => 1]
+        pane = Pane[now, 'foo' => 3, 'bar' => 1]
 
-        assert_equal Pane[time, 'foo' => 3, 'bar' => 2], pane.add('bar')
-        assert_equal Pane[time, 'foo' => 3, 'bar' => 1], pane
+        assert_equal Pane[now, 'foo' => 3, 'bar' => 2], pane.add('bar')
+        assert_equal Pane[now, 'foo' => 3, 'bar' => 1], pane
       end
 
       def test_pane_set
-        t1 = Time.now.to_i - 10
-        t2 = Time.now.to_i
-
-        pane_set = PaneSet[Pane[t1, 'foo' => 3], Pane[t2, 'bar']]
+        pane_set = PaneSet[Pane[now - 10, 'foo' => 3], Pane[now, 'bar']]
         assert_equal 2, pane_set.length
-        assert_equal [t1, t2], pane_set.times
+        assert_equal [now - 10, now], pane_set.times
 
-        assert_equal pane_set, PaneSet[[t1, 'foo' => 3], [t2, 'bar']]
+        assert_equal pane_set, PaneSet[[now - 10, 'foo' => 3], [now, 'bar']]
 
-        pane_set2 = PaneSet[t1 => ['foo' => 3], t2 => %w(bar baz)]
-        assert_equal Pane[t1, 'foo' => 3], pane_set2.first
+        pane_set2 = PaneSet[now - 10 => ['foo' => 3], now => %w(bar baz)]
+        assert_equal Pane[now - 10, 'foo' => 3], pane_set2.first
         assert_equal %w(bar baz), pane_set2.to_a[1].task_names
       end
 
       def test_pane_set_add
-        t1 = Time.now.to_i - 10
-        t2 = Time.now.to_i
-        pane_set = PaneSet[t1 => 'foo']
+        pane_set = PaneSet[now - 10 => 'foo']
 
-        assert_equal PaneSet[t1 => ['foo' => 1], t2 => ['bar' => 1]],
-                     pane_set.add(t2, 'bar')
-        assert_equal PaneSet[t1 => 'foo'], pane_set
+        assert_equal PaneSet[now - 10 => ['foo' => 1], now => ['bar' => 1]],
+                     pane_set.add(now, 'bar')
+        assert_equal PaneSet[now - 10 => 'foo'], pane_set
       end
 
       def test_dump
-        t1 = Time.now.to_i - 10
-        t2 = Time.now.to_i
-        pane_set = PaneSet[t1 => ['foo' => 1], t2 => ['bar' => 2]]
+        pane_set = PaneSet[now - 10 => ['foo' => 1], now => ['bar' => 2]]
 
         assert_equal(
-          { ps: [{ tm: t1, es: [{ name: 'foo' }] },
-                 { tm: t2, es: [{ name: 'bar', n: 2 }] }] },
+          { ps: [{ tm: now - 10, es: [{ name: 'foo' }] },
+                 { tm: now, es: [{ name: 'bar', n: 2 }] }] },
           pane_set.dump
         )
 

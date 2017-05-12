@@ -31,7 +31,7 @@ module Sorge
         t4 = Sorge.tasks['test_trigger:t4']
 
         assert_kind_of Proc, t4.time_trunc
-        assert_equal 9, t4.time_trunc.call(10)
+        assert_equal now - 1, t4.time_trunc.call(now)
 
         assert_kind_of Trigger::Custom, t4.trigger
         assert_equal [[0], []], t4.trigger.call([0], nil)
@@ -41,7 +41,7 @@ module Sorge
         t5 = Sorge.tasks['test_trigger:t5']
 
         assert_kind_of Proc, t5.time_trunc
-        assert_equal 9, t5.time_trunc.call(10)
+        assert_equal now - 1, t5.time_trunc.call(now)
 
         assert_kind_of Trigger::Custom, t5.trigger
         assert_equal [[0], []], t5.trigger.call([0], nil)

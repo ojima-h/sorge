@@ -14,8 +14,8 @@ module Sorge
         self.trigger_state ||= {}
         self.pending ||= PaneSet.new
         self.running ||= []  # Array<Pane>
-        self.finished ||= [] # Array<time>
-        self.position ||= 0
+        self.finished ||= [] # Array<Time>
+        self.position ||= Time.at(0)
       end
 
       def freeze!
@@ -34,7 +34,7 @@ module Sorge
         ret[:pnd] = pending.dump        unless pending.empty?
         ret[:run] = running.map(&:dump) unless running.empty?
         ret[:fin] = finished            unless finished.empty?
-        ret[:pos] = position            unless position.zero?
+        ret[:pos] = position            unless position.to_i.zero?
         ret
       end
 

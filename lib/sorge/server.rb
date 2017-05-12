@@ -31,7 +31,7 @@ module Sorge
     # Handlers
     #
     def handle_submit(name:, time:)
-      @app.submit(name, Util.parse_time(time))
+      @app.submit(name, Util::Time(time))
     end
 
     #
