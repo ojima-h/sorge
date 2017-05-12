@@ -10,7 +10,7 @@ module Sorge
         @worker = Concurrent::IVar.new
 
         @task_operators = {}
-        @jobflow_status = {}
+        @jobflow_status = JobflowStatus.new
         initialize_with_tasks
 
         @heartbeat_interval = 0.1
@@ -53,7 +53,7 @@ module Sorge
       private
 
       def initialize_with_tasks
-        Sorge.tasks.each do |task_name, _|
+        Sorge.tasks.each_task do |task_name, _|
           @task_operators[task_name] = TaskOperator.new(@engine, task_name)
           @jobflow_status[task_name] = TaskStatus.new.freeze!
         end
@@ -68,11 +68,12 @@ module Sorge
 
       def update
         update_tasks
+        # TODO: savepoint.update(jobflow_status)
         complete? ? @complete.set : @complete.reset
       end
 
       def update_tasks
-        next_jobflow_status = {}
+        next_jobflow_status = JobflowStatus.new
 
         @task_operators.each do |task_name, task_operator|
           next_jobflow_status[task_name] =
@@ -80,7 +81,6 @@ module Sorge
         end
 
         @jobflow_status = next_jobflow_status.freeze
-        # TODO: savepoint.update(jobflow_status)
       end
 
       #

@@ -57,6 +57,20 @@ module Sorge
                      pane_set.add(t2, 'bar')
         assert_equal PaneSet[t1 => 'foo'], pane_set
       end
+
+      def test_dump
+        t1 = Time.now.to_i - 10
+        t2 = Time.now.to_i
+        pane_set = PaneSet[t1 => ['foo' => 1], t2 => ['bar' => 2]]
+
+        assert_equal(
+          { ps: [{ tm: t1, es: [{ name: 'foo' }] },
+                 { tm: t2, es: [{ name: 'bar', n: 2 }] }] },
+          pane_set.dump
+        )
+
+        assert_equal pane_set, PaneSet.restore(pane_set.dump)
+      end
     end
   end
 end

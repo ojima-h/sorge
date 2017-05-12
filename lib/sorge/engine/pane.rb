@@ -8,6 +8,17 @@ module Sorge
       def inc(n = 1)
         self.class[task_name, count + n]
       end
+
+      def dump
+        hash = {}
+        hash[:name] = task_name
+        hash[:n] = count if count > 1
+        hash
+      end
+
+      def self.restore(hash)
+        new(hash[:name], hash[:n] || 1)
+      end
     end
 
     class Pane
@@ -50,6 +61,23 @@ module Sorge
         new_entry = @entries.fetch(task_name, PaneEntry[task_name, 0]).inc
         self.class.new(@time, @entries.merge(task_name => new_entry))
       end
+
+      def dump
+        hash = {}
+        hash[:tm] = time
+        hash[:es] = entries.each_value.map(&:dump) unless entries.empty?
+        hash
+      end
+
+      def self.restore(hash)
+        time = hash[:tm]
+        entries = {}
+        hash.fetch(:es, []).each do |e|
+          entry = PaneEntry.restore(e)
+          entries[entry.task_name] = entry
+        end
+        new(time, entries)
+      end
     end
 
     class PaneSet
@@ -87,6 +115,21 @@ module Sorge
       def add(time, task_name)
         new_pane = @panes.fetch(time) { Pane.new(time) }.add(task_name)
         self.class.new(@panes.merge(time => new_pane))
+      end
+
+      def dump
+        hash = {}
+        hash[:ps] = @panes.each_value.map(&:dump) unless @panes.empty?
+        hash
+      end
+
+      def self.restore(hash)
+        panes = {}
+        hash.fetch(:ps, []).each do |p|
+          pane = Pane.restore(p)
+          panes[pane.time] = pane
+        end
+        new(panes)
       end
     end
   end

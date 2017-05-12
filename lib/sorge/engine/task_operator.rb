@@ -16,7 +16,7 @@ module Sorge
         @state = {}
         @trigger_state = {}
         @pending = PaneSet.new
-        @running = []
+        @running = [] # Array<Pane>
         @finished = []
         @position = 0
 

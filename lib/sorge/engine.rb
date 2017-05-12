@@ -26,6 +26,7 @@ end
 require 'sorge/engine/event_queue'
 require 'sorge/engine/driver'
 require 'sorge/engine/jobflow_operator'
+require 'sorge/engine/jobflow_status'
 require 'sorge/engine/pane'
 require 'sorge/engine/savepoint'
 require 'sorge/engine/task_handler'

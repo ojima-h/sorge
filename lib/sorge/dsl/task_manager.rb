@@ -1,10 +1,13 @@
 module Sorge
   class DSL
     class TaskManager
+      extend Forwardable
+
       def initialize(dsl)
         @dsl = dsl
         @tasks = {}
       end
+      def_delegators :@tasks, :include?, :each, :keys
 
       # @param name [String, Symbol] task name
       # @param klass [Class] task class (Task or Mixin)
@@ -26,10 +29,13 @@ module Sorge
       end
       alias validate_name []
 
-      def each
-        @tasks.each do |name, task|
-          yield name, task if task < Task
+      def each_task(&block)
+        enum = Enumerator.new do |y|
+          @tasks.each do |task_name, task|
+            y << [task_name, task] if task < Task
+          end
         end
+        block_given? ? enum.each(&block) : enum
       end
     end
   end

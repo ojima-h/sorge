@@ -54,6 +54,7 @@ module Sorge
         def state=(state); end
 
         def dump_state
+          return {} if state.empty?
           state.merge(type: self.class.type)
         end
 
