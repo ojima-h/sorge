@@ -7,13 +7,15 @@ module Sorge
         end
       end
 
+      Event = Struct.new(:task_name, :time)
+
       def initialize(engine, task_name)
         @engine = engine
         @task = DSL.instance[task_name]
 
         @state = {}
         @trigger_state = {}
-        @pending = []
+        @pending = PaneSet.new
         @running = []
         @finished = []
         @position = 0
@@ -31,17 +33,20 @@ module Sorge
 
       def post(time, jobflow_status)
         @mutex.synchronize do
-          ns_enqueue([time], jobflow_status)
+          ns_enqueue([Event[nil, time]], jobflow_status)
           ns_collect_status
         end
       end
 
       def update(jobflow_status)
         @mutex.synchronize do
-          times = @task.upstreams.map do |task_name, _|
-            jobflow_status[task_name].finished
-          end.flatten
-          ns_enqueue(times, jobflow_status)
+          events = []
+          @task.upstreams.each do |task_name, _|
+            jobflow_status[task_name].finished.each do |time|
+              events << Event[task_name, time]
+            end
+          end
+          ns_enqueue(events, jobflow_status)
           ns_collect_status
         end
       end
@@ -64,45 +69,48 @@ module Sorge
 
       private
 
-      def ns_enqueue(times, _jobflow_status)
+      def ns_enqueue(events, jobflow_status)
         raise AlreadyStopped if @stop
-        ns_merge_pending(*times)
 
-        ready = ns_collect_ready
+        ns_append_events(events)
+        ready = ns_collect_ready(jobflow_status)
         return if ready.empty?
 
-        @running += ready
+        @running += ready.to_a
         @engine.worker.post { perform } if @running.length == ready.length
       end
 
-      def ns_merge_pending(*times)
-        time_truncs = times.map { |time| @task.time_trunc.call(time) }
-        @pending = (@pending + time_truncs).uniq
+      def ns_append_events(events)
+        events.each do |event|
+          time = @task.time_trunc.call(event.time)
+          @pending = @pending.add(time, event.task_name)
+        end
       end
 
-      def ns_collect_ready
-        ready, @pending = @task.trigger.call(@pending)
+      def ns_collect_ready(jobflow_status)
+        ready, pending = @task.trigger.call(@pending.panes, jobflow_status)
+        @pending = PaneSet[*pending]
         ready
       end
 
       def perform
         return @stopped.set if @stop
 
-        time = @mutex.synchronize { @running.first }
-        return if time.nil?
+        pane = @mutex.synchronize { @running.first }
+        return if pane.nil?
 
-        execute(time)
+        execute(pane)
 
         @mutex.synchronize do
           @running = @running[1..-1]
-          @finished += [time]
-          @position = [@position, time].max
+          @finished += [pane.time]
+          @position = [@position, pane.time].max
           @engine.worker.post { perform } unless @running.empty?
         end
       end
 
-      def execute(time)
-        context = Context[@engine.application, time, @state.dup]
+      def execute(pane)
+        context = Context[@engine.application, pane.time, @state.dup]
         @task.new(context).invoke
         @mutex.synchronize { @state = context.state }
       end

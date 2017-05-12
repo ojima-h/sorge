@@ -177,7 +177,7 @@ namespace :test_trigger do
 
   task :t5 do
     time_trunc ->(time) { time - 1 }
-    trigger ->(pending) { [pending, []] }
+    trigger ->(pending, _jobflow_status) { [pending, []] }
   end
 
   task :t6 do

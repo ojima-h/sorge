@@ -60,24 +60,24 @@ module Sorge
         task_operator.post(t1, ctx)
         sleep 0.1
         status = task_operator.update(ctx)
-        assert_equal [t0], status.pending
+        assert_equal [t0], status.pending.times
 
         task_operator.post(t1 + 1, ctx)
         sleep 0.1
         status = task_operator.update(ctx)
-        assert_equal [t0], status.pending, 'time is truncated'
+        assert_equal [t0], status.pending.times, 'time is truncated'
         assert_empty status.finished, 'no tasks run'
 
         task_operator.post(t1 - 60, ctx)
         sleep 0.1
         status = task_operator.update(ctx)
-        assert_equal [t0, t0 - 60], status.pending
+        assert_equal [t0, t0 - 60], status.pending.times
         assert_empty status.finished, 'no tasks run'
 
         task_operator.post(t1 + 3600, ctx)
         sleep 0.1
         status = task_operator.update(ctx)
-        assert_equal [t0 + 3600], status.pending
+        assert_equal [t0 + 3600], status.pending.times
         assert_equal [t0, t0 - 60], status.finished
       end
 

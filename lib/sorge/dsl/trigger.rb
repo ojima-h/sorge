@@ -92,7 +92,7 @@ module Sorge
           return [[], panes] if now - @last < @period
 
           @last = now
-          [panes, PaneSet[]]
+          [panes, []]
         end
       end
 

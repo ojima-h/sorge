@@ -44,7 +44,7 @@ module Sorge
         assert_equal 9, t5.time_trunc.call(10)
 
         assert_kind_of Proc, t5.trigger
-        assert_equal [[0], []], t5.trigger.call([0])
+        assert_equal [[0], []], t5.trigger.call([0], nil)
       end
     end
   end
