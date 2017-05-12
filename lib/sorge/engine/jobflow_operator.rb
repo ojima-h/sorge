@@ -15,6 +15,7 @@ module Sorge
 
         @heartbeat_interval = 0.1
         @next_heartbeat = nil
+        @complete = Concurrent::Event.new
         @stopped = Concurrent::Event.new
         @killed = Concurrent::Event.new
       end
@@ -23,13 +24,15 @@ module Sorge
         enqueue { post_task(task_name, time) }
       end
 
-      def invoke(task_name, time)
-        post_task(task_name, time)
-        loop do
-          @killed.wait(heartbeat)
-          break if complete?
-          break if @killed.set?
-        end
+      def complete?
+        @task_operators.each_value.all?(&:complete?) \
+        && !@jobflow_status.each_value.any?(&:next?)
+      end
+
+      # This is for testing.
+      # It may cause deadlock if there is lag | align triggers.
+      def wait_complete(timeout = nil)
+        @complete.wait(timeout)
       end
 
       def shutdown
@@ -43,6 +46,7 @@ module Sorge
 
       def kill
         @task_operators.each_value(&:kill)
+        @complete.set
         @killed.set
       end
 
@@ -62,6 +66,11 @@ module Sorge
         @jobflow_status = @jobflow_status.merge(task_name => st).freeze
       end
 
+      def update
+        update_tasks
+        complete? ? @complete.set : @complete.reset
+      end
+
       def update_tasks
         next_jobflow_status = {}
 
@@ -72,11 +81,6 @@ module Sorge
 
         @jobflow_status = next_jobflow_status.freeze
         # TODO: savepoint.update(jobflow_status)
-      end
-
-      def complete?
-        @task_operators.each_value.all?(&:complete?) \
-        && !@jobflow_status.each_value.any?(&:next?)
       end
 
       #
@@ -119,7 +123,7 @@ module Sorge
         @next_heartbeat ||= now + @heartbeat_interval
         return @next_heartbeat - now if @next_heartbeat > now
 
-        update_tasks
+        update
 
         @next_heartbeat += @heartbeat_interval
         @heartbeat_interval
