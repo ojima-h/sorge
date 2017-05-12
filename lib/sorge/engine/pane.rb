@@ -73,26 +73,20 @@ module Sorge
       def initialize(panes = {})
         @panes = panes
       end
-      attr_reader :panes
-      protected :panes
       def_delegators :@panes, :[], :include?, :empty?, :length
       def_delegator :@panes, :keys, :times
+      def_delegator :@panes, :values, :to_a
+      def_delegator :@panes, :values, :panes
       def_delegator :@panes, :each_value, :each
 
       def ==(other)
         return false unless other.is_a?(PaneSet)
-        @panes == other.panes
+        panes == other.panes
       end
 
       def add(time, task_name)
         new_pane = @panes.fetch(time) { Pane.new(time) }.add(task_name)
         self.class.new(@panes.merge(time => new_pane))
-      end
-
-      def partition
-        return to_enum(:partition) unless block_given?
-        a, b = super
-        [self.class[*a], self.class[*b]]
       end
     end
   end

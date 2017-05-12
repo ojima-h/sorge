@@ -57,17 +57,6 @@ module Sorge
                      pane_set.add(t2, 'bar')
         assert_equal PaneSet[t1 => 'foo'], pane_set
       end
-
-      def test_pane_set_partition
-        t1 = Time.now.to_i - 10
-        t2 = Time.now.to_i
-        pane_set = PaneSet[t1 => 'foo', t2 => 'bar']
-
-        a, b = pane_set.partition { |pane| pane.time < t1 + 5 }
-
-        assert_equal PaneSet[t1 => ['foo' => 1]], a
-        assert_equal PaneSet[t2 => ['bar' => 1]], b
-      end
     end
   end
 end

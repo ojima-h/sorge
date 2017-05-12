@@ -43,7 +43,7 @@ module Sorge
           @task = task
         end
 
-        def call(_pane_set, _jobflow_status)
+        def call(_panes, _jobflow_status)
           raise NotImplementedError
         end
 
@@ -65,8 +65,8 @@ module Sorge
       class Default < Base
         register :default
 
-        def call(pane_set, _jobflow_status)
-          [pane_set, []] # trigger all
+        def call(panes, _jobflow_status)
+          [panes, []] # trigger all
         end
       end
 
@@ -86,13 +86,13 @@ module Sorge
           @last = state[:last]
         end
 
-        def call(pane_set, _jobflow_status)
+        def call(panes, _jobflow_status)
           now = Time.now.to_i
 
-          return [[], pane_set] if now - @last < @period
+          return [[], panes] if now - @last < @period
 
           @last = now
-          [pane_set, []]
+          [panes, PaneSet[]]
         end
       end
 
@@ -112,10 +112,10 @@ module Sorge
           @latest = state[:latest]
         end
 
-        def call(pane_set, _jobflow_status)
-          @latest = [@latest, *pane_set.times].max
+        def call(panes, _jobflow_status)
+          @latest = [@latest, *panes.map(&:time)].max
 
-          pane_set.partition do |pane|
+          panes.partition do |pane|
             @latest - pane.time >= @lag
           end
         end
@@ -128,9 +128,9 @@ module Sorge
           @delay = delay
         end
 
-        def call(pane_set, _jobflow_status)
+        def call(panes, _jobflow_status)
           now = Time.now.to_i
-          pane_set.partition do |pane|
+          panes.partition do |pane|
             now - pane.time >= @delay
           end
         end
