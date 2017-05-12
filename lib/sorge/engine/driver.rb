@@ -7,7 +7,7 @@ module Sorge
       attr_reader :engine
 
       def submit(task_name, time)
-        DSL.instance.task_manager.validate_name(task_name)
+        Sorge.tasks.validate_name(task_name)
         @engine.jobflow_operator.submit(task_name, time)
       end
 

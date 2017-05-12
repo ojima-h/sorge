@@ -7,12 +7,12 @@ module Sorge
 
       def task(name, &block)
         full_name = Scope.current.join(name)
-        Sorge::DSL.instance.task_manager.define(full_name, Task, &block)
+        Sorge.tasks.define(full_name, Task, &block)
       end
 
       def mixin(name, &block)
         full_name = Scope.current.join(name)
-        Sorge::DSL.instance.task_manager.define(full_name, Mixin, &block)
+        Sorge.tasks.define(full_name, Mixin, &block)
       end
 
       def global(&block)

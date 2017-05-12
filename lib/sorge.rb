@@ -29,10 +29,6 @@ module Sorge
     end
     attr_writer :logger
   end
-
-  def self.tasks
-    DSL.instance.task_manager
-  end
 end
 
 # for jruby compatibility

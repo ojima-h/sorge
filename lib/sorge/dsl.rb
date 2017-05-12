@@ -10,7 +10,10 @@ module Sorge
       @task_graph = TaskGraph.new(self)
     end
     attr_reader :global, :task_manager, :task_graph
-    def_delegators :@task_manager, :define, :[]
+  end
+
+  def self.tasks
+    DSL.instance.task_manager
   end
 end
 
