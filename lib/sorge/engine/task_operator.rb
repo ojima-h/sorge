@@ -1,13 +1,8 @@
 module Sorge
   class Engine
     class TaskOperator
-      Context = Struct.new(:app, :time, :state) do
-        def job
-          Struct.new(:stash, :params)[{}, {}]
-        end
-      end
-
       Event = Struct.new(:task_name, :time)
+      TaskResult = Struct.new(:successed?, :state, :emitted)
 
       def initialize(engine, task_name)
         @engine = engine
@@ -113,20 +108,29 @@ module Sorge
         pane = @mutex.synchronize { @running.first }
         return if pane.nil?
 
-        execute(pane)
+        result = execute(pane)
 
         @mutex.synchronize do
-          @running = @running[1..-1]
-          @finished += [pane.time]
-          @position = [@position, pane.time].max
+          ns_update_status(result)
           @engine.worker.post { perform } unless @running.empty?
         end
       end
 
       def execute(pane)
-        context = Context[@engine.application, pane.time, @state.dup]
-        @task.new(context).invoke
-        @mutex.synchronize { @state = context.state }
+        context = DSL::TaskContext[@engine.application, pane.time, @state.dup]
+        task_instance = @task.new(context)
+        result = task_instance.invoke
+        TaskResult[result, context.state, task_instance.emitted]
+      end
+
+      def ns_update_status(result)
+        @state = result.state
+        pane, *@running = @running
+
+        return unless result.successed?
+
+        @finished += result.emitted.empty? ? [pane.time] : result.emitted
+        @position = [@position, pane.time].max
       end
 
       def ns_collect_status

@@ -3,44 +3,25 @@ module Sorge
     class Driver
       def initialize(engine)
         @engine = engine
-        @error = nil
       end
       attr_reader :engine
 
-      def submit(name, time)
-        DSL.instance.task_manager.validate_name(name)
-        @engine.event_queue.submit(:run, name: name, time: time)
-        self
+      def submit(task_name, time)
+        DSL.instance.task_manager.validate_name(task_name)
+        @engine.jobflow_operator.submit(task_name, time)
       end
 
       def shutdown
-        @engine.savepoint.stop
-        @engine.event_queue.shutdown
-        raise @error if @error
-        self
+        @engine.jobflow_operator.shutdown
       end
 
-      def kill(error)
-        @error = error
-        @engine.event_queue.kill
-        self
+      def kill
+        @engine.jobflow_operator.kill
       end
 
       def resume(file_path = 'latest')
-        if file_path == 'latest'
-          file_path = File.read(@engine.savepoint.latest_file_path)
-        end
-
-        hash = @engine.savepoint.read(file_path)
-        (hash[:states] || {}).each { |k, v| @engine.task_states[k] = v }
-
-        if @engine.application.remote_mode?
-          @engine.event_queue.resume(hash[:queue] || [], hash[:running] || [])
-        end
-
-        Sorge.logger.info("resumed from #{file_path}")
-
-        self
+        data = @engine.savepoint.read(file_path)
+        @engine.jobflow_operator.resume(data)
       end
     end
   end

@@ -24,6 +24,22 @@ module Sorge
       def test_helper
         assert_equal :h1, DSL.instance.task_manager['test_namespace:ns:t1'].h1
       end
+
+      def test_hook
+        job = DSL.instance['test_hook:t1'].new(TaskContext[app, 0, {}])
+        job.invoke
+        assert_equal [:before, :run, :successed_in_mixin, :successed, :after],
+                     SorgeTest.spy.map(&:name)
+      end
+
+      def test_hook2
+        job = DSL.instance['test_hook:t2'].new(TaskContext[app, 0, {}])
+        job.invoke
+        assert_equal [:before, :failed, :after], SorgeTest.spy.map(&:name)
+
+        e = SorgeTest.spy.find { |s| s.name == :failed }.error
+        assert_equal 'test', e.message
+      end
     end
   end
 end

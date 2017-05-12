@@ -12,11 +12,7 @@ module Sorge
              when String then Time.parse(time).to_i
              else time.to_i
              end
-        @emitted << tm
-      end
-
-      def to_h
-        emitted.empty? ? super : super.merge(time: emitted)
+        emitted << tm
       end
     end
   end

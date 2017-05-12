@@ -1,5 +1,11 @@
 module Sorge
   class DSL
+    TaskContext = Struct.new(:app, :time, :state) do
+      def job
+        Struct.new(:stash, :params)[{}, {}]
+      end
+    end
+
     class Task
       include Base
 

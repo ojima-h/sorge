@@ -45,11 +45,11 @@ module Sorge
 
     def assign_default_savepoint
       @config.savepoint_path ||= File.join(@config.process_dir, 'savepoints')
-      @config.savepoint_interval ||= -1 # fine savepoints
+      @config.savepoint_interval ||= 10
     end
 
     def assign_default_server
-      @config.server_rpc_port ||= 39410
+      @config.server_rpc_port ||= 39_410
       @config.server_rpc_retry ||= 3
     end
 

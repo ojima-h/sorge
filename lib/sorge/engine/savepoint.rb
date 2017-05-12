@@ -5,10 +5,8 @@ module Sorge
         @engine = engine
         @path = engine.config.savepoint_path
         @interval = engine.config.savepoint_interval
-
+        @last_saved = nil
         @latest = nil
-        @started = Concurrent::AtomicBoolean.new
-        @worker = nil
       end
       attr_reader :latest
 
@@ -16,54 +14,33 @@ module Sorge
         File.join(@path, 'latest')
       end
 
-      def stop
-        @worker.shutdown if @worker
+      def save(data)
+        return unless should_save?
+        save!(data)
       end
 
-      def start
-        return if @interval <= 0
-        return unless @started.make_true
+      def save!(data)
+        file_path = write(data)
+        @last_saved = Time.now
 
-        @worker = Concurrent::TimerTask.new(
-          execution_interval: interval,
-          timeout_interval: 60
-        ) do
-          @engine.event_queue.submit(:savepoint)
-        end.execute
-      end
-
-      def update
-        return unless @engine.application.remote_mode?
-
-        begin
-          file_path = @engine.synchronize { write }
-          swap(file_path)
-          Sorge.logger.info("savepoint updated: #{file_path}")
-        ensure
-          try_write(latest_file_path, latest)
-        end
-      end
-
-      # update savepoint everytime when event_queue consumes a message.
-      def fine_update
-        update if @interval < 0
+        swap(file_path)
+        Sorge.logger.info("savepoint updated: #{file_path}")
       end
 
       def read(file_path)
+        file_path = File.read(latest_file_path) if file_path == 'latest'
+        Sorge.logger.info("savepoint restored: #{file_path}")
         YAML.load_file(file_path)
       end
 
       private
 
-      def data
-        {
-          queue: @engine.event_queue.queue,
-          running: @engine.task_runner.running,
-          states: @engine.task_states
-        }
+      def should_save?
+        return true if @last_saved.nil?
+        Time.now >= @last_saved + @interval
       end
 
-      def write
+      def write(data)
         id = 'savepoint-' + Util.generate_id
         file_path = File.join(@path, id + '.yml')
         FileUtils.makedirs(File.dirname(file_path))
@@ -74,6 +51,8 @@ module Sorge
       def swap(file_path)
         f = @latest
         @latest = file_path
+        save_latest
+
         try_delete(f) if f
       end
 
@@ -83,8 +62,8 @@ module Sorge
         nil # savepoint file may be deleted while test running
       end
 
-      def try_write(file_path, body)
-        File.write(file_path, body)
+      def save_latest
+        File.write(latest_file_path, latest)
       rescue
         nil # savepoint file may be deleted while test running
       end

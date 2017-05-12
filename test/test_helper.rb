@@ -26,6 +26,11 @@ class SorgeTest < Minitest::Test
     @hooks
   end
 
+  def self.process_dir_lock(&block)
+    @mutex ||= Mutex.new
+    @mutex.synchronize(&block)
+  end
+
   def setup
     SorgeTest.spy.clear
     SorgeTest.hook.clear
@@ -38,15 +43,15 @@ class SorgeTest < Minitest::Test
   def teardown
     return unless @app
 
-    @app.kill('test finish')
+    @app.kill
     clear_savepoint
   end
 
   def clear_savepoint
-    f = @app.config.savepoint_path
-    FileUtils.rm_r(f) if File.exist?(f)
-  rescue
-    nil # this may fail if a new savepoint is created while cleaning.
+    SorgeTest.process_dir_lock do
+      f = @app.config.savepoint_path
+      FileUtils.rm_r(f) if File.exist?(f)
+    end
   end
 
   #
@@ -57,6 +62,8 @@ class SorgeTest < Minitest::Test
   end
 
   def invoke(task_name, time = nil)
-    app.submit(task_name, time || Time.now.to_i).shutdown
+    jobflow = app.engine.jobflow_operator
+    jobflow.submit(task_name, time || Time.now.to_i)
+    jobflow.wait_complete
   end
 end

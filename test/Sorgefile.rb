@@ -78,31 +78,6 @@ namespace :test_failure do
   end
 end
 
-namespace :test_window do
-  task :t0
-  task :t1 do
-    upstream :t0
-  end
-  task :t2
-
-  task :t3 do
-    window 3
-    upstream :t1
-    upstream :t2
-  end
-
-  task :t4 do
-    window :daily
-    upstream :t1
-  end
-
-  task :t5 do
-    window :daily, delay: 0
-    upstream :t2
-    upstream :t4
-  end
-end
-
 namespace :test_hook do
   mixin :m1 do
     successed { SorgeTest.spy(name: :successed_in_mixin) }

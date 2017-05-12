@@ -9,7 +9,7 @@ module Sorge
 
       def error_handler(error)
         Sorge.logger.fatal(Util.format_error_info(error))
-        @engine.application.kill(error)
+        @engine.application.kill
       end
 
       def with_error_handler
@@ -17,17 +17,6 @@ module Sorge
       rescue Exception => exception
         error_handler(exception)
         raise
-      end
-
-      def new_agent
-        Concurrent::Agent.new(nil, error_handler: method(:error_handler))
-      end
-
-      def post_agent(agent, *args)
-        agent.send_via(task_worker, *args) do |_, *my_args|
-          with_error_handler { yield(*my_args) }
-          nil
-        end
       end
 
       def post(&block)

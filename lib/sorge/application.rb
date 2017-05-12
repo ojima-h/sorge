@@ -12,23 +12,18 @@ module Sorge
 
       @engine = Engine.new(self)
       @server = Server.new(self)
-
-      @remote_mode = false
     end
     attr_reader :config, :env, :engine, :config, :server, :plugins
     def_delegators :'@engine.driver', :kill, :shutdown, :submit, :run, :resume
-
-    attr_accessor :remote_mode
-    alias remote_mode? remote_mode
 
     def shutdown
       @server.stop
       @engine.driver.shutdown
     end
 
-    def kill(error)
+    def kill
       @server.stop
-      @engine.driver.kill(error)
+      @engine.driver.kill
     end
 
     def name

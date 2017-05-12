@@ -80,7 +80,7 @@ module Sorge
 
       def update
         update_tasks
-        # TODO: savepoint.update(jobflow_status)
+        @engine.savepoint.save(@jobflow_status.dump)
         complete? ? @complete.set : @complete.reset
       end
 

@@ -8,41 +8,27 @@ module Sorge
       end
 
       def test_update
-        app.remote_mode = true
-        stub_data = {
-          queue: [
-            [:foo, param: 1],
-            [:foo, param: 2]
-          ],
-          running: {
-            'job_id' => { name: 'bar', time: 100 }
-          },
-          states: {
-            'bar' => { baz: 1 }
-          }
-        }
-        app.engine.savepoint.stub(:data, stub_data) do
-          savepoint.update
-
-          assert File.file?(savepoint.latest)
-          assert_equal stub_data, YAML.load_file(savepoint.latest)
-        end
+        data = { foo: 'bar' }
+        savepoint.save(data)
+        assert File.file?(savepoint.latest)
+        assert_equal data, savepoint.read('latest')
       end
 
       def test_clean
-        app.remote_mode = true
-        FileUtils.makedirs(app.config.savepoint_path)
-        junk = File.join(app.config.savepoint_path, 'junk')
-        File.write(junk, '')
+        SorgeTest.process_dir_lock do
+          FileUtils.makedirs(app.config.savepoint_path)
+          junk = File.join(app.config.savepoint_path, 'junk')
+          File.write(junk, '')
 
-        savepoint.update
-        path = savepoint.latest
-        assert File.file?(path)
-        assert File.file?(junk)
+          savepoint.save!(foo: 'bar')
+          path = savepoint.latest
+          assert File.file?(path)
+          assert File.file?(junk)
 
-        savepoint.update
-        refute File.file?(path)
-        assert File.file?(junk)
+          savepoint.save!(foo: 'bar')
+          refute File.file?(path)
+          assert File.file?(junk)
+        end
       end
     end
   end

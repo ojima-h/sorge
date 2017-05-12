@@ -18,7 +18,6 @@ module Sorge
       include CoreTime
       include CoreUpstreams
       include CoreUse
-      include CoreWindow
     end
   end
 end
