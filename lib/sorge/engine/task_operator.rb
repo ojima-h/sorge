@@ -38,6 +38,19 @@ module Sorge
         end
       end
 
+      def resume(task_status)
+        @mutex.synchronize do
+          @state         = task_status.state
+          @trigger_state = task_status.trigger_state
+          @pending       = task_status.pending
+          @running       = task_status.running
+          @finished      = task_status.finished
+          @position      = task_status.position
+
+          @engine.worker.post { perform } unless @running.empty?
+        end
+      end
+
       def update(jobflow_status)
         @mutex.synchronize do
           events = []

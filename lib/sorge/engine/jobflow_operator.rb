@@ -20,8 +20,20 @@ module Sorge
         @killed = Concurrent::Event.new
       end
 
+      def start
+        start_worker
+      end
+
       def submit(task_name, time)
         enqueue { post_task(task_name, time) }
+      end
+
+      def resume(data)
+        @jobflow_status = JobflowStatus.restore(data)
+        @task_operators.each do |task_name, task_operator|
+          task_operator.resume(@jobflow_status[task_name])
+        end
+        start_worker
       end
 
       def complete?
