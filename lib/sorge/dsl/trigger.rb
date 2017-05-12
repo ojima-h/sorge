@@ -24,7 +24,7 @@ module Sorge
           if type.is_a?(Symbol)
             self[type].new(task, *args, &block)
           else
-            type || block
+            self[:custom].new(task, type || block, *args)
           end
         end
       end
@@ -53,11 +53,11 @@ module Sorge
 
         def state=(state); end
 
-        def dump
+        def dump_state
           state.merge(type: self.class.type)
         end
 
-        def restore(state)
+        def restore_state(state)
           self.state = state if state[:type] == self.class.type
         end
       end
@@ -67,6 +67,18 @@ module Sorge
 
         def call(panes, _jobflow_status)
           [panes, []] # trigger all
+        end
+      end
+
+      class Custom < Base
+        register :custom
+
+        def initialize(_task, trigger)
+          @trigger = trigger
+        end
+
+        def call(panes, jobflow_status)
+          @trigger.call(panes, jobflow_status)
         end
       end
 

@@ -61,6 +61,7 @@ module Sorge
         sleep 0.1
         status = task_operator.update(ctx)
         assert_equal [t0], status.pending.times
+        assert_equal({ type: :lag, latest: t0 }, status.trigger_state)
         assert_equal 0, status.position
 
         task_operator.post(t1 + 1, ctx)
@@ -68,6 +69,7 @@ module Sorge
         status = task_operator.update(ctx)
         assert_equal [t0], status.pending.times, 'time is truncated'
         assert_empty status.finished, 'no tasks run'
+        assert_equal({ type: :lag, latest: t0 }, status.trigger_state)
         assert_equal 0, status.position
 
         task_operator.post(t1 - 60, ctx)
@@ -75,6 +77,7 @@ module Sorge
         status = task_operator.update(ctx)
         assert_equal [t0, t0 - 60], status.pending.times
         assert_empty status.finished, 'no tasks run'
+        assert_equal({ type: :lag, latest: t0 }, status.trigger_state)
         assert_equal 0, status.position
 
         task_operator.post(t1 + 3600, ctx)
@@ -82,6 +85,7 @@ module Sorge
         status = task_operator.update(ctx)
         assert_equal [t0 + 3600], status.pending.times
         assert_equal [t0, t0 - 60], status.finished
+        assert_equal({ type: :lag, latest: t0 + 3600 }, status.trigger_state)
         assert_equal t0, status.position
       end
 

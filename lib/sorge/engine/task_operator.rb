@@ -90,6 +90,7 @@ module Sorge
       def ns_collect_ready(jobflow_status)
         ready, pending = @task.trigger.call(@pending.panes, jobflow_status)
         @pending = PaneSet[*pending]
+        @trigger_state = @task.trigger.dump_state
         ready
       end
 
