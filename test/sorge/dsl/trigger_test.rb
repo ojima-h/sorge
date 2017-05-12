@@ -56,6 +56,27 @@ module Sorge
         assert_equal [t[-2], t[-1]], ready
         assert_equal [t[0]], pending
       end
+
+      def test_align
+        task = Sorge.tasks['test_namespace:t3']
+        trigger = Trigger::Align.new(task, 1)
+
+        now = Time.now.to_i
+        pos = ->(i) { Engine::TaskStatus.new.tap { |st| st.position = now + i } }
+        t = ->(i) { pane(now + i) }
+
+        jobflow_status = {
+          'test_namespace:ns:t1' => pos[10],
+          'test_namespace:ns:t2' => pos[12]
+        }
+
+        ready, pending = trigger.call(
+          [t[8], t[9], t[10], t[11], t[12], t[13]],
+          jobflow_status
+        )
+        assert_equal [t[8], t[9]], ready
+        assert_equal [t[10], t[11], t[12], t[13]], pending
+      end
     end
   end
 end

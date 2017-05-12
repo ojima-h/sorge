@@ -135,6 +135,26 @@ module Sorge
           end
         end
       end
+
+      class Align < Base
+        register :align
+
+        def initialize(task, lag = 0)
+          @task = task
+          @lag = lag
+        end
+
+        def call(panes, jobflow_status)
+          min_time = @task.upstreams.map do |task_name, _|
+            next 0 unless jobflow_status.include?(task_name)
+            jobflow_status[task_name].position
+          end.min
+
+          panes.partition do |pane|
+            pane.time <= min_time - @lag
+          end
+        end
+      end
     end
   end
 end
