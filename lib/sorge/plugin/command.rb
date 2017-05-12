@@ -3,7 +3,7 @@ mixin 'plugin:command' do
   set :script, nil
 
   def run
-    cmd = Sorge::Util.assume_array(command)
+    cmd = Array(command)
     ret = system(*cmd)
 
     return if ret

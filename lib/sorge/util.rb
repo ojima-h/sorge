@@ -27,12 +27,7 @@ module Sorge
       error_info
     end
 
-    def assume_array(obj)
-      return obj if obj.is_a? Array
-      [obj]
-    end
-
-    def assume_proc(value)
+    def Proc(value)
       return value if value.is_a? Proc
       proc { value }
     end

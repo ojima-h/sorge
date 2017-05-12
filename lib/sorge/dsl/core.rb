@@ -33,9 +33,8 @@ module Sorge
         @context = context
       end
       attr_reader :context
-      def_delegators :context, :app, :state, :job
+      def_delegators :context, :app, :state
       def_delegators :app, :env, :dryrun?
-      def_delegators :job, :stash
 
       def time
         @time ||= Time.at(context.time)
@@ -49,10 +48,6 @@ module Sorge
         task.name
       end
 
-      def to_h
-        { name: task.name, time: context.time, state: state }
-      end
-
       def inspect
         format('#<Task:0x00%x name=%s time=%d>',
                object_id << 1, task.name, time)
@@ -61,7 +56,6 @@ module Sorge
       def task
         self.class
       end
-      def_delegators :task, :name
 
       def logger
         Sorge.logger

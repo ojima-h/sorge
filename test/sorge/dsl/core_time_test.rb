@@ -4,21 +4,21 @@ module Sorge
   class DSL
     class CoreTimeTest < SorgeTest
       def test_default
-        t1 = tasks['test_trigger:t1']
+        t1 = Sorge.tasks['test_trigger:t1']
 
         assert_equal t1.trigger, Trigger.default
         assert_equal t1.time_trunc, TimeTrunc.default
       end
 
       def test_time_trunc
-        t2 = tasks['test_trigger:t2']
+        t2 = Sorge.tasks['test_trigger:t2']
 
         assert_kind_of TimeTrunc::Default, t2.time_trunc
         assert_equal 10, t2.time_trunc.instance_eval { @sec }
       end
 
       def test_declair
-        t3 = tasks['test_trigger:t3']
+        t3 = Sorge.tasks['test_trigger:t3']
 
         assert_kind_of TimeTrunc::Week, t3.time_trunc
         assert_equal 3, t3.time_trunc.instance_eval { @wday }
@@ -28,7 +28,7 @@ module Sorge
       end
 
       def test_with_block
-        t4 = tasks['test_trigger:t4']
+        t4 = Sorge.tasks['test_trigger:t4']
 
         assert_kind_of Proc, t4.time_trunc
         assert_equal 9, t4.time_trunc.call(10)
@@ -38,7 +38,7 @@ module Sorge
       end
 
       def test_with_lambda
-        t5 = tasks['test_trigger:t5']
+        t5 = Sorge.tasks['test_trigger:t5']
 
         assert_kind_of Proc, t5.time_trunc
         assert_equal 9, t5.time_trunc.call(10)

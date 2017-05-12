@@ -57,10 +57,6 @@ class SorgeTest < Minitest::Test
   #
   # Helpers
   #
-  def tasks
-    Sorge::DSL.instance.task_manager
-  end
-
   def invoke(task_name, time = nil)
     jobflow = app.engine.jobflow_operator
     jobflow.submit(task_name, time || Time.now.to_i)

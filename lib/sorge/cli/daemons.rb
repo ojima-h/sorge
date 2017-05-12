@@ -18,7 +18,6 @@ module Sorge
       abort 'sorge server is already running' if app_group.running?
 
       daemonize
-      @app.remote_mode = true
       @app.resume(@options['savepoint']) if @options['savepoint']
       @app.server.start
     end

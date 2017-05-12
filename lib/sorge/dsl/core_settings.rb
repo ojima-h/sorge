@@ -22,7 +22,7 @@ module Sorge
 
           define_method(name) do
             unless instance_variable_defined?(var)
-              val = Util.assume_proc(args.fetch(0, block || true))
+              val = Util::Proc(args.fetch(0, block || true))
               instance_variable_set(var, instance_exec(&val))
             end
             instance_variable_get(var)

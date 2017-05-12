@@ -25,7 +25,7 @@ module Sorge
         #     end
         #   end
         def upstream(name, as: nil)
-          up_task = @dsl.task_manager[name, Scope.current]
+          up_task = Sorge.tasks[name, Scope.current]
           @upstreams[up_task.name] = up_task
           @upstream_aliases[name] = up_task
           @upstream_aliases[as] = up_task if as
