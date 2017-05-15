@@ -1,6 +1,8 @@
 module Sorge
   class Engine
     class TaskOperator
+      extend Forwardable
+
       Event = Struct.new(:task_name, :time)
       TaskResult = Struct.new(:successed?, :state, :emitted)
 
@@ -15,14 +17,14 @@ module Sorge
         @finished = []
         @position = Time.at(0)
 
+        @worker = AsyncWorker.new(@engine)
         @mutex = Mutex.new
-        @stop = false
-        @stopped = Concurrent::Event.new
       end
+      def_delegators :@worker, :stop, :wait_stop, :kill
 
       def complete?
         @mutex.synchronize do
-          @stop || [@pending, @running, @finished].all?(&:empty?)
+          [@pending, @running, @finished].all?(&:empty?)
         end
       end
 
@@ -42,7 +44,7 @@ module Sorge
           @finished      = task_status.finished
           @position      = task_status.position
 
-          @engine.worker.post { perform } unless @running.empty?
+          @running.each { @worker.post { perform } }
         end
       end
 
@@ -59,33 +61,15 @@ module Sorge
         end
       end
 
-      def shutdown
-        @mutex.synchronize do
-          @stop = true
-          @stopped.set if @running.empty?
-        end
-      end
-
-      def wait_for_termination(timeout = nil)
-        @stopped.wait(timeout)
-      end
-
-      def kill
-        @stop = true
-        @stopped.set
-      end
-
       private
 
       def ns_enqueue(events, jobflow_status)
-        raise AlreadyStopped if @stop
-
         ns_append_events(events)
         ready = ns_collect_ready(jobflow_status)
         return if ready.empty?
 
         @running += ready.to_a
-        @engine.worker.post { perform } if @running.length == ready.length
+        ready.each { @worker.post { perform } }
       end
 
       def ns_append_events(events)
@@ -103,17 +87,11 @@ module Sorge
       end
 
       def perform
-        return @stopped.set if @stop
-
         pane = @mutex.synchronize { @running.first }
-        return if pane.nil?
 
         result = execute(pane)
 
-        @mutex.synchronize do
-          ns_update_status(result)
-          @engine.worker.post { perform } unless @running.empty?
-        end
+        @mutex.synchronize { ns_update_status(result) }
       end
 
       def execute(pane)

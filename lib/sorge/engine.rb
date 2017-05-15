@@ -17,6 +17,7 @@ module Sorge
   end
 end
 
+require 'sorge/engine/async_worker'
 require 'sorge/engine/driver'
 require 'sorge/engine/jobflow_operator'
 require 'sorge/engine/jobflow_status'

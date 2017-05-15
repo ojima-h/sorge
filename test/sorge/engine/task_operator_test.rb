@@ -89,15 +89,15 @@ module Sorge
         assert_equal t0, status.position
       end
 
-      def test_shutdown
+      def test_stop
         task_operator = make_task_operator('t1')
 
         task_operator.post(now, ctx)
-        task_operator.shutdown
+        task_operator.stop
         assert_raises Sorge::AlreadyStopped do
           task_operator.post(now + 1, ctx)
         end
-        task_operator.wait_for_termination
+        task_operator.wait_stop
       end
     end
   end
