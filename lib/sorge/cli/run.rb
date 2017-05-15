@@ -11,6 +11,7 @@ module Sorge
         @options = options
 
         @app.resume(@options['savepoint']) if @options['savepoint']
+        @app.engine.local = true
       end
 
       def run

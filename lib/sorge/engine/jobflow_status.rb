@@ -1,6 +1,18 @@
 module Sorge
   class Engine
     class JobflowStatus < Hash
+      def active?
+        each_value.any?(&:active?)
+      end
+
+      def complete?
+        each_value.all?(&:complete?)
+      end
+
+      def pending?
+        !active? && !complete?
+      end
+
       def dump
         hash = {}
         each do |task_name, task_status|

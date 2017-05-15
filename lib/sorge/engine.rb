@@ -10,10 +10,14 @@ module Sorge
       @driver = Driver.new(self)
       @jobflow_operator = JobflowOperator.new(self)
       @savepoint = Savepoint.new(self)
+
+      @local = false
     end
     attr_reader :application, :config,
                 :driver, :savepoint, :worker, :jobflow_operator
     def_delegators :@driver, :kill, :shutdown, :run, :submit, :resume
+    attr_accessor :local
+    alias local? local
   end
 end
 

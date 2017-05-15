@@ -19,12 +19,6 @@ module Sorge
         @mutex = Mutex.new
       end
 
-      def complete?
-        @mutex.synchronize do
-          @worker.stop? || [@pending, @running, @finished].all?(&:empty?)
-        end
-      end
-
       def post(time, jobflow_status)
         @mutex.synchronize do
           ns_enqueue([Event[nil, time]], jobflow_status)
@@ -42,6 +36,17 @@ module Sorge
           @position      = task_status.position
 
           @running.each { @worker.post { perform } }
+        end
+      end
+
+      def flush
+        @mutex.synchronize do
+          ps = @pending.panes
+          @pending = PaneSet[]
+          @running += ps
+          ps.each { @worker.post { perform } }
+
+          ns_collect_status
         end
       end
 

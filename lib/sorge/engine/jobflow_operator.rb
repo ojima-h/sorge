@@ -15,12 +15,8 @@ module Sorge
         @timer = create_timer
         @mutex = Mutex.new
         @complete = Concurrent::Event.new
+        @stop = false
         @stopped = Concurrent::Event.new
-      end
-
-      def complete?
-        @task_operators.each_value.all?(&:complete?) \
-        && !@jobflow_status.each_value.any?(&:next?)
       end
 
       def submit(task_name, time)
@@ -29,6 +25,10 @@ module Sorge
 
       def resume(data)
         post(data, &method(:ns_resume))
+      end
+
+      def wait_complete
+        @complete.wait
       end
 
       def start
@@ -45,10 +45,6 @@ module Sorge
 
       def wait_stop
         @stopped.wait
-      end
-
-      def wait_complete
-        @complete.wait
       end
 
       def kill
@@ -90,8 +86,8 @@ module Sorge
       #
       def ns_submit(task_name, time)
         task_operator = @task_operators[task_name]
-        st = task_operator.post(time, @jobflow_status)
-        @jobflow_status = @jobflow_status.merge(task_name => st).freeze
+        s = task_operator.post(time, @jobflow_status)
+        @jobflow_status = @jobflow_status.merge(task_name => s).freeze
       end
 
       def ns_resume(data)
@@ -102,9 +98,14 @@ module Sorge
       end
 
       def ns_update
-        ns_update_tasks
+        if @engine.local? && @jobflow_status.pending?
+          ns_flush_task
+        else
+          ns_update_tasks
+        end
+
         ns_savepoint
-        complete? ? @complete.set : @complete.reset
+        @jobflow_status.complete? ? @complete.set : @complete.reset
       end
 
       def ns_update_tasks
@@ -114,6 +115,14 @@ module Sorge
             task_operator.update(@jobflow_status)
         end
         @jobflow_status = next_jobflow_status.freeze
+      end
+
+      def ns_flush_task
+        task_name, = @jobflow_status.find { |_, o| o.pending? }
+        return if task_name.nil?
+
+        s = @task_operators[task_name].flush
+        @jobflow_status = @jobflow_status.merge(task_name => s).freeze
       end
 
       def ns_savepoint

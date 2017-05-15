@@ -3,12 +3,11 @@ require 'test_helper'
 module Sorge
   class Engine
     class JobflowOperatorTest < SorgeTest
-      def make_jobflow_operator
-        JobflowOperator.new(app.engine)
+      def jobflow
+        app.engine.jobflow_operator
       end
 
       def test_submit
-        jobflow = make_jobflow_operator
         jobflow.submit('test_namespace:ns:t1', now)
         jobflow.wait_complete
 
@@ -21,7 +20,6 @@ module Sorge
       end
 
       def test_kill
-        jobflow = make_jobflow_operator
         t = Thread.new { jobflow.invoke('test_namespace:ns:t1', now) }
         jobflow.kill
         begin
@@ -33,7 +31,6 @@ module Sorge
       end
 
       def test_resume
-        jobflow = make_jobflow_operator
         data = {
           'test_namespace:ns:t1' => {
             run: [{ tm: now, es: [{ name: nil }] }]
@@ -49,6 +46,15 @@ module Sorge
           'test_namespace:t3', 'test_namespace:t3',
           'test_namespace:t4', 'test_namespace:t4', 'test_namespace:t4'
         ], SorgeTest.spy.map(&:name).sort
+      end
+
+      def test_flush
+        app.engine.local = true
+        jobflow = app.engine.jobflow_operator
+        jobflow.submit('test_trigger:t6', now)
+        jobflow.wait_complete
+
+        assert_equal ['test_trigger:t6'], SorgeTest.spy.map(&:name).sort
       end
     end
   end

@@ -23,8 +23,16 @@ module Sorge
         freeze
       end
 
-      def next?
-        !finished.empty?
+      def active?
+        ![running, finished].all?(&:empty?)
+      end
+
+      def complete?
+        [pending, running, finished].all?(&:empty?)
+      end
+
+      def pending?
+        !active? && !complete?
       end
 
       def dump
