@@ -28,7 +28,7 @@ module Sorge
 
       def test_fatal_error
         invoke('test_failure:fatal', now)
-        assert app.engine.jobflow_operator.instance_eval { @killed.set? }
+        assert app.engine.jobflow_operator.instance_eval { @stopped.set? }
       end
 
       def test_unexpected_error

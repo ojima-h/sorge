@@ -9,7 +9,8 @@ module Sorge
         @stop = false
         @stopped = Concurrent::Event.new
       end
-      attr_reader :queue
+      attr_reader :queue, :stop
+      alias stop? stop
 
       def post(*args, &block)
         @mutex.synchronize do

@@ -1,8 +1,6 @@
 module Sorge
   class Engine
     class TaskOperator
-      extend Forwardable
-
       Event = Struct.new(:task_name, :time)
       TaskResult = Struct.new(:successed?, :state, :emitted)
 
@@ -20,11 +18,10 @@ module Sorge
         @worker = AsyncWorker.new(@engine)
         @mutex = Mutex.new
       end
-      def_delegators :@worker, :stop, :wait_stop, :kill
 
       def complete?
         @mutex.synchronize do
-          [@pending, @running, @finished].all?(&:empty?)
+          @worker.stop? || [@pending, @running, @finished].all?(&:empty?)
         end
       end
 
@@ -46,6 +43,19 @@ module Sorge
 
           @running.each { @worker.post { perform } }
         end
+      end
+
+      def stop
+        @worker.stop
+      end
+
+      def wait_stop
+        @worker.wait_stop
+        @mutex.synchronize { ns_collect_status }
+      end
+
+      def kill
+        @worker.kill
       end
 
       def update(jobflow_status)
