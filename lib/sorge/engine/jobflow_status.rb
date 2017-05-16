@@ -24,7 +24,8 @@ module Sorge
 
       def self.restore(hash)
         o = new
-        Sorge.tasks.each_task do |task_name, _|
+        DSL.task_definition.each do |task_name, definition|
+          next unless definition.klass <= DSL::Task
           o[task_name] =
             if (status = hash[task_name])
               TaskStatus.restore(status)

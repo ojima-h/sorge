@@ -4,7 +4,7 @@ module Sorge
       include Core
 
       class_methods do
-        def init(dsl, name)
+        def init(app, name)
           super
           @hooks = Hash.new { |hash, key| hash[key] = [] }
         end

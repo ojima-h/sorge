@@ -8,8 +8,8 @@ module Sorge
 
         def use(*mixins)
           ms = mixins.map do |name|
-            task = Sorge.tasks[name, Scope.current]
-            raise "#{mod} is not a mixin" unless task < Mixin
+            task = app.tasks[name, scope]
+            raise "#{task} is not a mixin" unless task < Mixin
             task
           end
 

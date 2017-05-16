@@ -2,18 +2,17 @@ module Sorge
   class DSL
     extend MonitorMixin
     extend Forwardable
-    include Singleton
 
-    def initialize
-      @global = Base.create(self, :global)
-      @task_manager = TaskManager.new(self)
-      @task_graph = TaskGraph.new(self)
+    def initialize(application)
+      @application = application
+
+      @tasks = TaskCollection.new(self, self.class.task_definition)
     end
-    attr_reader :global, :task_manager, :task_graph
-  end
+    attr_reader :application, :tasks
 
-  def self.tasks
-    DSL.instance.task_manager
+    def self.task_definition
+      @task_definition ||= TaskDefinition.new
+    end
   end
 end
 
@@ -34,7 +33,7 @@ require 'sorge/dsl/task'
 require 'sorge/dsl/linked_list'
 require 'sorge/dsl/syntax'
 require 'sorge/dsl/scope'
-require 'sorge/dsl/task_graph'
-require 'sorge/dsl/task_manager'
+require 'sorge/dsl/task_collection'
+require 'sorge/dsl/task_definition'
 require 'sorge/dsl/time_trunc'
 require 'sorge/dsl/trigger'

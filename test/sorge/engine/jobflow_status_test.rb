@@ -31,7 +31,7 @@ module Sorge
         restored = JobflowStatus.restore(jobflow_status.dump)
         assert_equal jobflow_status['t1'], restored['t1']
 
-        all_task_names = Sorge.tasks.each_task.map(&:first)
+        all_task_names = app.tasks.each_task.map(&:first)
         assert_equal all_task_names.sort, restored.keys.sort
       end
     end

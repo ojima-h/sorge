@@ -7,7 +7,7 @@ module Sorge
 
       def initialize(engine, task_name)
         @engine = engine
-        @task = Sorge.tasks[task_name]
+        @task = @engine.application.tasks[task_name]
 
         @state = {}
         @trigger_state = {}

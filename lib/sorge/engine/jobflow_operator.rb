@@ -66,7 +66,7 @@ module Sorge
       end
 
       def initialize_with_tasks
-        Sorge.tasks.each_task do |task_name, _|
+        @engine.application.tasks.each_task do |task_name, _|
           @task_operators[task_name] = TaskOperator.new(@engine, task_name)
           @jobflow_status[task_name] = TaskStatus.new.freeze!
         end
@@ -85,7 +85,7 @@ module Sorge
       # Async Handlers
       #
       def ns_submit(task_name, time)
-        task_operator = @task_operators[task_name]
+        task_operator = @task_operators.fetch(task_name)
         s = task_operator.post(time, @jobflow_status)
         @jobflow_status = @jobflow_status.merge(task_name => s).freeze
       end

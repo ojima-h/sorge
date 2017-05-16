@@ -15,11 +15,11 @@ global do
   end
 end
 
-task :t1
-
 task :t2 do
   upstream :t1
 end
+
+task :t1
 
 namespace :test_namespace do
   namespace :ns do

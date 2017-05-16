@@ -7,12 +7,13 @@ module Sorge
       class_methods do
         extend Forwardable
 
-        def init(dsl, name)
-          @dsl = dsl
+        def init(app, name)
+          @app = app
           @name = name
+          @scope = Scope.null
           @initialized = true
         end
-        attr_reader :name
+        attr_reader :app, :name, :scope
 
         def initialized?
           defined?(@initialized) && @initialized
@@ -26,6 +27,14 @@ module Sorge
         # Return a list of Mixin objects included.
         def super_mixin
           ancestors[1..-1].find { |o| o <= Core }
+        end
+
+        def in_scope(scope)
+          orig_scope = @scope
+          @scope = scope
+          yield
+        ensure
+          @scope = orig_scope
         end
       end
 

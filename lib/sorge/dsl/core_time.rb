@@ -4,7 +4,7 @@ module Sorge
       include Core
 
       class_methods do
-        def init(dsl, name)
+        def init(app, name)
           super
           @trigger = nil
           @time_trunc = nil

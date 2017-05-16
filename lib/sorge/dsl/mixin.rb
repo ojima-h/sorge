@@ -12,11 +12,11 @@ module Sorge
       class_methods do
         # Create new Mixin object.
         # @param task [Rake::Task] owner task
-        def create(dsl, name)
+        def create(app, name)
           Module.new do
             include Mixin
-            include dsl.global
-            init(dsl, name)
+            init(app, name)
+            use 'global' unless name == 'global'
           end
         end
       end

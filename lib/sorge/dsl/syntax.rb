@@ -7,16 +7,16 @@ module Sorge
 
       def task(name, &block)
         full_name = Scope.current.join(name)
-        Sorge.tasks.define(full_name, Task, &block)
+        DSL.task_definition.define(full_name, Task, Scope.current, &block)
       end
 
       def mixin(name, &block)
         full_name = Scope.current.join(name)
-        Sorge.tasks.define(full_name, Mixin, &block)
+        DSL.task_definition.define(full_name, Mixin, Scope.current, &block)
       end
 
       def global(&block)
-        Sorge::DSL.instance.global.class_eval(&block)
+        DSL.task_definition.define(:global, Mixin, Scope.current, &block)
       end
 
       def require_all(path)

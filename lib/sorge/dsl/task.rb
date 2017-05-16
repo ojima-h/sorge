@@ -6,10 +6,10 @@ module Sorge
       include Base
 
       class << self
-        def create(dsl, name)
+        def create(app, name)
           Class.new(self) do
-            include dsl.global
-            init(dsl, name)
+            init(app, name)
+            use :global
           end
         end
       end

@@ -66,7 +66,7 @@ module Sorge
       end
 
       def test_align
-        task = Sorge.tasks['test_namespace:t3']
+        task = app.tasks['test_namespace:t3']
         trigger = Trigger::Align.new(task, 1)
 
         pos = lambda do |i|
