@@ -4,6 +4,7 @@ module Sorge
 
     DEFAULT_PROCESS_DIR = './var/sorge'.freeze
     DEFAULT_CONFIG = {
+      app_name:           'sorge',
       heartbeat_interval: 1,
       process_dir:        DEFAULT_PROCESS_DIR,
       savepoint_path:     File.join(DEFAULT_PROCESS_DIR, 'savepoints'),
@@ -20,6 +21,10 @@ module Sorge
       @engine = Engine.new(self)
       @server = Server.new(self)
 
+      # In Sorgefile:
+      #   - setup blocks are registered
+      #   - tasks are declared
+      #   - plugins are loaded
       load_sorgefile
 
       @plugins = Plugin.build(self)
