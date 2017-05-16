@@ -5,8 +5,7 @@ module Sorge
 
     def initialize(app)
       @app = app
-
-      @tasks = TaskCollection.new(self, self.class.task_definition)
+      @tasks = TaskCollection.new(self)
     end
     attr_reader :app, :tasks
 

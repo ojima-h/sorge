@@ -17,17 +17,18 @@ module Sorge
       @config = OpenStruct.new(DEFAULT_CONFIG)
 
       @dsl = DSL.new(self)
-      @plugins = Plugin.build(self)
-      load_sorgefile
-      @dsl.tasks.build
-      setup
-
       @engine = Engine.new(self)
       @server = Server.new(self)
+
+      load_sorgefile
+
+      @plugins = Plugin.build(self)
+      @dsl.tasks.build
+      setup
     end
-    attr_reader :config, :dsl, :engine, :config, :server, :plugins
+    attr_reader :config, :dsl, :engine, :server, :plugins
     def_delegators :@dsl, :tasks
-    def_delegators :'@engine.driver', :kill, :shutdown, :submit, :run, :resume
+    def_delegators :'@engine.driver', :submit, :run, :resume
 
     def setup
       Sorge.setup.each { |block| block.call(self) }

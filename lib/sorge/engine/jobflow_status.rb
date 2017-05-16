@@ -1,6 +1,10 @@
 module Sorge
   class Engine
     class JobflowStatus < Hash
+      def [](key)
+        super || TaskStatus.new.freeze
+      end
+
       def active?
         each_value.any?(&:active?)
       end
@@ -24,14 +28,9 @@ module Sorge
 
       def self.restore(hash)
         o = new
-        DSL.task_definition.each do |task_name, definition|
-          next unless definition.klass <= DSL::Task
-          o[task_name] =
-            if (status = hash[task_name])
-              TaskStatus.restore(status)
-            else
-              TaskStatus.new
-            end
+        hash.each do |task_name, status|
+          next unless DSL.task_definition.include?(task_name)
+          o[task_name] = TaskStatus.restore(status)
         end
         o
       end

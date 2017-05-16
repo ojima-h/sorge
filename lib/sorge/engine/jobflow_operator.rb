@@ -5,18 +5,24 @@ module Sorge
 
       def initialize(engine)
         @engine = engine
-        @heartbeat_interval = engine.app.config.heartbeat_interval
 
         @task_operators = {}
-        @jobflow_status = JobflowStatus.new
-        initialize_with_tasks
+        @jobflow_status = JobflowStatus.new.freeze
 
         @worker = AsyncWorker.new(@engine)
-        @timer = create_timer
+        @timer = nil
         @mutex = Mutex.new
+        @started = Concurrent::AtomicBoolean.new
         @complete = Concurrent::Event.new
         @stop = false
         @stopped = Concurrent::Event.new
+      end
+
+      def start
+        return unless @started.make_true
+
+        setup_task_operators
+        start_timer
       end
 
       def submit(task_name, time)
@@ -31,13 +37,9 @@ module Sorge
         @complete.wait
       end
 
-      def start
-        @timer.execute
-      end
-
       def stop
         @mutex.synchronize do
-          @timer.shutdown
+          @timer.shutdown if @timer
           @stop = true
           post(&method(:ns_stop))
         end
@@ -55,29 +57,27 @@ module Sorge
 
       private
 
-      def create_timer
-        Concurrent::TimerTask.new(
-          execution_interval: @heartbeat_interval
-        ) do
+      def start_timer
+        opts = { execution_interval: @engine.config.heartbeat_interval }
+
+        @timer = Concurrent::TimerTask.execute(opts) do
           @engine.worker.with_error_handler do
             post(&method(:ns_update))
           end
         end
       end
 
-      def initialize_with_tasks
+      def setup_task_operators
         @engine.app.tasks.each_task do |task_name, _|
           @task_operators[task_name] = TaskOperator.new(@engine, task_name)
-          @jobflow_status[task_name] = TaskStatus.new.freeze!
         end
-        @jobflow_status.freeze
       end
 
       def post(*args, &block)
         @mutex.synchronize do
           raise AlreadyStopped if @stop
-          @worker.post(*args, &block)
           start
+          @worker.post(*args, &block)
         end
       end
 

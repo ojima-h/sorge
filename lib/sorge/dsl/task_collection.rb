@@ -6,9 +6,8 @@ module Sorge
       extend Forwardable
       include Enumerable
 
-      def initialize(dsl, task_definition)
+      def initialize(dsl)
         @dsl = dsl
-        @task_definition = task_definition
         @tasks = {}
         @matrix = nil
       end
@@ -23,7 +22,7 @@ module Sorge
 
       def [](name, scope = Scope.null)
         name = name.to_s
-        if scope.root? && !@task_definition.include?(name)
+        if scope.root? && !DSL.task_definition.include?(name)
           raise NameError, "undefined task #{name}"
         end
         fetch(scope.join(name)) || self[name, scope.parent]
@@ -37,14 +36,14 @@ module Sorge
       private
 
       def fetch(task_name)
-        return nil unless @task_definition.include?(task_name)
+        return nil unless DSL.task_definition.include?(task_name)
 
         @tasks[task_name] ||= \
-          @task_definition[task_name].create(@dsl.app)
+          DSL.task_definition[task_name].create(@dsl.app)
       end
 
       def build_all_tasks
-        @task_definition.each_key(&method(:fetch))
+        DSL.task_definition.each_key(&method(:fetch))
       end
 
       def build_matrix
