@@ -1,3 +1,7 @@
+Sorge.setup do |app|
+  app.config.heartbeat_interval = 0.1
+end
+
 global do
   def run
     if defined?(SorgeTest)

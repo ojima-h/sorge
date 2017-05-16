@@ -5,7 +5,7 @@ module Sorge
 
       def initialize(engine)
         @engine = engine
-        @heartbeat_interval = 0.1
+        @heartbeat_interval = engine.app.config.heartbeat_interval
 
         @task_operators = {}
         @jobflow_status = JobflowStatus.new

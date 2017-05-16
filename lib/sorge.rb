@@ -13,7 +13,6 @@ require 'concurrent'
 
 require 'sorge/dsl'
 require 'sorge/application'
-require 'sorge/config_loader'
 require 'sorge/util'
 require 'sorge/version'
 
@@ -28,6 +27,11 @@ module Sorge
       end
     end
     attr_writer :logger
+
+    def setup(&block)
+      @setup ||= []
+      block_given? ? @setup << block : @setup
+    end
   end
 end
 
