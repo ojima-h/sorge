@@ -43,30 +43,15 @@ module Sorge
           @task = task
         end
 
-        def call(_panes, _jobflow_status)
+        def call(_panes, _context)
           raise NotImplementedError
-        end
-
-        def state
-          {}
-        end
-
-        def state=(state); end
-
-        def dump_state
-          return {} if state.empty?
-          state.merge(type: self.class.type)
-        end
-
-        def restore_state(state)
-          self.state = state if state[:type] == self.class.type
         end
       end
 
       class Default < Base
         register :default
 
-        def call(panes, _jobflow_status)
+        def call(panes, _context)
           [panes, []] # trigger all
         end
       end
@@ -78,8 +63,8 @@ module Sorge
           @trigger = trigger
         end
 
-        def call(panes, jobflow_status)
-          @trigger.call(panes, jobflow_status)
+        def call(panes, context)
+          @trigger.call(panes, context)
         end
       end
 
@@ -88,23 +73,16 @@ module Sorge
 
         def initialize(_task, period)
           @period = period
-          @last = Time.now
         end
 
-        def state
-          { last: @last }
-        end
-
-        def state=(state)
-          @last = state[:last]
-        end
-
-        def call(panes, _jobflow_status)
+        def call(panes, context)
+          s = context.state
           now = Time.now
+          s[:last] ||= now
 
-          return [[], panes] if now - @last < @period
+          return [[], panes] if now - s[:last] < @period
 
-          @last = now
+          s[:last] = now
           [panes, []]
         end
       end
@@ -114,22 +92,14 @@ module Sorge
 
         def initialize(_task, lag)
           @lag = lag
-          @latest = Time.at(0)
         end
 
-        def state
-          { latest: @latest }
-        end
-
-        def state=(state)
-          @latest = state[:latest]
-        end
-
-        def call(panes, _jobflow_status)
-          @latest = [@latest, *panes.map(&:time)].max
+        def call(panes, context)
+          s = context.state
+          s[:latest] = [s[:latest] || Time.at(0), *panes.map(&:time)].max
 
           panes.partition do |pane|
-            @latest - pane.time >= @lag
+            s[:latest] - pane.time >= @lag
           end
         end
       end
@@ -141,7 +111,7 @@ module Sorge
           @delay = delay
         end
 
-        def call(panes, _jobflow_status)
+        def call(panes, _context)
           now = Time.now
           panes.partition do |pane|
             now - pane.time >= @delay
@@ -157,10 +127,10 @@ module Sorge
           @lag = lag
         end
 
-        def call(panes, jobflow_status)
+        def call(panes, context)
           min_time = @task.upstreams.map do |task_name, _|
-            next 0 unless jobflow_status.include?(task_name)
-            jobflow_status[task_name].position
+            next 0 unless context.jobflow_status.include?(task_name)
+            context.jobflow_status[task_name].position
           end.min
 
           panes.partition do |pane|

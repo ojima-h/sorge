@@ -47,16 +47,16 @@ module Sorge
       end
 
       def self.restore(hash)
-        new.tap do |o|
-          o.state         = hash[:st]   if hash.include?(:st)
-          o.trigger_state = hash[:tst]  if hash.include?(:tst)
-          o.pending       = PaneSet.restore(hash[:pnd]) \
-                                        if hash.include?(:pnd)
-          o.running       = hash[:run].map { |h| Pane.restore(h) } \
-                                        if hash.include?(:run)
-          o.finished      = hash[:fin]  if hash.include?(:fin)
-          o.position      = hash[:pos]  if hash.include?(:pos)
-        end.freeze!
+        o = new
+        o.state         = hash[:st]                   if hash.include?(:st)
+        o.trigger_state = hash[:tst]                  if hash.include?(:tst)
+        o.pending       = PaneSet.restore(hash[:pnd]) if hash.include?(:pnd)
+        o.running       = hash[:run].map { |h| Pane.restore(h) } \
+                                                      if hash.include?(:run)
+        o.finished      = hash[:fin]                  if hash.include?(:fin)
+        o.position      = hash[:pos]                  if hash.include?(:pos)
+
+        o.freeze!
       end
     end
   end

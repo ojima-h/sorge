@@ -3,6 +3,7 @@ module Sorge
     class TaskOperator
       Event = Struct.new(:task_name, :time)
       TaskResult = Struct.new(:successed?, :state, :emitted)
+      TriggerContext = Struct.new(:state, :jobflow_status)
 
       def initialize(engine, task_name)
         @engine = engine
@@ -95,9 +96,10 @@ module Sorge
       end
 
       def ns_collect_ready(jobflow_status)
-        ready, pending = @task.trigger.call(@pending.panes, jobflow_status)
+        context = TriggerContext[@trigger_state.dup, jobflow_status]
+        ready, pending = @task.trigger.call(@pending.panes, context)
         @pending = PaneSet[*pending]
-        @trigger_state = @task.trigger.dump_state
+        @trigger_state = context.state
         ready
       end
 

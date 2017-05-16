@@ -4,9 +4,16 @@ module Sorge
   class DSL
     class TriggerTest < SorgeTest
       Pane = Engine::Pane
+      TriggerContext = Engine::TaskOperator::TriggerContext
+
       def pane(time)
         Pane[time, 'foo']
       end
+
+      def context(state = {})
+        TriggerContext[state, {}]
+      end
+      alias ctx context
 
       def test_default
         trigger = Trigger.default
@@ -21,7 +28,7 @@ module Sorge
 
         count = 0
         5.times do
-          ready, = trigger.call(panes, {})
+          ready, = trigger.call(panes, ctx)
           count += 1 unless ready.empty?
           sleep 0.1
         end
@@ -31,28 +38,29 @@ module Sorge
 
       def test_lag
         trigger = Trigger::Lag.new(nil, 1)
+        ctx = context
 
         ps = ->(i) { pane(now + i) }
-        ready, pending = trigger.call([ps[8], ps[9], ps[10]], {})
+        ready, pending = trigger.call([ps[8], ps[9], ps[10]], ctx)
         assert_equal [ps[8], ps[9]], ready
         assert_equal [ps[10]], pending.to_a
 
-        ready, pending = trigger.call([ps[1], ps[2], ps[3]], {})
+        ready, pending = trigger.call([ps[1], ps[2], ps[3]], ctx)
         assert_equal [ps[1], ps[2], ps[3]], ready
         assert_equal [], pending.to_a
 
-        ready, pending = trigger.call([ps[9], ps[10], ps[11]], {})
+        ready, pending = trigger.call([ps[9], ps[10], ps[11]], ctx)
         assert_equal [ps[9], ps[10]], ready
         assert_equal [ps[11]], pending.to_a
 
-        assert_equal({ latest: now + 11 }, trigger.state)
+        assert_equal({ latest: now + 11 }, ctx.state)
       end
 
       def test_delay
         trigger = Trigger::Delay.new(nil, 3600)
         ps = ->(i) { pane(now + (i - 2) * 3600) }
 
-        ready, pending = trigger.call([ps[0], ps[1], ps[2]], {})
+        ready, pending = trigger.call([ps[0], ps[1], ps[2]], ctx)
         assert_equal [ps[0], ps[1]], ready
         assert_equal [ps[2]], pending
       end
@@ -66,14 +74,15 @@ module Sorge
         end
         ps = ->(i) { pane(now + i) }
 
-        jobflow_status = {
+        ctx = context
+        ctx.jobflow_status = {
           'test_namespace:ns:t1' => pos[10],
           'test_namespace:ns:t2' => pos[12]
         }
 
         ready, pending = trigger.call(
           [ps[8], ps[9], ps[10], ps[11], ps[12], ps[13]],
-          jobflow_status
+          ctx
         )
         assert_equal [ps[8], ps[9]], ready
         assert_equal [ps[10], ps[11], ps[12], ps[13]], pending
