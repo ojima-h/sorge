@@ -14,7 +14,7 @@ module Sorge
     def test_plugin
       assert_kind_of DummyPlugin, app.plugins.dummy
       assert_equal 1, app.plugins.dummy.number
-      assert_equal app, app.plugins.dummy.application
+      assert_equal app, app.plugins.dummy.app
     end
 
     def test_command

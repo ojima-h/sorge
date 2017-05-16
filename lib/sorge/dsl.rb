@@ -3,12 +3,12 @@ module Sorge
     extend MonitorMixin
     extend Forwardable
 
-    def initialize(application)
-      @application = application
+    def initialize(app)
+      @app = app
 
       @tasks = TaskCollection.new(self, self.class.task_definition)
     end
-    attr_reader :application, :tasks
+    attr_reader :app, :tasks
 
     def self.task_definition
       @task_definition ||= TaskDefinition.new

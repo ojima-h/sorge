@@ -40,7 +40,7 @@ module Sorge
         return nil unless @task_definition.include?(task_name)
 
         @tasks[task_name] ||= \
-          @task_definition[task_name].create(@dsl.application)
+          @task_definition[task_name].create(@dsl.app)
       end
 
       def build_all_tasks

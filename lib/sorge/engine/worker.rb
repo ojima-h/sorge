@@ -9,7 +9,7 @@ module Sorge
 
       def error_handler(error)
         Sorge.logger.fatal(Util.format_error_info(error))
-        @engine.application.kill
+        @engine.app.kill
       end
 
       def with_error_handler

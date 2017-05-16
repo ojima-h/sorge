@@ -2,9 +2,9 @@ module Sorge
   class Engine
     extend Forwardable
 
-    def initialize(application)
-      @application = application
-      @config = application.config
+    def initialize(app)
+      @app = app
+      @config = app.config
 
       @worker = Worker.new(self)
       @driver = Driver.new(self)
@@ -13,7 +13,7 @@ module Sorge
 
       @local = false
     end
-    attr_reader :application, :config,
+    attr_reader :app, :config,
                 :driver, :savepoint, :worker, :jobflow_operator
     def_delegators :@driver, :kill, :shutdown, :run, :submit, :resume
     attr_accessor :local

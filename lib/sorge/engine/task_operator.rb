@@ -7,7 +7,7 @@ module Sorge
 
       def initialize(engine, task_name)
         @engine = engine
-        @task = @engine.application.tasks[task_name]
+        @task = @engine.app.tasks[task_name]
 
         @state = {}
         @trigger_state = {}
@@ -112,7 +112,7 @@ module Sorge
       end
 
       def execute(pane)
-        context = DSL::TaskContext[@engine.application, pane.time, @state.dup]
+        context = DSL::TaskContext[@engine.app, pane.time, @state.dup]
         task_instance = @task.new(context)
         result = task_instance.invoke
         TaskResult[result, context.state, task_instance.emitted]

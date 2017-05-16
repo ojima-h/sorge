@@ -66,7 +66,7 @@ module Sorge
       end
 
       def initialize_with_tasks
-        @engine.application.tasks.each_task do |task_name, _|
+        @engine.app.tasks.each_task do |task_name, _|
           @task_operators[task_name] = TaskOperator.new(@engine, task_name)
           @jobflow_status[task_name] = TaskStatus.new.freeze!
         end
