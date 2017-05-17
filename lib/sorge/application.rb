@@ -48,10 +48,6 @@ module Sorge
       @engine.driver.kill
     end
 
-    def name
-      config.app_name
-    end
-
     def env
       @options[:env]
     end

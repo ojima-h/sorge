@@ -18,6 +18,8 @@ module Sorge
       @server.mount(PATH, s)
       write_server_info
       @server.start
+    ensure
+      delete_server_info
     end
 
     def stop
@@ -45,6 +47,13 @@ module Sorge
     def write_server_info
       path = @app.config.server_info_path
       File.write(path, YAML.dump(port: @server.config[:Port]))
+    end
+
+    def delete_server_info
+      path = @app.config.server_info_path
+      File.delete(path)
+    rescue
+      nil
     end
 
     class JobflowHandler

@@ -41,10 +41,13 @@ module Sorge
     option :daemonize, aliases: '-d', desc: 'run in the background'
     def start
       require 'sorge/cli/daemons'
-      Daemons.new(app, options).start
+      Daemons.new(app, options['daemonize']).start
+
+      app.resume(options['savepoint']) if options['savepoint']
+      app.server.start
     end
 
-    desc 'stop', 'Stop sorge daemon'
+    desc 'stop', 'Stop sorge server'
     def stop
       require 'sorge/cli/daemons'
       Daemons.new(app, options).stop

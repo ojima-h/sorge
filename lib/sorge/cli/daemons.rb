@@ -2,46 +2,38 @@ require 'daemons'
 
 module Sorge
   class Daemons
-    def initialize(app, options)
+    def initialize(app, daemonize = true)
       @app = app
-      @options = options
-
-      @process_dir = @app.config.process_dir
+      @daemonize = daemonize
     end
 
     def app_group
-      @app_group ||= ::Daemons::ApplicationGroup.new(@app.name, daemon_options)
-                                                .tap(&:setup)
+      @app_group ||=
+        ::Daemons::ApplicationGroup.new(@app.config.name, daemons_option)
+                                   .tap(&:setup)
     end
 
     def start
-      abort 'sorge server is already running' if app_group.running?
+      FileUtils.makedirs(@app.config.process_dir)
+      pwd = Dir.pwd
 
-      daemonize
-      @app.resume(@options['savepoint']) if @options['savepoint']
-      @app.server.start
+      app_group.new_application(mode: :none).start
+
+      Dir.chdir pwd
     end
 
     def stop
-      abort 'no process found' if app_group.applications.empty?
       app_group.stop_all
     end
 
     private
 
-    def daemon_options
-      { ontop: !@options['daemonize'],
-        app_name: @app.name,
+    def daemons_option
+      { ontop: !@daemonize,
+        app_name: @app.config.name,
         dir_mode: :normal,
-        dir: @process_dir,
+        dir: @app.config.process_dir,
         log_output: true }
-    end
-
-    def daemonize
-      FileUtils.makedirs(@process_dir)
-      pwd = Dir.pwd
-      ::Daemons.daemonize(daemon_options)
-      Dir.chdir pwd
     end
   end
 end
