@@ -57,9 +57,13 @@ module Sorge
     end
 
     class JobflowHandler
+      WAIT_STOP_TIMEOUT = 10
+
       def self.interface
         XMLRPC.interface('jobflow') do
           meth 'void submit(string, time)'
+          meth 'void stop()'
+          meth 'void wait_stop()'
         end
       end
 
@@ -73,6 +77,16 @@ module Sorge
 
       def submit(task_name, time)
         @app.submit(task_name, Util::Time(time))
+        true
+      end
+
+      def stop
+        @app.engine.stop
+        true
+      end
+
+      def wait_stop
+        @app.engine.wait_stop(WAIT_STOP_TIMEOUT)
       end
     end
   end

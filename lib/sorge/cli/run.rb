@@ -1,25 +1,28 @@
-require 'sorge/cli/parser'
+require 'sorge/cli/common'
 
 module Sorge
   class CLI
     class Run
-      def initialize(app, task_name, time, args, options)
-        @app = app
-        @task_name = task_name
-        @time = Util::Time(time)
-        @params = Parser.parse(args)
+      include Common
+
+      def initialize(options)
         @options = options
+        @app = build_app(options)
+      end
 
+      def run(task, time)
         @app.resume(@options['savepoint']) if @options['savepoint']
-        @app.engine.local = true
+        @app.run(task, Util::Time(time))
       end
 
-      def run
-        @app.submit(@task_name, @time).shutdown
+      def execute(task, time)
+        context = DSL::TaskContext[@app, Util::Time(time), {}]
+        @app.tasks[task].new(context).invoke
       end
 
-      def exec
-        Engine::TaskHandler.new(@app.engine, @task_name).to_job(@time).invoke
+      def submit(task, time)
+        client = @app.server.client
+        client.call('jobflow.submit', task, Util::Time(time).to_f)
       end
     end
   end

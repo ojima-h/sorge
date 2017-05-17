@@ -5,35 +5,40 @@ module Sorge
     def initialize(app, daemonize = true)
       @app = app
       @daemonize = daemonize
-    end
+      @group = build_application_group
 
-    def app_group
-      @app_group ||=
-        ::Daemons::ApplicationGroup.new(@app.config.name, daemons_option)
-                                   .tap(&:setup)
+      FileUtils.makedirs(@app.config.process_dir)
     end
 
     def start
-      FileUtils.makedirs(@app.config.process_dir)
-      pwd = Dir.pwd
-
-      app_group.new_application(mode: :none).start
-
-      Dir.chdir pwd
+      keepdir { @group.new_application.start }
     end
 
     def stop
-      app_group.stop_all
+      @group.stop_all
     end
 
     private
 
+    def build_application_group
+      ::Daemons::ApplicationGroup.new(@app.config.app_name, daemons_option)
+                                 .tap(&:setup)
+    end
+
     def daemons_option
       { ontop: !@daemonize,
-        app_name: @app.config.name,
+        mode: :none,
+        app_name: @app.config.app_name,
         dir_mode: :normal,
         dir: @app.config.process_dir,
         log_output: true }
+    end
+
+    def keepdir
+      pwd = Dir.pwd
+      yield
+    ensure
+      Dir.chdir pwd
     end
   end
 end

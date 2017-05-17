@@ -20,7 +20,7 @@ module Sorge
       error_info << "#{error.class}: #{error.message}\n"
 
       bt = error.backtrace || []
-      bt = bt.head(depth) if depth
+      bt = bt.first(depth) if depth
       bt.each do |line|
         error_info << ' ' * 8 + 'from ' + line + "\n"
       end
