@@ -43,6 +43,7 @@ module Sorge
       when Date then time.to_time
       when Time then time
       when String then Time.parse(time)
+      when ->(t) { t.respond_to?(:to_time) } then time.to_time
       else Time.parse(time)
       end
     end

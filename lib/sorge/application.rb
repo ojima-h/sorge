@@ -9,8 +9,7 @@ module Sorge
       process_dir:        DEFAULT_PROCESS_DIR,
       savepoint_path:     File.join(DEFAULT_PROCESS_DIR, 'savepoints'),
       savepoint_interval: 10,
-      server_rpc_port:    39_410,
-      server_rpc_retry:   3
+      server_info_path:   File.join(DEFAULT_PROCESS_DIR, 'server-info.yml')
     }.freeze
 
     def initialize(options = {})
