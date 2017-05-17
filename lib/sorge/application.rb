@@ -32,20 +32,25 @@ module Sorge
     end
     attr_reader :config, :dsl, :engine, :server, :plugins
     def_delegators :@dsl, :tasks
-    def_delegators :'@engine.driver', :submit, :run, :resume
+    def_delegators :'@engine', :submit, :resume, :run
 
     def setup
       Sorge.setup.each { |block| block.call(self) }
     end
 
-    def shutdown
+    def start
+      @engine.start
+      @server.start
+    end
+
+    def stop
       @server.stop
-      @engine.driver.shutdown
+      @engine.stop
     end
 
     def kill
       @server.stop
-      @engine.driver.kill
+      @engine.kill
     end
 
     def env

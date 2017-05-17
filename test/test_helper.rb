@@ -58,9 +58,7 @@ class SorgeTest < Minitest::Test
   # Helpers
   #
   def invoke(task_name, time = nil)
-    jobflow = app.engine.jobflow_operator
-    jobflow.submit(task_name, time || now)
-    jobflow.wait_complete
+    app.run(task_name, time || now)
   end
 
   def now

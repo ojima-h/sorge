@@ -7,22 +7,30 @@ module Sorge
       @config = app.config
 
       @worker = Worker.new(self)
-      @driver = Driver.new(self)
       @jobflow_operator = JobflowOperator.new(self)
       @savepoint = Savepoint.new(self)
-
-      @local = false
     end
-    attr_reader :app, :config,
-                :driver, :savepoint, :worker, :jobflow_operator
-    def_delegators :@driver, :kill, :shutdown, :run, :submit, :resume
-    attr_accessor :local
-    alias local? local
+    attr_reader :app, :config, :savepoint, :worker, :jobflow_operator
+    def_delegators :@jobflow_operator, :start, :stop, :wait_stop, :kill
+
+    def submit(task_name, time)
+      @app.tasks.validate_name(task_name)
+      @jobflow_operator.submit(task_name, time)
+    end
+
+    def run(task_name, time)
+      @app.tasks.validate_name(task_name)
+      @jobflow_operator.run(task_name, time)
+    end
+
+    def resume(file_path = 'latest')
+      data = @savepoint.read(file_path)
+      @jobflow_operator.resume(data)
+    end
   end
 end
 
 require 'sorge/engine/async_worker'
-require 'sorge/engine/driver'
 require 'sorge/engine/jobflow_operator'
 require 'sorge/engine/jobflow_status'
 require 'sorge/engine/pane'

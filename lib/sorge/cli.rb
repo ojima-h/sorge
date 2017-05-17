@@ -44,7 +44,7 @@ module Sorge
       Daemons.new(app, options['daemonize']).start
 
       app.resume(options['savepoint']) if options['savepoint']
-      app.server.start
+      app.start
     end
 
     desc 'stop', 'Stop sorge server'

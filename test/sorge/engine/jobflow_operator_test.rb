@@ -48,11 +48,9 @@ module Sorge
         ], SorgeTest.spy.map(&:name).sort
       end
 
-      def test_flush
-        app.engine.local = true
+      def test_run
         jobflow = app.engine.jobflow_operator
-        jobflow.submit('test_trigger:t6', now)
-        jobflow.wait_complete
+        jobflow.run('test_trigger:t6', now)
 
         assert_equal ['test_trigger:t6'], SorgeTest.spy.map(&:name).sort
       end
