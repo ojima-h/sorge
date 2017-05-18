@@ -16,7 +16,7 @@ module Sorge
       end
 
       def execute(task, time)
-        context = DSL::TaskContext[@app, Util::Time(time), {}]
+        context = DSL::TaskContext[Util::Time(time)]
         @app.tasks[task].new(context).invoke
       end
 

@@ -112,7 +112,7 @@ module Sorge
       end
 
       def execute(pane)
-        context = DSL::TaskContext[@engine.app, pane.time, @state.dup]
+        context = DSL::TaskContext[pane.time, @state.dup, pane]
         task_instance = @task.new(context)
         result = task_instance.invoke
         TaskResult[result, context.state, task_instance.emitted]

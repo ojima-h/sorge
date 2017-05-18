@@ -30,6 +30,7 @@ module Sorge
       # Pane[time, 'foo' => 3, 'bar' => 1, ...]
       def self.[](time, *entries)
         entries = entries.first if entries.first.is_a?(Hash)
+        entries = [nil] if entries.empty?
         es = entries.map do |entry|
           next [entry.task_name, entry] if entry.is_a?(PaneEntry)
           task_name, count = entry

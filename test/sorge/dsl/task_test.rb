@@ -26,14 +26,14 @@ module Sorge
       end
 
       def test_hook
-        job = app.tasks['test_hook:t1'].new(TaskContext[app, 0, {}])
+        job = app.tasks['test_hook:t1'].new(TaskContext[0])
         job.invoke
         assert_equal [:before, :run, :successed_in_mixin, :successed, :after],
                      SorgeTest.spy.map(&:name)
       end
 
       def test_hook2
-        job = app.tasks['test_hook:t2'].new(TaskContext[app, 0, {}])
+        job = app.tasks['test_hook:t2'].new(TaskContext[0])
         job.invoke
         assert_equal [:before, :failed, :after], SorgeTest.spy.map(&:name)
 

@@ -1,6 +1,12 @@
 module Sorge
   class DSL
-    TaskContext = Struct.new(:app, :time, :state)
+    TaskContext = Struct.new(:time, :state, :pane) do
+      def initialize(*args)
+        super
+        self.state ||= {}
+        self.pane ||= Engine::Pane[time]
+      end
+    end
 
     class Task
       include Base
