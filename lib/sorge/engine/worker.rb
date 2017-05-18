@@ -1,9 +1,14 @@
 module Sorge
   class Engine
     class Worker
+      JOBFLOW = Object.new
+
       def initialize(engine)
         @engine = engine
-        @task_worker = Concurrent::FixedThreadPool.new(4)
+        @workers = {
+          JOBFLOW => Concurrent::FixedThreadPool.new(1),
+          :default => Concurrent::FixedThreadPool.new(4)
+        }
       end
       attr_reader :task_worker
 
@@ -19,10 +24,15 @@ module Sorge
         raise
       end
 
-      def post(&block)
-        @task_worker.post(block) do |my_block|
+      def post(name, &block)
+        @workers.fetch(name).post(block) do |my_block|
           with_error_handler(&my_block)
         end
+      end
+
+      def kill
+        @workers[JOBFLOW].kill # kill jobflow worker first
+        @workers.each_value(&:kill)
       end
     end
   end

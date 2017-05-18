@@ -1,8 +1,9 @@
 module Sorge
   class Engine
     class AsyncWorker
-      def initialize(engine)
+      def initialize(engine, worker_name)
         @engine = engine
+        @worker_name = worker_name
 
         @mutex = Mutex.new
         @queue = []
@@ -16,7 +17,7 @@ module Sorge
         @mutex.synchronize do
           raise AlreadyStopped if @stop
           @queue << [args, block]
-          @engine.worker.post { perform } if @queue.length == 1
+          @engine.worker.post(@worker_name) { perform } if @queue.length == 1
         end
       end
 
@@ -46,7 +47,7 @@ module Sorge
         @mutex.synchronize do
           @queue.shift
           return @stopped.set if @stop
-          @engine.worker.post { perform } unless @queue.empty?
+          @engine.worker.post(@worker_name) { perform } unless @queue.empty?
         end
       end
     end

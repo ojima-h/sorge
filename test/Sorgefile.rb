@@ -1,5 +1,15 @@
 Sorge.setup do |app|
+  test_dir = File.expand_path('../../var/sorge-test', __FILE__)
+  process_dir = File.join(test_dir, Sorge::Util.generate_id)
+
+  app.config.process_dir      = process_dir
+  app.config.savepoint_path   = File.join(process_dir, 'savepoints')
+  app.config.server_info_path = File.join(process_dir, 'server-info.yml')
+
   app.config.heartbeat_interval = 0.1
+
+  cleanup = -> { FileUtils.rm_r(process_dir) if File.exist?(process_dir) }
+  defined?(Minitest) ? Minitest.after_run(&cleanup) : at_exit(&cleanup)
 end
 
 global do

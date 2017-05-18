@@ -11,7 +11,7 @@ module Sorge
       @savepoint = Savepoint.new(self)
     end
     attr_reader :app, :config, :savepoint, :worker, :jobflow_operator
-    def_delegators :@jobflow_operator, :start, :stop, :wait_stop, :kill
+    def_delegators :@jobflow_operator, :start, :stop, :wait_stop
 
     def submit(task_name, time)
       @app.tasks.validate_name(task_name)
@@ -26,6 +26,11 @@ module Sorge
     def resume(file_path = 'latest')
       data = @savepoint.read(file_path)
       @jobflow_operator.resume(data)
+    end
+
+    def kill
+      @jobflow_operator.kill
+      @worker.kill
     end
   end
 end

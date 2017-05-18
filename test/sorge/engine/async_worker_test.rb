@@ -4,7 +4,7 @@ module Sorge
   class Engine
     class AsyncWorkerTest < SorgeTest
       def test_post
-        worker = AsyncWorker.new(app.engine)
+        worker = AsyncWorker.new(app.engine, :default)
 
         q = []
         c = Concurrent::CountDownLatch.new(10)
@@ -20,7 +20,7 @@ module Sorge
       end
 
       def test_stop
-        worker = AsyncWorker.new(app.engine)
+        worker = AsyncWorker.new(app.engine, :default)
 
         q = []
         b = Concurrent::CyclicBarrier.new(2)

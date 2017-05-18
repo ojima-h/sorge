@@ -9,7 +9,7 @@ module Sorge
         @task_operators = {}
         @status = JobflowStatus.new.freeze
 
-        @worker = AsyncWorker.new(@engine)
+        @worker = AsyncWorker.new(@engine, Worker::JOBFLOW)
         @timer = nil
         @mutex = Mutex.new
         @started = Concurrent::AtomicBoolean.new
@@ -61,6 +61,7 @@ module Sorge
       end
 
       def kill
+        @timer.shutdown if @timer
         @task_operators.each_value(&:kill)
         @stopped.set
         @complete.set
