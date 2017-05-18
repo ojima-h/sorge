@@ -36,6 +36,14 @@ module Sorge
         stop_process
       end
 
+      def ping
+        client = @app.server.client
+        client.call('ping')
+        puts 'ok'
+      rescue => e
+        abort "ng (#{e})"
+      end
+
       private
 
       def stop_jobflow

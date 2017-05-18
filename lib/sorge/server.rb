@@ -11,11 +11,8 @@ module Sorge
       require 'webrick'
       require 'xmlrpc/server'
 
-      s = XMLRPC::WEBrickServlet.new
-      JobflowHandler.add_to(s, @app)
-
       @server = build_webrick
-      @server.mount(PATH, s)
+      @server.mount(PATH, build_servlet)
       write_server_info
       @server.start
     ensure
@@ -46,6 +43,13 @@ module Sorge
       )
     end
 
+    def build_servlet
+      servlet = XMLRPC::WEBrickServlet.new
+      servlet.add_handler('ping') { 'pong' }
+      JobflowHandler.add_to(servlet, @app)
+      servlet
+    end
+
     def read_server_info
       path = @app.config.server_info_path
       YAML.load_file(path)
@@ -70,6 +74,7 @@ module Sorge
       def self.interface
         XMLRPC.interface('jobflow') do
           meth 'void submit(string, time)'
+          meth 'struct status()'
           meth 'void stop()'
           meth 'void wait_stop()'
         end
@@ -86,6 +91,10 @@ module Sorge
       def submit(task_name, time)
         @app.submit(task_name, Util::Time(time))
         true
+      end
+
+      def status
+        YAML.dump(@app.engine.jobflow_operator.status.dump)
       end
 
       def stop

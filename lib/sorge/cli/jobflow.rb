@@ -2,7 +2,7 @@ require 'sorge/cli/common'
 
 module Sorge
   class CLI
-    class Run
+    class Jobflow
       include Common
 
       def initialize(options)
@@ -23,6 +23,11 @@ module Sorge
       def submit(task, time)
         client = @app.server.client
         client.call('jobflow.submit', task, Util::Time(time).to_f)
+      end
+
+      def status
+        client = @app.server.client
+        puts client.call('jobflow.status')
       end
     end
   end

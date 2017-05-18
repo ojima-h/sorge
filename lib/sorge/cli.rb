@@ -45,28 +45,34 @@ module Sorge
     end
 
     #
-    # Task Runner Commands
+    # Jobflow Commands
     #
     desc 'submit', 'Submit a job to server'
     def submit(task, time = Time.now)
-      require 'sorge/cli/run'
-      Run.new(options).submit(task, time)
+      require 'sorge/cli/jobflow'
+      Jobflow.new(options).submit(task, time)
     end
 
     desc 'run TASK [TIME]', 'Run task'
     option_savepoint
     option_dryrun
     def _run(task, time = Time.now)
-      require 'sorge/cli/run'
-      Run.new(options).run(task, time)
+      require 'sorge/cli/jobflow'
+      Jobflow.new(options).run(task, time)
     end
     map run: :_run
 
     desc 'exec TASK [TIME]', 'Execute single task'
     option_dryrun
     def exec(task, time = Time.now)
-      require 'sorge/cli/run'
-      Run.new(options).execute(task, time)
+      require 'sorge/cli/jobflow'
+      Jobflow.new(options).execute(task, time)
+    end
+
+    desc 'status', 'Display jobflow status'
+    def status
+      require 'sorge/cli/jobflow'
+      Jobflow.new(options).status
     end
 
     #
@@ -101,6 +107,12 @@ module Sorge
     def kill
       require 'sorge/cli/server'
       Server.new(options).kill
+    end
+
+    desc 'ping', 'Ping server'
+    def ping
+      require 'sorge/cli/server'
+      Server.new(options).ping
     end
   end
 end
