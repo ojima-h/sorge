@@ -30,7 +30,12 @@ global do
 end
 
 task :t2 do
+  upstream :t0
   upstream :t1
+end
+
+task :t0 do
+  before { skip }
 end
 
 task :t1
@@ -114,7 +119,8 @@ namespace :test_hook do
 
     successed { SorgeTest.spy(name: :successed) }
     failed { |error| SorgeTest.spy(name: :failed, error: error) }
-    after { SorgeTest.spy(name: :after) }
+    finally { SorgeTest.spy(name: :finally) }
+    finally { raise 'test' }
   end
 
   task :t2 do
@@ -126,7 +132,7 @@ namespace :test_hook do
 
     successed { SorgeTest.spy(name: :successed) }
     failed { |error| SorgeTest.spy(name: :failed, error: error) }
-    after { SorgeTest.spy(name: :after) }
+    finally { SorgeTest.spy(name: :finally) }
   end
 end
 

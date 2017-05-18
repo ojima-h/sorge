@@ -14,6 +14,11 @@ module Sorge
                    SorgeTest.spy.map(&:name).uniq.sort
     end
 
+    def test_skip
+      invoke('t0')
+      assert_empty SorgeTest.spy
+    end
+
     def test_failure
       invoke('test_failure:t1')
 

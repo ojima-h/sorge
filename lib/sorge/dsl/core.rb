@@ -50,6 +50,10 @@ module Sorge
         nil
       end
 
+      def dryrun
+        nil
+      end
+
       def to_s
         task.name
       end

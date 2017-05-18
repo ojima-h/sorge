@@ -129,7 +129,7 @@ module Sorge
 
         def call(panes, context)
           min_time = @task.upstreams.map do |task_name, _|
-            next 0 unless context.jobflow_status.include?(task_name)
+            next Time.at(0) unless context.jobflow_status.include?(task_name)
             context.jobflow_status[task_name].position
           end.min
 

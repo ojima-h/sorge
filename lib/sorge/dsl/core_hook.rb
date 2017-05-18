@@ -35,8 +35,8 @@ module Sorge
         # @!method failed(error, &block)
         define_hook :failed
 
-        # @!method after(&block)
-        define_hook :after
+        # @!method finally(&block)
+        define_hook :finally
       end
 
       private
