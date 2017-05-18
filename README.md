@@ -12,6 +12,7 @@ Add this line to your application's Gemfile:
 
 ```ruby
 gem 'sorge'
+gem 'xmlrpc' if RUBY_VERSION >= '2.4.0'
 ```
 
 And then execute:
@@ -40,4 +41,3 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/[USERN
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
-

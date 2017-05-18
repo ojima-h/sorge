@@ -72,6 +72,7 @@ module Sorge
     private
 
     def setup_trap
+      return if Sorge.test_mode
       trap(:INT) do
         trap(:INT) { Thread.new { kill } } # kill application at second time
         Thread.new do
