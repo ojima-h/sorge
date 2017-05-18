@@ -14,7 +14,7 @@ module Sorge
       s = XMLRPC::WEBrickServlet.new
       JobflowHandler.add_to(s, @app)
 
-      @server = WEBrick::HTTPServer.new(Port: 0)
+      @server = build_webrick
       @server.mount(PATH, s)
       write_server_info
       @server.start
@@ -38,6 +38,13 @@ module Sorge
     end
 
     private
+
+    def build_webrick
+      WEBrick::HTTPServer.new(
+        Port: 0,
+        AccessLog: []
+      )
+    end
 
     def read_server_info
       path = @app.config.server_info_path
