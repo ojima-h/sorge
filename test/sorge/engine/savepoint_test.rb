@@ -15,20 +15,18 @@ module Sorge
       end
 
       def test_clean
-        SorgeTest.process_dir_lock do
-          FileUtils.makedirs(app.config.savepoint_path)
-          junk = File.join(app.config.savepoint_path, 'junk')
-          File.write(junk, '')
+        FileUtils.makedirs(app.config.savepoint_path)
+        junk = File.join(app.config.savepoint_path, 'junk')
+        File.write(junk, '')
 
-          savepoint.save!(foo: 'bar')
-          path = savepoint.latest
-          assert File.file?(path)
-          assert File.file?(junk)
+        savepoint.save(foo: 'bar')
+        path = savepoint.latest
+        assert File.file?(path)
+        assert File.file?(junk)
 
-          savepoint.save!(foo: 'bar')
-          refute File.file?(path)
-          assert File.file?(junk)
-        end
+        savepoint.save(foo: 'bar')
+        refute File.file?(path)
+        assert File.file?(junk)
       end
     end
   end

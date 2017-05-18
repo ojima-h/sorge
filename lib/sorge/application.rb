@@ -8,7 +8,6 @@ module Sorge
       heartbeat_interval: 1,
       process_dir:        DEFAULT_PROCESS_DIR,
       savepoint_path:     File.join(DEFAULT_PROCESS_DIR, 'savepoints'),
-      savepoint_interval: 10,
       server_info_path:   File.join(DEFAULT_PROCESS_DIR, 'server-info.yml')
     }.freeze
 
@@ -36,6 +35,7 @@ module Sorge
 
     def setup
       Sorge.setup.each { |block| block.call(self) }
+      FileUtils.makedirs(@config.process_dir)
     end
 
     def start

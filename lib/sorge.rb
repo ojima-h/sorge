@@ -24,6 +24,7 @@ module Sorge
     def logger
       @logger ||= Logger.new($stderr).tap do |logger|
         logger.progname = 'sorge'
+        logger.level = Logger::Severity::INFO
       end
     end
     attr_writer :logger

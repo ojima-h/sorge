@@ -53,6 +53,7 @@ module Sorge
 
     def write_server_info
       path = @app.config.server_info_path
+      FileUtils.makedirs(File.dirname(path))
       File.write(path, YAML.dump(port: @server.config[:Port]))
     end
 

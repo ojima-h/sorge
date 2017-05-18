@@ -3,28 +3,18 @@ module Sorge
     class Savepoint
       def initialize(engine)
         @engine = engine
-        @path = engine.config.savepoint_path
-        @interval = engine.config.savepoint_interval
-        @last_saved = nil
         @latest = nil
       end
       attr_reader :latest
 
       def latest_file_path
-        File.join(@path, 'latest')
+        File.join(@engine.config.savepoint_path, 'latest')
       end
 
       def save(data)
-        return unless should_save?
-        save!(data)
-      end
-
-      def save!(data)
         file_path = write(data)
-        @last_saved = Time.now
-
         swap(file_path)
-        Sorge.logger.info("savepoint updated: #{file_path}")
+        Sorge.logger.debug("savepoint updated: #{file_path}")
       end
 
       def read(file_path)
@@ -35,14 +25,9 @@ module Sorge
 
       private
 
-      def should_save?
-        return true if @last_saved.nil?
-        Time.now >= @last_saved + @interval
-      end
-
       def write(data)
         id = 'savepoint-' + Util.generate_id
-        file_path = File.join(@path, id + '.yml')
+        file_path = File.join(@engine.config.savepoint_path, id + '.yml')
         FileUtils.makedirs(File.dirname(file_path))
         File.write(file_path, YAML.dump(data))
         file_path
@@ -51,21 +36,9 @@ module Sorge
       def swap(file_path)
         f = @latest
         @latest = file_path
-        save_latest
+        File.write(latest_file_path, @latest)
 
-        try_delete(f) if f
-      end
-
-      def try_delete(file_path)
-        File.delete(file_path)
-      rescue
-        nil # savepoint file may be deleted while test running
-      end
-
-      def save_latest
-        File.write(latest_file_path, latest)
-      rescue
-        nil # savepoint file may be deleted while test running
+        File.delete(f) if f
       end
     end
   end

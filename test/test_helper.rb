@@ -5,11 +5,15 @@ require 'sorge'
 require 'minitest/autorun'
 require 'tempfile'
 
-# # Disable Sorge logger
-# Sorge.logger = Logger.new(nil)
+# Sorge logger setting:
+# Sorge.logger = Logger.new(nil) # Disable Sorge logger
+# Sorge.logger.level = Logger::Severity::DEBUG
 
 # Enable Concurrent gem logger
 Concurrent.use_stdlib_logger(Logger::DEBUG)
+
+TEST_DIR = File.expand_path('../../var/sorge-test', __FILE__)
+FileUtils.rm_r(TEST_DIR) if File.exist?(TEST_DIR)
 
 class SorgeTest < Minitest::Test
   attr_reader :app
@@ -26,32 +30,29 @@ class SorgeTest < Minitest::Test
     @hooks
   end
 
-  def self.process_dir_lock(&block)
-    @mutex ||= Mutex.new
-    @mutex.synchronize(&block)
-  end
-
   def setup
     SorgeTest.spy.clear
     SorgeTest.hook.clear
 
-    @app = Sorge::Application.new(
-      sorgefile: File.expand_path('../Sorgefile.rb', __FILE__)
-    )
+    build_app
   end
 
   def teardown
     return unless @app
 
     @app.kill
-    clear_savepoint
   end
 
-  def clear_savepoint
-    SorgeTest.process_dir_lock do
-      f = @app.config.savepoint_path
-      FileUtils.rm_r(f) if File.exist?(f)
-    end
+  def build_app
+    @app = Sorge::Application.new(
+      sorgefile: File.expand_path('../Sorgefile.rb', __FILE__)
+    )
+
+    process_dir = File.join(TEST_DIR, Sorge::Util.generate_id)
+
+    @app.config.process_dir      = process_dir
+    @app.config.savepoint_path   = File.join(process_dir, 'savepoints')
+    @app.config.server_info_path = File.join(process_dir, 'server-info.yml')
   end
 
   #
