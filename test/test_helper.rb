@@ -48,4 +48,14 @@ class SorgeTest < Minitest::Test
   def now
     @now ||= Time.now
   end
+
+  def runcli(*args)
+    root = File.expand_path('../..', __FILE__)
+    binpath = File.join(root, 'exe/sorge')
+    options = [
+      '-f', File.join(root, 'test/Sorgefile'),
+      '-C', root
+    ]
+    system(binpath, *args, *options)
+  end
 end

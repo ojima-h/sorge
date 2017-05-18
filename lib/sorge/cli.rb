@@ -8,10 +8,14 @@ module Sorge
     class_option :directory, aliases: '-C',
                              desc: 'Change to DIRECTORY before doing anything.'
     class_option :sorgefile, aliases: '-f', desc: 'Sorgefile path'
+    class_option :libdir, aliases: '-I', type: :array,
+                          desc: 'Include LIBDIR in the search path ' \
+                                'for required modules.'
 
     def initialize(*args)
       super
 
+      options['libdir'].each { |d| $LOAD_PATH.unshift(d) } if options['libdir']
       Dir.chdir(options['directory']) if options.include?('directory')
     end
 
