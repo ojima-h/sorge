@@ -5,6 +5,8 @@ require 'sorge'
 require 'minitest/autorun'
 require 'tempfile'
 
+Sorge.test_mode = true
+
 # Sorge logger setting:
 # Sorge.logger = Logger.new(nil) # Disable Sorge logger
 # Sorge.logger.level = Logger::Severity::DEBUG

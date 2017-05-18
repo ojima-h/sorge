@@ -33,6 +33,8 @@ module Sorge
       @setup ||= []
       block_given? ? @setup << block : @setup
     end
+
+    attr_accessor :test_mode
   end
 end
 

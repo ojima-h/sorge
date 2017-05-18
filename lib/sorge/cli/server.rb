@@ -22,17 +22,18 @@ module Sorge
 
       def stop
         stop_jobflow
-        @daemons.stop
+        stop_server
+        stop_process
       rescue => error
-        puts Util.format_error_info(error, 10)
-        puts
-        puts 'Failed to stop application.'
-        puts 'Trying to force kill...'
-        @daemons.stop
+        $stderr.puts Util.format_error_info(error, 10)
+        $stderr.puts
+        $stderr.puts 'Failed to stop application.'
+        $stderr.puts 'Trying to force kill...'
+        stop_process
       end
 
       def kill
-        @daemons.stop
+        stop_process
       end
 
       private
@@ -41,10 +42,18 @@ module Sorge
         client = @app.server.client
         client.call('jobflow.stop')
 
-        puts 'waiting to stop sorge server ...'
+        $stderr.puts 'waiting to stop sorge server ...'
 
         expiration = Time.now + @options.fetch('timeout', 60)
         sleep 1 until client.call('jobflow.wait_stop') || Time.now >= expiration
+      end
+
+      def stop_server
+        @daemons.signal(:INT)
+      end
+
+      def stop_process
+        @daemons.stop
       end
     end
   end

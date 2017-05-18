@@ -18,6 +18,17 @@ module Sorge
       @group.stop_all
     end
 
+    def signal(sig)
+      @group.applications.each do |app|
+        begin
+          pid = app.pid.pid
+          Process.kill(sig, pid)
+        rescue Errno::ESRCH
+          nil
+        end
+      end
+    end
+
     private
 
     def build_application_group

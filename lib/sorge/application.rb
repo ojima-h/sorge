@@ -36,6 +36,7 @@ module Sorge
     def setup
       Sorge.setup.each { |block| block.call(self) }
       FileUtils.makedirs(@config.process_dir)
+      setup_trap
     end
 
     def start
@@ -43,9 +44,21 @@ module Sorge
       @server.start
     end
 
-    def kill
+    def stop
+      Sorge.logger.info('stopping sorge jobflow...')
       @server.stop
-      @engine.kill
+      @engine.stop
+      @engine.wait_stop
+    end
+
+    def kill(error = nil)
+      if Sorge.test_mode
+        @server.stop
+        @engine.kill
+      else
+        @server.stop
+        exit(error.nil?)
+      end
     end
 
     def env
@@ -57,6 +70,17 @@ module Sorge
     end
 
     private
+
+    def setup_trap
+      trap(:INT) do
+        trap(:INT) { Thread.new { kill } } # kill application at second time
+        Thread.new do
+          Sorge.logger.info('going to gracefully shutdown sorge...')
+          Sorge.logger.info('Ctrl-C again if you want to immediately shutdown')
+          stop
+        end
+      end
+    end
 
     def load_sorgefile
       sorgefile = find_sorgefile

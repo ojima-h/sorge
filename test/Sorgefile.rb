@@ -80,6 +80,12 @@ namespace :test_failure do
       raise Exception, 'test fatal'
     end
   end
+
+  task :sleep do
+    def run
+      sleep
+    end
+  end
 end
 
 namespace :test_hook do
