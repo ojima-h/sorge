@@ -16,7 +16,7 @@ module Sorge
         puts 'Starting sorge server...'
         @daemons.start
 
-        @app.resume(@options['savepoint']) if @options['savepoint']
+        @app.resume(@options['resume']) if @options['resume']
         @app.start
       end
 

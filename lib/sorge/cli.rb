@@ -22,11 +22,17 @@ module Sorge
     #
     # Common options
     #
-    def self.option_savepoint(default = nil)
-      option :savepoint, aliases: '-s', banner: 'FILE_PATH',
+    def self.option_resume(default = nil)
+      option :resume, aliases: '-r', banner: 'SAVEPOINT_PATH',
+                      default: default,
+                      desc: 'Resume from savepoint ' \
+                            '(from latest savepoint if \'latest\' given)'
+    end
+
+    def self.option_savepoint(default = false)
+      option :savepoint, aliases: '-s', type: :boolean,
                          default: default,
-                         desc: 'Resume from savepoint ' \
-                               '(from latest savepoint if \'latest\' given)'
+                         desc: 'Enable savepoint'
     end
 
     def self.option_dryrun
@@ -54,7 +60,8 @@ module Sorge
     end
 
     desc 'run TASK [TIME]', 'Run task'
-    option_savepoint
+    option_resume
+    option_savepoint(false)
     option_dryrun
     def _run(task, time = Time.now)
       require 'sorge/cli/jobflow'
@@ -79,7 +86,8 @@ module Sorge
     # Server Commands
     #
     desc 'start', 'Start sorge server'
-    option_savepoint
+    option_resume
+    option_savepoint(true)
     option_daemonize
     def start
       require 'sorge/cli/server'
@@ -95,7 +103,8 @@ module Sorge
 
     desc 'restart', 'Restart sorge server'
     option_daemonize(true)
-    option_savepoint('latest')
+    option_resume('latest')
+    option_savepoint(true)
     option_timeout
     def restart
       require 'sorge/cli/server'

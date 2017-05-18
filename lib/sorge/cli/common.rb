@@ -3,7 +3,7 @@ module Sorge
     module Common
       def build_app(options)
         opts = {}
-        %w(sorgefile env dryrun).each do |key|
+        %w(sorgefile env dryrun savepoint).each do |key|
           opts[key.to_sym] = options[key]
         end
         Application.new(opts)

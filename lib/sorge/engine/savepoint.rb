@@ -12,6 +12,8 @@ module Sorge
       end
 
       def save(data)
+        return if @engine.app.dryrun? || !@engine.app.savepoint?
+
         file_path = write(data)
         swap(file_path)
         Sorge.logger.debug("savepoint updated: #{file_path}")

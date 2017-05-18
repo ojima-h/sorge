@@ -11,7 +11,7 @@ module Sorge
       end
 
       def run(task, time)
-        @app.resume(@options['savepoint']) if @options['savepoint']
+        @app.resume(@options['resume']) if @options['resume']
         @app.run(task, Util::Time(time))
       end
 

@@ -14,6 +14,20 @@ module Sorge
         assert_equal data, savepoint.read('latest')
       end
 
+      def test_dryrun
+        app.stub(:dryrun?, true) do
+          savepoint.save(foo: 'bar')
+          assert_nil savepoint.latest
+        end
+      end
+
+      def test_disable_savepoint
+        app.stub(:savepoint?, false) do
+          savepoint.save(foo: 'bar')
+          assert_nil savepoint.latest
+        end
+      end
+
       def test_clean
         FileUtils.makedirs(app.config.savepoint_path)
         junk = File.join(app.config.savepoint_path, 'junk')

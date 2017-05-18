@@ -11,8 +11,15 @@ module Sorge
       server_info_path:   File.join(DEFAULT_PROCESS_DIR, 'server-info.yml')
     }.freeze
 
+    DEFAULT_OPTIONS = {
+      sorgefile: nil,
+      env: nil,
+      dryrun: false,
+      savepoint: true
+    }.freeze
+
     def initialize(options = {})
-      @options = options
+      @options = DEFAULT_OPTIONS.merge(options)
       @config = OpenStruct.new(DEFAULT_CONFIG)
 
       @dsl = DSL.new(self)
@@ -67,6 +74,10 @@ module Sorge
 
     def dryrun?
       @options[:dryrun]
+    end
+
+    def savepoint?
+      @options[:savepoint]
     end
 
     private
