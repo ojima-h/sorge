@@ -13,7 +13,7 @@ module Sorge
 
     DEFAULT_OPTIONS = {
       sorgefile: nil,
-      env: nil,
+      env: 'development',
       dryrun: false,
       savepoint: true
     }.freeze
@@ -69,7 +69,7 @@ module Sorge
     end
 
     def env
-      @options[:env]
+      @options[:environment]
     end
 
     def dryrun?

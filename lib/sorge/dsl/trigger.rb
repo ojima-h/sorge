@@ -128,6 +128,8 @@ module Sorge
         end
 
         def call(panes, context)
+          return [panes, []] if @task.upstreams.empty?
+
           min_time = @task.upstreams.map do |task_name, _|
             next Time.at(0) unless context.jobflow_status.include?(task_name)
             context.jobflow_status[task_name].position

@@ -31,14 +31,13 @@ module Sorge
         invoke_setup
         invoke_before
         invoke_run
-        true
       rescue SkipError
         false
       rescue => error
         invoke_failed(error)
-        false
+        false # always false
       else
-        invoke_successed
+        invoke_successed # true if hook is successed
       ensure
         invoke_finally
       end
@@ -62,9 +61,11 @@ module Sorge
 
       def invoke_with_error_handler(tag)
         yield
+        true
       rescue => error
         Sorge.logger.error("error while `#{tag}` hook: #{task.name} '#{time}'")
         Sorge.logger.error(Util.format_error_info(error, 10))
+        false
       end
 
       def invoke_successed
