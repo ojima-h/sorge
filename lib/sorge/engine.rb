@@ -4,13 +4,13 @@ module Sorge
 
     def initialize(app)
       @app = app
-      @config = app.config
 
       @worker = Worker.new(self)
       @jobflow_operator = JobflowOperator.new(self)
       @savepoint = Savepoint.new(self)
     end
-    attr_reader :app, :config, :savepoint, :worker, :jobflow_operator
+    attr_reader :app, :worker, :jobflow_operator, :savepoint
+    def_delegators :@app, :config
     def_delegators :@jobflow_operator, :start, :stop, :wait_stop
 
     def submit(task_name, time)

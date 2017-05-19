@@ -2,15 +2,6 @@ module Sorge
   class Application
     extend Forwardable
 
-    DEFAULT_PROCESS_DIR = './var/sorge'.freeze
-    DEFAULT_CONFIG = {
-      app_name:           'sorge',
-      heartbeat_interval: 1,
-      process_dir:        DEFAULT_PROCESS_DIR,
-      savepoint_path:     File.join(DEFAULT_PROCESS_DIR, 'savepoints'),
-      server_info_path:   File.join(DEFAULT_PROCESS_DIR, 'server-info.yml')
-    }.freeze
-
     DEFAULT_OPTIONS = {
       sorgefile: nil,
       env: 'development',
@@ -20,11 +11,12 @@ module Sorge
 
     def initialize(options = {})
       @options = DEFAULT_OPTIONS.merge(options)
-      @config = OpenStruct.new(DEFAULT_CONFIG)
 
       @dsl = DSL.new(self)
       @engine = Engine.new(self)
       @server = Server.new(self)
+
+      @config = OpenStruct.new
 
       # In Sorgefile:
       #   - setup blocks are registered
@@ -42,6 +34,7 @@ module Sorge
 
     def setup
       Sorge.setup.each { |block| block.call(self) }
+      assign_default_config
       FileUtils.makedirs(@config.process_dir)
       setup_trap
     end
@@ -81,6 +74,16 @@ module Sorge
     end
 
     private
+
+    def assign_default_config
+      @config.app_name           ||= 'sorge'
+      @config.heartbeat_interval ||= dryrun? ? 0.1 : 1
+      @config.process_dir        ||= './var/sorge'
+
+      dir = @config.process_dir
+      @config.savepoint_path     ||= File.join(dir, 'savepoints')
+      @config.server_info_path   ||= File.join(dir, 'server-info.yml')
+    end
 
     def setup_trap
       return if Sorge.test_mode
