@@ -131,13 +131,19 @@ module Sorge
           return [panes, []] if @task.upstreams.empty?
 
           min_time = @task.upstreams.map do |task_name, _|
-            next Time.at(0) unless context.jobflow_status.include?(task_name)
-            context.jobflow_status[task_name].position
+            upstream_time(context, task_name)
           end.min
 
           panes.partition do |pane|
             pane.time <= min_time - @lag
           end
+        end
+
+        def upstream_time(context, task_name)
+          return Time.at(0) unless context.jobflow_status.include?(task_name)
+
+          pos = context.jobflow_status[task_name].position
+          @task.time_trunc.call(pos)
         end
       end
     end
