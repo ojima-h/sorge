@@ -114,7 +114,7 @@ module Sorge
         def call(panes, _context)
           now = Time.now
           panes.partition do |pane|
-            now - pane.time >= @delay
+            pane.time <= now - @delay
           end
         end
       end
