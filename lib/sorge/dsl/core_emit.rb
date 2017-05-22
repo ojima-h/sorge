@@ -5,8 +5,10 @@ module Sorge
         @emitted ||= []
       end
 
-      def emit(time)
-        emitted << Util::Time(time)
+      def emit(*times)
+        times.each do |time|
+          emitted << Util::Time(time)
+        end
       end
     end
   end
