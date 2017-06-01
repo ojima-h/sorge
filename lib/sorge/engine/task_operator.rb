@@ -81,11 +81,14 @@ module Sorge
 
       def ns_enqueue(events, jobflow_status)
         ns_append_events(events)
-        ready = ns_collect_ready(jobflow_status)
-        return if ready.empty?
 
-        @running += ready.to_a
-        ready.each { @worker.post { perform } }
+        return unless @running.empty?
+
+        target = ns_trigger_shift(jobflow_status)
+        return if target.nil?
+
+        @running += [target]
+        @worker.post { perform }
       end
 
       def ns_append_events(events)
@@ -95,12 +98,13 @@ module Sorge
         end
       end
 
-      def ns_collect_ready(jobflow_status)
+      def ns_trigger_shift(jobflow_status)
         context = TriggerContext[@trigger_state.dup, jobflow_status]
         ready, pending = @task.trigger.call(@pending.panes, context)
-        @pending = PaneSet[*pending]
+        target, *rest = ready
+        @pending = PaneSet[*rest, *pending]
         @trigger_state = context.state
-        ready
+        target
       end
 
       def perform
