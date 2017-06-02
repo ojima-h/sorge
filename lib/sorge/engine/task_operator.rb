@@ -84,7 +84,7 @@ module Sorge
 
         return unless @running.empty?
 
-        target = ns_trigger_shift(jobflow_status)
+        target = ns_shift_pending(jobflow_status)
         return if target.nil?
 
         @running += [target]
@@ -98,7 +98,7 @@ module Sorge
         end
       end
 
-      def ns_trigger_shift(jobflow_status)
+      def ns_shift_pending(jobflow_status)
         context = TriggerContext[@trigger_state.dup, jobflow_status]
         ready, pending = @task.trigger.call(@pending.panes, context)
         target, *rest = ready

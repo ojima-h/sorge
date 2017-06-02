@@ -84,7 +84,16 @@ module Sorge
         sleep 0.1
         status = task_operator.update(ctx)
         assert_equal [t0 + 3600], status.pending.times
-        assert_equal [t0, t0 - 60], status.finished
+        assert_equal [t0 - 60], status.running.map(&:time)
+        assert_equal [t0], status.finished
+        assert_equal({ latest: t0 + 3600 }, status.trigger_state)
+        assert_equal t0, status.position
+
+        sleep 0.1
+        status = task_operator.update(ctx)
+        assert_equal [t0 + 3600], status.pending.times
+        assert_empty status.running
+        assert_equal [t0 - 60], status.finished
         assert_equal({ latest: t0 + 3600 }, status.trigger_state)
         assert_equal t0, status.position
       end
@@ -92,10 +101,9 @@ module Sorge
       def test_stop
         task_operator = make_task_operator('t1')
 
-        task_operator.post(now, ctx)
         task_operator.stop
         assert_raises Sorge::AlreadyStopped do
-          task_operator.post(now + 1, ctx)
+          task_operator.post(now, ctx)
         end
         task_operator.wait_stop
       end
