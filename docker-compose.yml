@@ -1,0 +1,7 @@
+version: '3'
+services:
+  app:
+    build: .
+    volumes:
+     - .:/home/sorge/app
+     - ./vendor/bundle:/usr/local/bundle # BUNDLE_PATH defined in ruby image

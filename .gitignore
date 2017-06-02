@@ -8,5 +8,6 @@
 /spec/reports/
 /tmp/
 /var/
+/vendor/
 
 .ruby-version
