@@ -42,10 +42,14 @@ module Sorge
 
       def flush
         @mutex.synchronize do
-          ps = @pending.panes
-          @pending = PaneSet[]
-          @running += ps
-          ps.each { @worker.post { perform } }
+          return if @pending.empty?
+          return unless @running.empty?
+
+          target, *rest = @pending.panes
+          @pending = PaneSet[*rest]
+          @running += [target]
+
+          @worker.post { perform }
 
           ns_collect_status
         end
