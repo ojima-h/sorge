@@ -33,7 +33,7 @@ module Sorge
       def test_resume
         data = {
           'test_namespace:ns:t1' => {
-            run: [{ tm: now, es: [{ name: nil }] }]
+            run: { tm: now, es: [{ name: nil }] }
           }
         }
 

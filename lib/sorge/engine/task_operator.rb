@@ -12,7 +12,7 @@ module Sorge
         @state = {}
         @trigger_state = {}
         @pending = PaneSet.new
-        @running = [] # Array<Pane>
+        @running = nil
         @finished = []
         @position = Time.at(0)
 
@@ -36,18 +36,18 @@ module Sorge
           @finished      = task_status.finished
           @position      = task_status.position
 
-          @running.each { @worker.post { perform } }
+          @worker.post { perform } if @running
         end
       end
 
       def flush
         @mutex.synchronize do
           return if @pending.empty?
-          return unless @running.empty?
+          return if @running
 
           target, *rest = @pending.panes
           @pending = PaneSet[*rest]
-          @running += [target]
+          @running = target
 
           @worker.post { perform }
 
@@ -86,12 +86,12 @@ module Sorge
       def ns_enqueue(events, jobflow_status)
         ns_append_events(events)
 
-        return unless @running.empty?
+        return if @running
 
         target = ns_shift_pending(jobflow_status)
         return if target.nil?
 
-        @running += [target]
+        @running = target
         @worker.post { perform }
       end
 
@@ -112,9 +112,7 @@ module Sorge
       end
 
       def perform
-        pane = @mutex.synchronize { @running.first }
-
-        result = execute(pane)
+        result = execute(@running)
 
         @mutex.synchronize { ns_update_status(result) }
       end
@@ -128,12 +126,13 @@ module Sorge
 
       def ns_update_status(result)
         @state = result.state
-        pane, *@running = @running
+        time = @running.time
+        @running = nil
 
         return unless result.successed?
 
-        @finished += result.emitted.empty? ? [pane.time] : result.emitted
-        @position = [@position, pane.time].max
+        @finished += result.emitted.empty? ? [time] : result.emitted
+        @position = [@position, time].max
       end
 
       def ns_collect_status

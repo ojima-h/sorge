@@ -84,7 +84,7 @@ module Sorge
         sleep 0.1
         status = task_operator.update(ctx)
         assert_equal [t0 + 3600], status.pending.times
-        assert_equal [t0 - 60], status.running.map(&:time)
+        assert_equal t0 - 60, status.running.time
         assert_equal [t0], status.finished
         assert_equal({ latest: t0 + 3600 }, status.trigger_state)
         assert_equal t0, status.position
@@ -92,7 +92,7 @@ module Sorge
         sleep 0.1
         status = task_operator.update(ctx)
         assert_equal [t0 + 3600], status.pending.times
-        assert_empty status.running
+        assert_nil status.running
         assert_equal [t0 - 60], status.finished
         assert_equal({ latest: t0 + 3600 }, status.trigger_state)
         assert_equal t0, status.position

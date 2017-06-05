@@ -13,7 +13,7 @@ module Sorge
         self.state ||= {}
         self.trigger_state ||= {}
         self.pending ||= PaneSet.new
-        self.running ||= []  # Array<Pane>
+        self.running ||= nil
         self.finished ||= [] # Array<Time>
         self.position ||= Time.at(0)
       end
@@ -24,11 +24,11 @@ module Sorge
       end
 
       def active?
-        ![running, finished].all?(&:empty?)
+        !(running.nil? && finished.empty?)
       end
 
       def complete?
-        [pending, running, finished].all?(&:empty?)
+        pending.empty? && running.nil? && finished.empty?
       end
 
       def pending?
@@ -40,7 +40,7 @@ module Sorge
         ret[:st]  = state               unless state.empty?
         ret[:tst] = trigger_state       unless trigger_state.empty?
         ret[:pnd] = pending.dump        unless pending.empty?
-        ret[:run] = running.map(&:dump) unless running.empty?
+        ret[:run] = running.dump        unless running.nil?
         ret[:fin] = finished            unless finished.empty?
         ret[:pos] = position            unless position.to_i.zero?
         ret
@@ -51,8 +51,7 @@ module Sorge
         o.state         = hash[:st]                   if hash.include?(:st)
         o.trigger_state = hash[:tst]                  if hash.include?(:tst)
         o.pending       = PaneSet.restore(hash[:pnd]) if hash.include?(:pnd)
-        o.running       = hash[:run].map { |h| Pane.restore(h) } \
-                                                      if hash.include?(:run)
+        o.running       = Pane.restore(hash[:run])    if hash.include?(:run)
         o.finished      = hash[:fin]                  if hash.include?(:fin)
         o.position      = hash[:pos]                  if hash.include?(:pos)
 

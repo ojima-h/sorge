@@ -9,7 +9,7 @@ module Sorge
           s.state = { x: 1 }
           s.trigger_state = { y: 2 }
           s.pending = PaneSet.new
-          s.running = [Pane[now, 'foo', 'bar']]
+          s.running = Pane[now, 'foo', 'bar']
           s.finished = [now + 10]
           s.position = now + 10
         end
@@ -20,7 +20,7 @@ module Sorge
             't1' => {
               st: { x: 1 },
               tst: { y: 2 },
-              run: [{ tm: now, es: [{ name: 'foo' }, { name: 'bar' }] }],
+              run: { tm: now, es: [{ name: 'foo' }, { name: 'bar' }] },
               fin: [now + 10],
               pos: now + 10
             }

@@ -59,7 +59,7 @@ module Sorge
     def test_restore
       data = {
         'test_namespace:ns:t2' => {
-          run: [{ tm: now, es: [{ name: nil }] }]
+          run: { tm: now, es: [{ name: nil }] }
         }
       }
 
