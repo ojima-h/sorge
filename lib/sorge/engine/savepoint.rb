@@ -20,7 +20,7 @@ module Sorge
       end
 
       def read(file_path)
-        file_path = File.read(latest_file_path) if file_path == 'latest'
+        file_path = read_latest if file_path == 'latest'
         Sorge.logger.info("savepoint restored: #{file_path}")
         YAML.load_file(file_path)
       end
@@ -38,9 +38,17 @@ module Sorge
       def swap(file_path)
         f = @latest
         @latest = file_path
-        File.write(latest_file_path, @latest)
+        write_latest(@latest)
 
         File.delete(f) if f
+      end
+
+      def read_latest
+        open(latest_file_path) { |f| f.gets.strip }
+      end
+
+      def write_latest(latest)
+        File.write(latest_file_path, latest)
       end
     end
   end
