@@ -90,7 +90,7 @@ module Sorge
       class Lag < Base
         register :lag
 
-        def initialize(_task, lag, timeout = nil)
+        def initialize(_task, lag, timeout: nil)
           @lag = lag
           @timeout = timeout
         end
@@ -132,7 +132,7 @@ module Sorge
       class Align < Base
         register :align
 
-        def initialize(task, lag = 0, timeout = nil)
+        def initialize(task, lag = 0, timeout: nil)
           @task = task
           @lag = lag
           @timeout = timeout

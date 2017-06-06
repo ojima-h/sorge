@@ -89,7 +89,7 @@ module Sorge
       end
 
       def test_timeout
-        trigger = Trigger::Lag.new(nil, 1, 0.1)
+        trigger = Trigger::Lag.new(nil, 1, timeout: 0.1)
         ctx = context
 
         ps = [pane(now)]
