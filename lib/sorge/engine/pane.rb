@@ -29,6 +29,7 @@ module Sorge
       # Pane[time, ['foo', 3], 'bar', ...]
       # Pane[time, 'foo' => 3, 'bar' => 1, ...]
       def self.[](time, *entries)
+        injection_time, *entries = entries if entries.first.is_a?(Time)
         entries = entries.first if entries.first.is_a?(Hash)
         entries = [nil] if entries.empty?
         es = entries.map do |entry|
@@ -36,14 +37,15 @@ module Sorge
           task_name, count = entry
           [task_name, PaneEntry[task_name, count || 1]]
         end.to_h
-        new(time, es)
+        new(time, es, injection_time)
       end
 
-      def initialize(time, entries = {})
+      def initialize(time, entries = {}, injection_time = nil)
         @time = time
         @entries = entries
+        @injection_time = injection_time || Time.now
       end
-      attr_reader :time, :entries
+      attr_reader :time, :entries, :injection_time
       protected :entries
       def_delegators :@entries, :include?, :empty?, :length
       def_delegator :@entries, :keys, :task_names
@@ -60,13 +62,18 @@ module Sorge
 
       def add(task_name)
         new_entry = @entries.fetch(task_name, PaneEntry[task_name, 0]).inc
-        self.class.new(@time, @entries.merge(task_name => new_entry))
+        self.class.new(
+          @time,
+          @entries.merge(task_name => new_entry),
+          @injection_time
+        )
       end
 
       def dump
         hash = {}
         hash[:tm] = time
         hash[:es] = entries.each_value.map(&:dump) unless entries.empty?
+        hash[:in] = injection_time
         hash
       end
 
@@ -77,7 +84,8 @@ module Sorge
           entry = PaneEntry.restore(e)
           entries[entry.task_name] = entry
         end
-        new(time, entries)
+        injection_time = hash[:in]
+        new(time, entries, injection_time)
       end
     end
 

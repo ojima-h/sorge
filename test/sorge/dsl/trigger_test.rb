@@ -87,6 +87,22 @@ module Sorge
         assert_equal [ps[8], ps[9]], ready
         assert_equal [ps[10], ps[11], ps[12], ps[13]], pending
       end
+
+      def test_timeout
+        trigger = Trigger::Lag.new(nil, 1, 0.1)
+        ctx = context
+
+        ps = [pane(now)]
+        ready, pending = trigger.call(ps, ctx)
+        assert_empty ready
+        assert_equal ps, pending
+
+        sleep 0.1
+
+        ready, pending = trigger.call(ps, ctx)
+        assert_equal ps, ready
+        assert_empty pending
+      end
     end
   end
 end

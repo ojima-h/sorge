@@ -90,8 +90,9 @@ module Sorge
       class Lag < Base
         register :lag
 
-        def initialize(_task, lag)
+        def initialize(_task, lag, timeout = nil)
           @lag = lag
+          @timeout = timeout
         end
 
         def call(panes, context)
@@ -99,8 +100,17 @@ module Sorge
           s[:latest] = [s[:latest] || Time.at(0), *panes.map(&:time)].max
 
           panes.partition do |pane|
-            s[:latest] - pane.time >= @lag
+            timeout?(pane) || ready?(pane, s[:latest])
           end
+        end
+
+        def timeout?(pane)
+          return false if @timeout.nil?
+          Time.now - pane.injection_time > @timeout
+        end
+
+        def ready?(pane, latest)
+          latest - pane.time >= @lag
         end
       end
 
@@ -122,9 +132,10 @@ module Sorge
       class Align < Base
         register :align
 
-        def initialize(task, lag = 0)
+        def initialize(task, lag = 0, timeout = nil)
           @task = task
           @lag = lag
+          @timeout = timeout
         end
 
         def call(panes, context)
@@ -135,7 +146,7 @@ module Sorge
           end.min
 
           panes.partition do |pane|
-            pane.time <= min_time - @lag
+            timeout?(pane) || ready?(pane, min_time)
           end
         end
 
@@ -144,6 +155,15 @@ module Sorge
 
           pos = context.jobflow_status[task_name].position
           @task.time_trunc.call(pos)
+        end
+
+        def ready?(pane, min_time)
+          pane.time <= min_time - @lag
+        end
+
+        def timeout?(pane)
+          return false if @timeout.nil?
+          Time.now - pane.injection_time > @timeout
         end
       end
     end

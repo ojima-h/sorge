@@ -51,11 +51,14 @@ module Sorge
       end
 
       def test_dump
-        pane_set = PaneSet[now - 10 => ['foo' => 1], now => ['bar' => 2]]
+        pane_set = PaneSet[
+          Pane[now - 10, now, { 'foo' => 1 }],
+          Pane[now, now, { 'bar' => 2 }]
+        ]
 
         assert_equal(
-          { ps: [{ tm: now - 10, es: [{ name: 'foo' }] },
-                 { tm: now, es: [{ name: 'bar', n: 2 }] }] },
+          { ps: [{ tm: now - 10, es: [{ name: 'foo' }], in: now },
+                 { tm: now, es: [{ name: 'bar', n: 2 }], in: now }] },
           pane_set.dump
         )
 
