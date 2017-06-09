@@ -67,7 +67,7 @@ module Sorge
 
       def test_align
         task = app.tasks['test_namespace:t3']
-        trigger = Trigger::Align.new(task, 1)
+        trigger = Trigger::Align.new(task, lag: 1)
 
         pos = lambda do |i|
           Engine::TaskStatus.new.tap { |st| st.position = now + i }
