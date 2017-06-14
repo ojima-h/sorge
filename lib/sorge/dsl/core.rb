@@ -25,6 +25,9 @@ module Sorge
         end
 
         # Return a list of Mixin objects included.
+        def super_mixins
+          ancestors.select { |o| o <= Core && o.initialized? }
+        end
         def super_mixin
           ancestors[1..-1].find { |o| o <= Core }
         end

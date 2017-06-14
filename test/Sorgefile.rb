@@ -186,3 +186,24 @@ namespace :test_trigger do
     trigger :lag, 3600
   end
 end
+
+namespace :test_supermixin do
+  mixin :t1 do
+    before { 1 }
+  end
+
+  mixin :t2 do
+    use :t1
+    before { 2 }
+  end
+
+  mixin :t3 do
+    before { 3 }
+  end
+
+  mixin :t4 do
+    use :t2
+    use :t3
+    before { 4 }
+  end
+end

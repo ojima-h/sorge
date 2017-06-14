@@ -8,12 +8,12 @@ module Sorge
           super
           @hooks = Hash.new { |hash, key| hash[key] = [] }
         end
+        attr_reader :hooks
 
         def each_hook(tag, &block)
-          return unless initialized?
-
-          super_mixin.each_hook(tag, &block)
-          @hooks[tag].each { |b| yield b }
+          super_mixins.each do |m|
+            m.hooks[tag].each(&block)
+          end
         end
 
         # @!visibility :private
