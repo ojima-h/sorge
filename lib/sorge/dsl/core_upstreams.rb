@@ -6,9 +6,10 @@ module Sorge
       class_methods do
         def init(app, name)
           super
-          @upstreams = {}
-          @upstream_aliases = {}
+          @_upstreams = {}
+          @_upstream_aliases = {}
         end
+        attr_reader :_upstreams, :_upstream_aliases
 
         # Declare upstreams.
         #
@@ -26,23 +27,26 @@ module Sorge
         #   end
         def upstream(name, as: nil)
           up_task = app.tasks[name, scope]
-          @upstreams[up_task.name] = up_task
-          @upstream_aliases[name] = up_task
-          @upstream_aliases[as] = up_task if as
+          @_upstreams[up_task.name] = up_task
+          @_upstream_aliases[name] = up_task
+          @_upstream_aliases[as] = up_task if as
           up_task
         end
 
         def upstreams
-          return {} unless initialized?
-          super_mixin.upstreams.merge(@upstreams)
+          ret = {}
+          super_mixins.reverse_each { |m| ret.update(m._upstreams) }
+          ret
         end
 
         def find_upstream(name)
-          raise NameError, "undefined upstream: ##{name}" unless initialized?
+          o = super_mixins.find do |m|
+            m._upstream_aliases[name] || m._upstreams[name]
+          end
 
-          @upstream_aliases[name] \
-          || @upstreams[name] \
-          || super_mixin.find_upstream(name)
+          raise NameError, "undefined upstream: ##{name}" unless o
+
+          o._upstream_aliases[name] || o._upstreams[name]
         end
       end
     end

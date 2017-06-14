@@ -6,27 +6,26 @@ module Sorge
       class_methods do
         def init(app, name)
           super
-          @trigger = nil
-          @time_trunc = nil
+          @_trigger = nil
+          @_time_trunc = nil
         end
+        attr_reader :_trigger, :_time_trunc
 
         def time_trunc(type = nil, *args, &block)
           if type || block_given?
-            @time_trunc = TimeTrunc.build(type, *args, &block)
-          elsif !initialized?
-            TimeTrunc.default
+            @_time_trunc = TimeTrunc.build(type, *args, &block)
           else
-            @time_trunc || super_mixin.time_trunc
+            o = super_mixins.find(&:_time_trunc)
+            o ? o._time_trunc : TimeTrunc.default
           end
         end
 
         def trigger(type = nil, *args, &block)
           if type || block_given?
-            @trigger = Trigger.build(self, type, *args, &block)
-          elsif !initialized?
-            Trigger.default
+            @_trigger = Trigger.build(self, type, *args, &block)
           else
-            @trigger || super_mixin.trigger
+            o = super_mixins.find(&:_trigger)
+            o ? o._trigger : Trigger.default
           end
         end
       end
