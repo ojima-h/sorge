@@ -16,7 +16,7 @@ module Sorge
         @finished = []
         @position = Time.at(0)
 
-        @worker = AsyncWorker.new(@engine, :default)
+        @worker = AsyncWorker.new(@engine, @task.worker)
         @mutex = Mutex.new
       end
 

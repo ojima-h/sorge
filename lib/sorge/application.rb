@@ -25,12 +25,13 @@ module Sorge
       load_sorgefile
 
       @plugins = Plugin.build(self)
-      @dsl.tasks.build
       setup
+      @dsl.tasks.build
     end
     attr_reader :config, :dsl, :engine, :server, :plugins
     def_delegators :@dsl, :tasks
-    def_delegators :'@engine', :submit, :resume, :run, :stop, :wait_stop
+    def_delegators :'@engine',
+                   :worker, :submit, :resume, :run, :stop, :wait_stop
 
     def setup
       Sorge.setup.each { |block| block.call(self) }

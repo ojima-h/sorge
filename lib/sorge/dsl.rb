@@ -24,6 +24,7 @@ require 'sorge/dsl/core_settings'
 require 'sorge/dsl/core_time'
 require 'sorge/dsl/core_upstreams'
 require 'sorge/dsl/core_use'
+require 'sorge/dsl/core_worker'
 
 require 'sorge/dsl/base'
 require 'sorge/dsl/mixin'

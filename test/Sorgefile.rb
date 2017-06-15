@@ -8,6 +8,8 @@ Sorge.setup do |app|
 
   app.config.heartbeat_interval = 0.1
 
+  app.worker.define(:w1, 1)
+
   cleanup = -> { FileUtils.rm_r(process_dir) if File.exist?(process_dir) }
   defined?(Minitest) ? Minitest.after_run(&cleanup) : at_exit(&cleanup)
 end
@@ -205,5 +207,23 @@ namespace :test_supermixin do
     use :t2
     use :t3
     before { 4 }
+  end
+end
+
+namespace :test_worker do
+  task :t0
+
+  task :t1 do
+    worker :w1
+    upstream :t0
+  end
+
+  mixin :m1 do
+    worker :w1
+  end
+
+  task :t2 do
+    use :m1
+    upstream :t0
   end
 end

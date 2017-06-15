@@ -10,7 +10,20 @@ module Sorge
           :default => Concurrent::FixedThreadPool.new(4)
         }
       end
-      attr_reader :task_worker
+
+      def define(name, thread_num)
+        @workers[name] = \
+          if thread_num <= 0
+            Concurrent::CachedThreadPool.new
+          else
+            Concurrent::ThreadPoolExecutor.new(max_threads: thread_num)
+          end
+      end
+
+      def validate_name!(name)
+        raise KeyError, "worker '#{name}' is not defined" \
+          unless @workers.include?(name)
+      end
 
       def error_handler(error)
         Sorge.logger.fatal(Util.format_error_info(error))

@@ -18,6 +18,7 @@ module Sorge
       include CoreTime
       include CoreUpstreams
       include CoreUse
+      include CoreWorker
     end
   end
 end
