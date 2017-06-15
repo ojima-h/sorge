@@ -54,7 +54,7 @@ module Sorge
     # Jobflow Commands
     #
     desc 'submit', 'Submit a job to server'
-    def submit(task, time = Time.now)
+    def submit(task, time = nil)
       require 'sorge/cli/jobflow'
       Jobflow.new(options).submit(task, time)
     end
@@ -63,7 +63,7 @@ module Sorge
     option_resume
     option_savepoint(false)
     option_dryrun
-    def _run(task, time = Time.now)
+    def _run(task, time = nil)
       require 'sorge/cli/jobflow'
       Jobflow.new(options).run(task, time)
     end
@@ -71,7 +71,7 @@ module Sorge
 
     desc 'exec TASK [TIME]', 'Execute single task'
     option_dryrun
-    def exec(task, time = Time.now)
+    def exec(task, time = nil)
       require 'sorge/cli/jobflow'
       Jobflow.new(options).execute(task, time)
     end

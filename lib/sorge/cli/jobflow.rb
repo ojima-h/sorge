@@ -10,19 +10,19 @@ module Sorge
         @app = build_app(options)
       end
 
-      def run(task, time)
+      def run(task, time = nil)
         @app.resume(@options['resume']) if @options['resume']
-        @app.run(task, Util::Time(time))
+        @app.run(task, Util::Time(time || Time.now))
       end
 
-      def execute(task, time)
-        context = DSL::TaskContext[Util::Time(time)]
+      def execute(task, time = nil)
+        context = DSL::TaskContext[Util::Time(time || Time.now)]
         @app.tasks[task].new(context).invoke
       end
 
-      def submit(task, time)
+      def submit(task, time = nil)
         client = @app.server.client
-        client.call('jobflow.submit', task, Util::Time(time).to_f)
+        client.call('jobflow.submit', task, Util::Time(time || Time.now).to_f)
       end
 
       def status
