@@ -42,7 +42,7 @@ module Sorge
         @context = context
       end
       attr_reader :context
-      def_delegators :context, :time, :state, :pane
+      def_delegators :context, :time, :state, :pane, :position
       def_delegators :task, :app
       def_delegators :app, :env, :dryrun?
 

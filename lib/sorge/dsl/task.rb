@@ -1,6 +1,6 @@
 module Sorge
   class DSL
-    TaskContext = Struct.new(:time, :state, :pane) do
+    TaskContext = Struct.new(:time, :state, :pane, :position) do
       def initialize(*args)
         super
         self.state ||= {}
