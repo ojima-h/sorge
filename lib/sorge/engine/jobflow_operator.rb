@@ -21,6 +21,10 @@ module Sorge
       end
       attr_reader :status
 
+      def [](task_name)
+        @task_operators[task_name]
+      end
+
       def start
         return unless @started.make_true
 

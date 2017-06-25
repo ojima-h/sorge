@@ -31,6 +31,7 @@ class SorgeTest < Minitest::Test
     SorgeTest.hook.clear
 
     @app = Sorge::Application.new(sorgefile: SORGEFILE)
+    @app.engine.jobflow_operator.start
   end
   attr_reader :app
 

@@ -1,6 +1,8 @@
 module Sorge
   class Engine
     class TaskOperator
+      extend Forwardable
+
       Event = Struct.new(:task_name, :time)
       TaskResult = Struct.new(:successed?, :state, :emitted)
       TriggerContext = Struct.new(:state, :jobflow_status)
@@ -18,7 +20,9 @@ module Sorge
 
         @worker = AsyncWorker.new(@engine, @task.worker)
         @mutex = Mutex.new
+        @lock = Concurrent::ReadWriteLock.new
       end
+      def_delegators :@lock, :acquire_read_lock, :release_read_lock
 
       def post(time, jobflow_status)
         @mutex.synchronize do
@@ -112,7 +116,8 @@ module Sorge
       end
 
       def perform
-        result = execute(@running)
+        # result = execute(@running)
+        result = with_lock { execute(@running) }
 
         @mutex.synchronize { ns_update_status(result) }
       end
@@ -150,6 +155,24 @@ module Sorge
           @finished,
           @position
         ].freeze!
+      end
+
+      def with_lock
+        with_lock_upstreams do
+          @lock.with_write_lock { yield }
+        end
+      end
+
+      def with_lock_upstreams
+        locked = []
+        @task.upstreams.each_key do |up_name|
+          up_task = @engine.jobflow_operator[up_name]
+          locked << up_task if up_task.acquire_read_lock
+        end
+
+        yield
+      ensure
+        locked.each(&:release_read_lock)
       end
     end
   end
