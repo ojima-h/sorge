@@ -167,7 +167,8 @@ module Sorge
         locked = []
         @task.upstreams.each_key do |up_name|
           up_task = @engine.jobflow_operator[up_name]
-          locked << up_task if up_task.acquire_read_lock
+          up_task.acquire_read_lock
+          locked << up_task
         end
 
         yield
