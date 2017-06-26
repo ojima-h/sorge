@@ -54,6 +54,8 @@ module Sorge
 
       def stop
         @mutex.synchronize do
+          return if @stop
+
           @timer.shutdown if @timer
           @stop = true
           @worker.post(&method(:ns_stop))
