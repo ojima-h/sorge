@@ -53,11 +53,12 @@ module Sorge
     end
 
     def kill(error = nil)
+      Sorge.logger.info('goint to kill sorge...')
+
+      @server.stop
       if Sorge.test_mode
-        @server.stop
         @engine.kill
       else
-        @server.stop
         exit(error.nil?)
       end
     end
